@@ -30,7 +30,6 @@ public class AdditionalInfoActivity extends AppCompatActivity {
     private Button pickImage;
     private DatabaseReference databaseReference;
     private String gender;
-    private String gener;
     private StorageReference imgStorage;
     private StorageReference filePath;
 
