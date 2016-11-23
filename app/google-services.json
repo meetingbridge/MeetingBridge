@@ -1,0 +1,55 @@
+{
+  "project_info": {
+    "project_number": "815180073674",
+    "firebase_url": "https://meeting-bridge-3539b.firebaseio.com/",
+    "project_id": "meeting-bridge-3539b",
+    "storage_bucket": "meeting-bridge-3539b.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:815180073674:android:00df60cb5b51ecf8",
+        "android_client_info": {
+          "package_name": "com.cs.meetingbridge"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "815180073674-he193hc8sb80hk1aru4dlphj5dsh9o8v.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.cs.meetingbridge",
+            "certificate_hash": "012D2B8E560D035A9E131C987AA7B66E4CBC98CD"
+          }
+        },
+        {
+          "client_id": "815180073674-g68n823mlh36p0kflvfladdfitva8uqa.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC4Yj0biPAJAxjk07lOH6xTtfI2yM4q1Rk"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "815180073674-g68n823mlh36p0kflvfladdfitva8uqa.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
