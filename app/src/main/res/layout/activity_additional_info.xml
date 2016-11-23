@@ -48,7 +48,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Full Name"
-                android:inputType="text"
+                android:inputType="textPersonName"
                 android:maxLines="1"
                 android:textColor="@color/colorText"
                 android:textColorHint="@color/colorText" />
@@ -63,7 +63,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Phone Number"
-                android:inputType="textPhonetic"
+                android:inputType="number"
                 android:maxLines="1"
                 android:textColor="@color/colorText"
                 android:textColorHint="@color/colorText" />
@@ -110,11 +110,13 @@
             android:id="@+id/submit"
             android:layout_width="fill_parent"
             android:layout_height="wrap_content"
+            android:layout_gravity="bottom"
             android:backgroundTint="@color/colorAccent"
             android:text="Submit"
             android:textAllCaps="false"
             android:textColor="@color/colorText"
             android:textSize="24sp" />
+
     </LinearLayout>
 
     <ProgressBar

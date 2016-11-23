@@ -9,6 +9,7 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -19,23 +20,20 @@ import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
-import com.google.firebase.storage.UploadTask;
 
 public class AdditionalInfoActivity extends AppCompatActivity {
     private static final int GALLERY_INTENT = 2;
     private EditText fullName, contactNo;
     private FirebaseUser user;
-    private TextView welcome;
-    private Button pickImage;
     private DatabaseReference databaseReference;
     private String gender;
     private StorageReference imgStorage;
-    private StorageReference filePath;
 
     //URI
     private Uri uri;
-
+    private ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,14 +42,17 @@ public class AdditionalInfoActivity extends AppCompatActivity {
 
         FirebaseAuth auth = FirebaseAuth.getInstance();
         user = auth.getCurrentUser();
+        imgStorage = FirebaseStorage.getInstance().getReference().child("photos").child(user.getUid());
         databaseReference = FirebaseDatabase.getInstance().getReference().child("users");
         fullName = (EditText) findViewById(R.id.fullname);
         contactNo = (EditText) findViewById(R.id.contactno);
         final RadioGroup genderGroup = (RadioGroup) findViewById(R.id.genderGroup);
         Button submit = (Button) findViewById(R.id.submit);
-        pickImage = (Button) findViewById(R.id.pickImage);
-        welcome = (TextView) findViewById(R.id.welcome);
-        welcome.setText(user.getEmail());
+        Button pickImage = (Button) findViewById(R.id.pickImage);
+        progressBar = (ProgressBar) findViewById(R.id.progressBar);
+
+        TextView welcome = (TextView) findViewById(R.id.welcome);
+        welcome.setText("Welcome " + user.getEmail() + "!");
         if (user == null) {
             startActivity(new Intent(AdditionalInfoActivity.this, LoginActivity.class));
         }
@@ -60,7 +61,6 @@ public class AdditionalInfoActivity extends AppCompatActivity {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
                 if (checkedId == R.id.male) {
-                    Toast.makeText(AdditionalInfoActivity.this, "Male", Toast.LENGTH_SHORT).show();
                     gender = "Male";
                 } else if (checkedId == R.id.female) {
                     gender = "Female";
@@ -80,6 +80,7 @@ public class AdditionalInfoActivity extends AppCompatActivity {
         submit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                progressBar.setVisibility(View.VISIBLE);
                 final String name = fullName.getText().toString().trim();
                 final String contact = contactNo.getText().toString().trim();
                 if (TextUtils.isEmpty(name)) {
@@ -97,17 +98,7 @@ public class AdditionalInfoActivity extends AppCompatActivity {
                     return;
                 }
 
-                filePath.putFile(uri).addOnCompleteListener(new OnCompleteListener<UploadTask.TaskSnapshot>() {
-                    @Override
-                    public void onComplete(@NonNull Task<UploadTask.TaskSnapshot> task) {
-                        if (!task.isSuccessful()) {
-                            Toast.makeText(AdditionalInfoActivity.this, "Ooops", Toast.LENGTH_SHORT).show();
-                        } else {
-                            Toast.makeText(AdditionalInfoActivity.this, "Profile Picture Selected", Toast.LENGTH_SHORT).show();
-                        }
-                    }
-                });
-
+                imgStorage.putFile(uri);
                 userInfo user_Info = new userInfo(name, contact, gender);
                 databaseReference.child(user.getUid()).setValue(user_Info).addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
@@ -115,7 +106,9 @@ public class AdditionalInfoActivity extends AppCompatActivity {
                         if (!task.isSuccessful()) {
                             Toast.makeText(AdditionalInfoActivity.this, "oops", Toast.LENGTH_SHORT).show();
                         } else {
+                            progressBar.setVisibility(View.GONE);
                             Toast.makeText(AdditionalInfoActivity.this, "Great " + name + "! Your Profile has been Updated", Toast.LENGTH_SHORT).show();
+                            startActivity(new Intent(AdditionalInfoActivity.this, MainActivity.class));
                         }
                     }
                 });
@@ -129,7 +122,6 @@ public class AdditionalInfoActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == GALLERY_INTENT && resultCode == RESULT_OK) {
             uri = data.getData();
-            filePath = imgStorage.child("photos").child(user.getUid()).child(uri.getLastPathSegment());
         }
     }
 }

@@ -1,8 +1,13 @@
 package com.cs.meetingbridge;
 
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.View;
@@ -68,12 +73,12 @@ public class LoginActivity extends AppCompatActivity {
                 final String password = etPassword.getText().toString();
 
                 if (TextUtils.isEmpty(email)) {
-                    Toast.makeText(LoginActivity.this, "Enter email address!", Toast.LENGTH_SHORT).show();
+                    etEmail.setError("Enter email address!");
                     return;
                 }
 
                 if (TextUtils.isEmpty(password)) {
-                    Toast.makeText(LoginActivity.this, "Enter password!", Toast.LENGTH_SHORT).show();
+                    etPassword.setError("Enter password!");
                     return;
                 }
                 progressBar.setVisibility(View.VISIBLE);
@@ -82,7 +87,7 @@ public class LoginActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
                         if (!task.isSuccessful()) {
                             if (password.length() < 6) {
-                                etPassword.setError("Password too short, enter minimum 6 characters");
+                                etPassword.setError("Password too short, enter minimum 8 characters");
                             } else {
                                 Toast.makeText(LoginActivity.this, "Authentication Failed", Toast.LENGTH_LONG).show();
                             }
@@ -96,7 +101,7 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    /*private boolean isNetworkConnected() {
+    private boolean isNetworkConnected() {
         ConnectivityManager conManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo netInfo = conManager.getActiveNetworkInfo();
         return netInfo != null;
@@ -114,6 +119,6 @@ public class LoginActivity extends AppCompatActivity {
                 });
         AlertDialog alert = builder.create();
         alert.show();
-    }*/
+    }
 }
 
