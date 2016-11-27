@@ -11,4 +11,9 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.cs.meetingbridge.SplashScreen">
 
+    <!--<ImageView-->
+    <!--android:layout_width="fill_parent"-->
+    <!--android:layout_height="match_parent"-->
+    <!--android:src="@drawable/splashscreen" />-->
+
 </RelativeLayout>

@@ -1,6 +1,7 @@
 package com.cs.meetingbridge;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -14,15 +15,34 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.squareup.picasso.Picasso;
+
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private FirebaseAuth.AuthStateListener authListener;
     private FirebaseAuth auth;
+    private ImageView imageView;
+    private DatabaseReference databaseReference;
+    private StorageReference storageReference;
+    private TextView uName, uContact, uGender;
+    private Task<Uri> uri;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,6 +52,12 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
 
         final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        databaseReference = FirebaseDatabase.getInstance().getReference().child("users");
+        storageReference = FirebaseStorage.getInstance().getReference().child("photos").child(user.getUid());
+        uName = (TextView) findViewById(R.id.uName);
+        uContact = (TextView) findViewById(R.id.uContact);
+        uGender = (TextView) findViewById(R.id.uGender);
+        imageView = (ImageView) findViewById(R.id.img);
         auth = FirebaseAuth.getInstance();
         authListener = new FirebaseAuth.AuthStateListener() {
             @Override
@@ -44,6 +70,26 @@ public class MainActivity extends AppCompatActivity
             }
         };
 
+        databaseReference.child(user.getUid()).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                userInfo userInfo = dataSnapshot.getValue(userInfo.class);
+                uName.setText(userInfo.getName());
+                uContact.setText(userInfo.getContactNum());
+                uGender.setText(userInfo.getGender());
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Toast.makeText(MainActivity.this, databaseError.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
+        storageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+            @Override
+            public void onSuccess(Uri uri) {
+                Picasso.with(MainActivity.this).load(uri).resize(200, 200).centerCrop().into(imageView);
+            }
+        });
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {

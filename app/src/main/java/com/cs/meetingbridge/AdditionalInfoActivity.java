@@ -29,11 +29,12 @@ public class AdditionalInfoActivity extends AppCompatActivity {
     private FirebaseUser user;
     private DatabaseReference databaseReference;
     private String gender;
-    private StorageReference imgStorage;
+    private StorageReference storageReference;
 
     //URI
     private Uri uri;
     private ProgressBar progressBar;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,7 +43,7 @@ public class AdditionalInfoActivity extends AppCompatActivity {
 
         FirebaseAuth auth = FirebaseAuth.getInstance();
         user = auth.getCurrentUser();
-        imgStorage = FirebaseStorage.getInstance().getReference().child("photos").child(user.getUid());
+        storageReference = FirebaseStorage.getInstance().getReference().child("photos").child(user.getUid());
         databaseReference = FirebaseDatabase.getInstance().getReference().child("users");
         fullName = (EditText) findViewById(R.id.fullname);
         contactNo = (EditText) findViewById(R.id.contactno);
@@ -97,8 +98,7 @@ public class AdditionalInfoActivity extends AppCompatActivity {
                     Toast.makeText(AdditionalInfoActivity.this, "Select Gender", Toast.LENGTH_SHORT).show();
                     return;
                 }
-
-                imgStorage.putFile(uri);
+                storageReference.putFile(uri);
                 userInfo user_Info = new userInfo(name, contact, gender);
                 databaseReference.child(user.getUid()).setValue(user_Info).addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
@@ -122,6 +122,7 @@ public class AdditionalInfoActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == GALLERY_INTENT && resultCode == RESULT_OK) {
             uri = data.getData();
+
         }
     }
 }
