@@ -4,11 +4,13 @@ class userInfo {
     private String name;
     private String contactNum;
     private String gender;
+    private String email;
 
-    userInfo(String name, String contactNum, String gender) {
+    userInfo(String name, String contactNum, String gender, String email) {
         this.contactNum = contactNum;
         this.gender = gender;
         this.name = name;
+        this.email = email;
     }
 
     public userInfo() {
@@ -36,5 +38,14 @@ class userInfo {
 
     public void setGender(String gender) {
         this.gender = gender;
+
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 }

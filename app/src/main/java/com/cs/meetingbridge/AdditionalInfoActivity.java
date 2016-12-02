@@ -84,6 +84,7 @@ public class AdditionalInfoActivity extends AppCompatActivity {
                 progressBar.setVisibility(View.VISIBLE);
                 final String name = fullName.getText().toString().trim();
                 final String contact = contactNo.getText().toString().trim();
+                final String email = user.getEmail();
                 if (TextUtils.isEmpty(name)) {
                     fullName.setError("Enter Full Name");
                     return;
@@ -99,7 +100,7 @@ public class AdditionalInfoActivity extends AppCompatActivity {
                     return;
                 }
                 storageReference.putFile(uri);
-                userInfo user_Info = new userInfo(name, contact, gender);
+                userInfo user_Info = new userInfo(name, contact, gender, email);
                 databaseReference.child(user.getUid()).setValue(user_Info).addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
@@ -122,7 +123,6 @@ public class AdditionalInfoActivity extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == GALLERY_INTENT && resultCode == RESULT_OK) {
             uri = data.getData();
-
         }
     }
 }

@@ -15,12 +15,12 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -41,9 +41,11 @@ public class MainActivity extends AppCompatActivity
     private ImageView imageView;
     private DatabaseReference databaseReference;
     private StorageReference storageReference;
-    private TextView uName, uContact, uGender;
-    private Task<Uri> uri;
+    private TextView uName, uContact, uGender, uEmail;
+    private Button createGroupButton;
 
+    //    private ArrayList<String> userInfoArrayList = new ArrayList<>();
+//    private ArrayAdapter arrayAdapter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -57,12 +59,14 @@ public class MainActivity extends AppCompatActivity
         uName = (TextView) findViewById(R.id.uName);
         uContact = (TextView) findViewById(R.id.uContact);
         uGender = (TextView) findViewById(R.id.uGender);
-        imageView = (ImageView) findViewById(R.id.img);
+        imageView = (ImageView) findViewById(R.id.profileIcon);
+        uEmail = (TextView) findViewById(R.id.uEmail);
+        createGroupButton = (Button) findViewById(R.id.createGroupButton);
         auth = FirebaseAuth.getInstance();
         authListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                FirebaseUser user = firebaseAuth.getCurrentUser();
+                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
                 if (user == null) {
                     startActivity(new Intent(MainActivity.this, LoginActivity.class));
                     finish();
@@ -77,6 +81,8 @@ public class MainActivity extends AppCompatActivity
                 uName.setText(userInfo.getName());
                 uContact.setText(userInfo.getContactNum());
                 uGender.setText(userInfo.getGender());
+                uEmail.setText(userInfo.getEmail());
+                // getUpdates(dataSnapshot);
             }
 
             @Override
@@ -90,7 +96,12 @@ public class MainActivity extends AppCompatActivity
                 Picasso.with(MainActivity.this).load(uri).resize(200, 200).centerCrop().into(imageView);
             }
         });
-
+        createGroupButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(MainActivity.this, CreateGroupActivity.class));
+            }
+        });
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -182,4 +193,19 @@ public class MainActivity extends AppCompatActivity
             auth.removeAuthStateListener(authListener);
         }
     }
+
+//    private void getUpdates(DataSnapshot ds) {
+//        for (DataSnapshot dataSnapshot : ds.getChildren()) {
+//            userInfo user1 = new userInfo();
+//            user1.setEmail(dataSnapshot.getValue(userInfo.class).getEmail());
+//            userInfoArrayList.add(user1.getEmail());
+//        }
+//        if(userInfoArrayList.size()>0){
+//            arrayAdapter = new ArrayAdapter<String>(MainActivity.this,android.R.layout.simple_list_item_1,userInfoArrayList);
+//            ListView lv = (ListView) findViewById(R.id.lv);
+//            lv.setAdapter(arrayAdapter);
+//        }else{
+//            Toast.makeText(MainActivity.this,"NOT FOUND",Toast.LENGTH_LONG).show();
+//        }
+//    }
 }

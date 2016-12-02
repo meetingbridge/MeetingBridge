@@ -15,17 +15,26 @@
     tools:showIn="@layout/app_bar_main">
 
     <ImageView
-        android:id="@+id/img"
+        android:id="@+id/profileIcon"
         android:layout_width="200sp"
         android:layout_height="200sp"
-        android:contentDescription="Icon"
-        android:src="@drawable/ic_launcher" />
+        android:contentDescription="Icon" />
 
     <TextView
         android:id="@+id/uName"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Hell Yeah" />
+    <TextView
+        android:id="@+id/uEmail"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Hell Yeah" />
+
+    <ListView
+        android:id="@+id/lv"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
 
     <TextView
         android:id="@+id/uContact"
@@ -38,5 +47,11 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Hello World!" />
+
+    <Button
+        android:id="@+id/createGroupButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Create a Group" />
 
 </LinearLayout>
