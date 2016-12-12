@@ -20,7 +20,7 @@ public class CreateGroupActivity extends AppCompatActivity {
     private ListView selectedUsers;
     private EditText gName, userEmail;
     private Button searchButton;
-    private ArrayList<String> selectedUsersList;
+    private ArrayList<userInfo> selectedUsersList = null;
     private DatabaseReference databaseReference;
 
     @Override
@@ -37,10 +37,15 @@ public class CreateGroupActivity extends AppCompatActivity {
         searchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
                 databaseReference.addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
-                        addDatainListView(dataSnapshot);
+                        if (addDatainListView(dataSnapshot)) {
+                            Toast.makeText(CreateGroupActivity.this, "Hurrah!", Toast.LENGTH_SHORT).show();
+                        } else {
+                            Toast.makeText(CreateGroupActivity.this, "Fuck", Toast.LENGTH_SHORT).show();
+                        }
                     }
 
                     @Override
@@ -52,30 +57,16 @@ public class CreateGroupActivity extends AppCompatActivity {
         });
     }
 
-    private void addDatainListView(DataSnapshot dataSnapshot) {
-        selectedUsersList.clear();
-//String str= "haseeb@gmail.com";
+    private boolean addDatainListView(DataSnapshot dataSnapshot) {
+        //Toast.makeText(CreateGroupActivity.this, userEmail.getText(), Toast.LENGTH_LONG).show();
 
         for (DataSnapshot data : dataSnapshot.getChildren()) {
-            userInfo u = new userInfo();
-            //u = data.getValue(userInfo.class);
-            u.setEmail(data.getValue(userInfo.class).getEmail());
-
-            selectedUsersList.add(u.getEmail());
-
-        }
-        if (selectedUsersList.size() > 0) {
-            for (int i = 0; i < selectedUsersList.size(); i++) {
-
-                if (selectedUsersList.get(i).equals(userEmail.getText())) {
-                    Toast.makeText(CreateGroupActivity.this, "User Exists", Toast.LENGTH_LONG).show();
-                    return;
-                } else if (i == (selectedUsersList.size() - 1)) {
-                    Toast.makeText(CreateGroupActivity.this, "Does Not", Toast.LENGTH_SHORT).show();
-                }
+            userInfo u = data.getValue(userInfo.class);
+            String email = u.getEmail();
+            if (email.equals(userEmail.getText().toString())) {
+                return true;
             }
-        } else {
-            Toast.makeText(CreateGroupActivity.this, "No Data", Toast.LENGTH_SHORT).show();
         }
+        return false;
     }
 }
