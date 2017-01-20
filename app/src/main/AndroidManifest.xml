@@ -52,7 +52,11 @@
         <activity
             android:name=".AdditionalInfoActivity"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".CreateGroupActivity"></activity>
+        <activity android:name=".CreateGroupActivity" />
+        <activity
+            android:name=".GroupActivity"
+            android:label="@string/title_activity_group"
+            android:theme="@style/AppTheme.NoActionBar" />
     </application>
 
 </manifest>

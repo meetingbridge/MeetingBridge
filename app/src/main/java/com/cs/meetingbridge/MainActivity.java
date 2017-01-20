@@ -15,8 +15,11 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -32,20 +35,24 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
+
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
 
     private FirebaseAuth.AuthStateListener authListener;
     private FirebaseAuth auth;
+    private ListView groupsListView;
     private ImageView imageView;
     private DatabaseReference databaseReference;
     private StorageReference storageReference;
     private TextView uName, uContact, uGender, uEmail;
     private Button createGroupButton;
+    private ArrayList<userInfo> users;
+    private ArrayList<String> groups = new ArrayList<>();
+    private ArrayList<GroupInfo> groupInfos = new ArrayList<>();
 
-    //    private ArrayList<String> userInfoArrayList = new ArrayList<>();
-//    private ArrayAdapter arrayAdapter;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -54,7 +61,7 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
 
         final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        databaseReference = FirebaseDatabase.getInstance().getReference().child("users");
+        databaseReference = FirebaseDatabase.getInstance().getReference();
         storageReference = FirebaseStorage.getInstance().getReference().child("photos").child(user.getUid());
         uName = (TextView) findViewById(R.id.uName);
         uContact = (TextView) findViewById(R.id.uContact);
@@ -62,6 +69,7 @@ public class MainActivity extends AppCompatActivity
         imageView = (ImageView) findViewById(R.id.profileIcon);
         uEmail = (TextView) findViewById(R.id.uEmail);
         createGroupButton = (Button) findViewById(R.id.createGroupButton);
+        groupsListView = (ListView) findViewById(R.id.groupsListView);
         auth = FirebaseAuth.getInstance();
         authListener = new FirebaseAuth.AuthStateListener() {
             @Override
@@ -74,7 +82,7 @@ public class MainActivity extends AppCompatActivity
             }
         };
 
-        databaseReference.child(user.getUid()).addValueEventListener(new ValueEventListener() {
+        databaseReference.child("users").child(user.getUid()).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 userInfo userInfo = dataSnapshot.getValue(userInfo.class);
@@ -90,6 +98,20 @@ public class MainActivity extends AppCompatActivity
                 Toast.makeText(MainActivity.this, databaseError.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+
+        databaseReference.child("Groups").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                showGroups(dataSnapshot);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+
+
         storageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
             @Override
             public void onSuccess(Uri uri) {
@@ -102,6 +124,16 @@ public class MainActivity extends AppCompatActivity
                 startActivity(new Intent(MainActivity.this, CreateGroupActivity.class));
             }
         });
+
+        groupsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent intent = new Intent(MainActivity.this, GroupActivity.class);
+                intent.putExtra("id", id);
+                startActivity(intent);
+            }
+        });
+
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -120,6 +152,24 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
+
+    }
+
+    private void showGroups(DataSnapshot dataSnapshot) {
+        for (DataSnapshot data : dataSnapshot.getChildren()) {
+            GroupInfo g = data.getValue(GroupInfo.class);
+            users = g.getMembersList();
+            for (int i = 0; i < users.size(); i++) {
+                if (FirebaseAuth.getInstance().getCurrentUser().getEmail().equals(users.get(i).getEmail())) {
+                    groups.add(g.getGroupName());
+                    groupInfos.add(g);
+                }
+            }
+        }
+        if (groups.size() > 0) {
+            ArrayAdapter adapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1, groups);
+            groupsListView.setAdapter(adapter);
+        }
     }
 
     @Override
