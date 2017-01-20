@@ -1,6 +1,7 @@
 package com.cs.meetingbridge;
 
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -9,6 +10,8 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -29,18 +32,30 @@ public class CreateGroupActivity extends AppCompatActivity {
     private Button createGroupButton;
     private FirebaseUser user;
     private userInfo currentUser;
+    private boolean userExist;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_group);
 
+
         databaseReference = FirebaseDatabase.getInstance().getReference();
+        selectedUsers = (ListView) findViewById(R.id.selectedUsers);
+        gName = (EditText) findViewById(R.id.gName);
+        userEmail = (EditText) findViewById(R.id.userEmail);
+        searchButton = (Button) findViewById(R.id.searchButton);
+        createGroupButton = (Button) findViewById(R.id.createGroupButton);
+        selectedMembersNames = new ArrayList<>();
+        selectedMembers = new ArrayList<>();
         user = FirebaseAuth.getInstance().getCurrentUser();
+
         databaseReference.child("users").child(user.getUid()).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 currentUser = dataSnapshot.getValue(userInfo.class);
+                selectedMembers.add(currentUser);
+                selectedMembersNames.add(currentUser.getName());
             }
 
             @Override
@@ -49,14 +64,7 @@ public class CreateGroupActivity extends AppCompatActivity {
             }
         });
 
-        selectedUsers = (ListView) findViewById(R.id.selectedUsers);
-        gName = (EditText) findViewById(R.id.gName);
-        userEmail = (EditText) findViewById(R.id.userEmail);
-        searchButton = (Button) findViewById(R.id.searchButton);
-        createGroupButton = (Button) findViewById(R.id.createGroupButton);
-        selectedMembersNames = new ArrayList<>();
-        selectedMembers = new ArrayList<>();
-        selectedMembers.add(currentUser);
+
         searchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -78,15 +86,35 @@ public class CreateGroupActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 GroupInfo groupInfo = new GroupInfo();
+
                 groupInfo.setGroupName(gName.getText().toString());
                 groupInfo.setMembersList(selectedMembers);
-                databaseReference.child("Groups").push().setValue(groupInfo);
+                groupInfo.setGroupId("10");
+
+                databaseReference.child("Groups").push().setValue(groupInfo).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    @Override
+                    public void onComplete(@NonNull Task<Void> task) {
+                        Toast.makeText(CreateGroupActivity.this, "Group Created", Toast.LENGTH_SHORT).show();
+                    }
+                });
+
+                databaseReference.child("Groups").addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        addID(dataSnapshot);
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
             }
         });
     }
 
     private void addDatainListView(DataSnapshot dataSnapshot) {
-
+        userExist = false;
         for (DataSnapshot data : dataSnapshot.getChildren()) {
             userInfo u = data.getValue(userInfo.class);
             String email = u.getEmail();
@@ -95,21 +123,38 @@ public class CreateGroupActivity extends AppCompatActivity {
                 selectedMembers.add(u);
             }
         }
+        if (searchArray(userEmail.getText().toString().trim())) {
+            Toast.makeText(CreateGroupActivity.this, "User of this Email is added!", Toast.LENGTH_SHORT).show();
+        } else if (!userExist) {
+            Toast.makeText(CreateGroupActivity.this, "No User of this Email!", Toast.LENGTH_SHORT).show();
+        }
+
         if (selectedMembersNames.size() > 0) {
             ArrayAdapter adapter = new ArrayAdapter(CreateGroupActivity.this, android.R.layout.simple_list_item_1, selectedMembersNames);
             selectedUsers.setAdapter(adapter);
-        } else {
-            Toast.makeText(CreateGroupActivity.this, "No User of this Email!", Toast.LENGTH_SHORT).show();
         }
+        userEmail.setText(null);
     }
 
     private boolean searchArray(String email) {
-        for (int i = 0; i <= selectedMembers.size(); i++) {
+        for (int i = 0; i < selectedMembers.size(); i++) {
             if (email.equals(selectedMembers.get(i).getEmail())) {
                 return true;
             }
         }
         return false;
+    }
+
+    private void addID(DataSnapshot dataSnapshot) {
+        for (DataSnapshot data : dataSnapshot.getChildren()) {
+            GroupInfo g = data.getValue(GroupInfo.class);
+            if (g.getGroupId().equals("10")) {
+                String k = data.getKey();
+                g.setGroupId(k);
+                databaseReference.child("Groups").child(k).setValue(g);
+                break;
+            }
+        }
     }
 }
 
