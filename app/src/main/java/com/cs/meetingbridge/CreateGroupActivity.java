@@ -70,7 +70,7 @@ public class CreateGroupActivity extends AppCompatActivity {
                 databaseReference.child("users").addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
-                        addDatainListView(dataSnapshot);
+                        addUsersInGroup(dataSnapshot);
                     }
 
                     @Override
@@ -111,7 +111,7 @@ public class CreateGroupActivity extends AppCompatActivity {
         });
     }
 
-    private void addDatainListView(DataSnapshot dataSnapshot) {
+    private void addUsersInGroup(DataSnapshot dataSnapshot) {
         userExist = false;
         for (DataSnapshot data : dataSnapshot.getChildren()) {
             userInfo u = data.getValue(userInfo.class);
