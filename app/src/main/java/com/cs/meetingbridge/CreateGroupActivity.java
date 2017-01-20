@@ -1,7 +1,6 @@
 package com.cs.meetingbridge;
 
 import android.os.Bundle;
-import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -10,8 +9,7 @@ import android.widget.EditText;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -89,11 +87,11 @@ public class CreateGroupActivity extends AppCompatActivity {
 
                 groupInfo.setGroupName(gName.getText().toString());
                 groupInfo.setMembersList(selectedMembers);
-                groupInfo.setGroupId("10");
+                groupInfo.setGroupId("1");
 
-                databaseReference.child("Groups").push().setValue(groupInfo).addOnCompleteListener(new OnCompleteListener<Void>() {
+                databaseReference.child("Groups").push().setValue(groupInfo).addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
-                    public void onComplete(@NonNull Task<Void> task) {
+                    public void onSuccess(Void aVoid) {
                         Toast.makeText(CreateGroupActivity.this, "Group Created", Toast.LENGTH_SHORT).show();
                     }
                 });
@@ -148,7 +146,7 @@ public class CreateGroupActivity extends AppCompatActivity {
     private void addID(DataSnapshot dataSnapshot) {
         for (DataSnapshot data : dataSnapshot.getChildren()) {
             GroupInfo g = data.getValue(GroupInfo.class);
-            if (g.getGroupId().equals("10")) {
+            if (g.getGroupId().equals("1")) {
                 String k = data.getKey();
                 g.setGroupId(k);
                 databaseReference.child("Groups").child(k).setValue(g);
