@@ -45,13 +45,8 @@ public class MainActivity extends AppCompatActivity
     private FirebaseAuth auth;
     private ListView groupsListView;
     private ImageView imageView;
-    private DatabaseReference databaseReference;
-    private StorageReference storageReference;
     private TextView uName, uContact, uGender, uEmail;
-    private Button createGroupButton;
-    private ArrayList<userInfo> users;
-    private ArrayList<String> groups = new ArrayList<>();
-    private ArrayList<GroupInfo> groupInfos = new ArrayList<>();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,14 +56,14 @@ public class MainActivity extends AppCompatActivity
         setSupportActionBar(toolbar);
 
         final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-        databaseReference = FirebaseDatabase.getInstance().getReference();
-        storageReference = FirebaseStorage.getInstance().getReference().child("photos").child(user.getUid());
+        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
+        StorageReference storageReference = FirebaseStorage.getInstance().getReference().child("photos").child(user.getUid());
         uName = (TextView) findViewById(R.id.uName);
         uContact = (TextView) findViewById(R.id.uContact);
         uGender = (TextView) findViewById(R.id.uGender);
         imageView = (ImageView) findViewById(R.id.profileIcon);
         uEmail = (TextView) findViewById(R.id.uEmail);
-        createGroupButton = (Button) findViewById(R.id.createGroupButton);
+        Button createGroupButton = (Button) findViewById(R.id.createGroupButton);
         groupsListView = (ListView) findViewById(R.id.groupsListView);
         auth = FirebaseAuth.getInstance();
         authListener = new FirebaseAuth.AuthStateListener() {
@@ -103,6 +98,7 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 showGroups(dataSnapshot);
+
             }
 
             @Override
@@ -156,20 +152,23 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void showGroups(DataSnapshot dataSnapshot) {
+        ArrayList<String> groupNames = new ArrayList<>();
         for (DataSnapshot data : dataSnapshot.getChildren()) {
             GroupInfo g = data.getValue(GroupInfo.class);
-            users = g.getMembersList();
+            ArrayList<userInfo> users = g.getMembersList();
+
             for (int i = 0; i < users.size(); i++) {
                 if (FirebaseAuth.getInstance().getCurrentUser().getEmail().equals(users.get(i).getEmail())) {
-                    groups.add(g.getGroupName());
-                    groupInfos.add(g);
+                    groupNames.add(g.getGroupName());
+
                 }
             }
         }
-        if (groups.size() > 0) {
-            ArrayAdapter adapter = new ArrayAdapter(MainActivity.this, android.R.layout.simple_list_item_1, groups);
+        if (groupNames.size() > 0) {
+            ArrayAdapter<String> adapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_list_item_1, groupNames);
             groupsListView.setAdapter(adapter);
         }
+
     }
 
     @Override
