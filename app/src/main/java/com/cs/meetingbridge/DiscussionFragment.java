@@ -19,7 +19,8 @@ import java.util.ArrayList;
 public class DiscussionFragment extends Fragment {
 
 
-    ArrayList<GroupInfo> groupInfos = new ArrayList<>();
+    DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
+    ArrayList<GroupInfo> groupInfos1 = new ArrayList<>();
 
     public DiscussionFragment() {
         // Required empty public constructor
@@ -33,34 +34,25 @@ public class DiscussionFragment extends Fragment {
         return dis;
     }
 
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        final View rootView = inflater.inflate(R.layout.fragment_discussion, container, false);
+        View rootView = inflater.inflate(R.layout.fragment_discussion, container, false);
+        final TextView textView = (TextView) rootView.findViewById(R.id.textView);
         Bundle bundle = this.getArguments();
         if (bundle != null) {
-
             final String id = bundle.getString("id");
-            DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
             databaseReference.child("Groups").addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
-
-                    for (DataSnapshot data : dataSnapshot.getChildren()) {
-                        GroupInfo g = data.getValue(GroupInfo.class);
-                        ArrayList<userInfo> userInfos = g.getMembersList();
-                        for (int i = 0; i < userInfos.size(); i++) {
-                            if (FirebaseAuth.getInstance().getCurrentUser().getEmail().equals(userInfos.get(i).getEmail())) {
-                                groupInfos.add(g);
-                            }
-                        }
-                    }
+                    groupInfos1 = getCurrentGroup(dataSnapshot);
                     int a = Integer.parseInt(id);
-                    String x = groupInfos.get(a).getGroupName();
-                    TextView textView = (TextView) rootView.findViewById(R.id.textView);
-                    textView.setText(x + "Ssssssss");
+                    String x = groupInfos1.get(a).getGroupName();
+                    textView.setText(x);
                 }
+
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
 
@@ -70,4 +62,19 @@ public class DiscussionFragment extends Fragment {
         }
         return rootView;
     }
+
+    private ArrayList<GroupInfo> getCurrentGroup(DataSnapshot dataSnapshot) {
+        ArrayList<GroupInfo> groupInfos = new ArrayList<>();
+        for (DataSnapshot data : dataSnapshot.getChildren()) {
+            GroupInfo g = data.getValue(GroupInfo.class);
+            ArrayList<userInfo> userInfos = g.getMembersList();
+            for (int i = 0; i < userInfos.size(); i++) {
+                if (FirebaseAuth.getInstance().getCurrentUser().getEmail().equals(userInfos.get(i).getEmail())) {
+                    groupInfos.add(g);
+                }
+            }
+        }
+        return groupInfos;
+    }
+
 }
