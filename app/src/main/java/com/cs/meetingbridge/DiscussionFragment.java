@@ -59,9 +59,8 @@ public class DiscussionFragment extends Fragment {
                     int a = Integer.parseInt(id);
                     String x = groupInfos.get(a).getGroupName();
                     TextView textView = (TextView) rootView.findViewById(R.id.textView);
-                    textView.setText(x);
+                    textView.setText(x + "Ssssssss");
                 }
-
                 @Override
                 public void onCancelled(DatabaseError databaseError) {
 
@@ -69,7 +68,6 @@ public class DiscussionFragment extends Fragment {
             });
 
         }
-
         return rootView;
     }
 }
