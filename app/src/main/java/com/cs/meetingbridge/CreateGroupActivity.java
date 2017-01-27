@@ -23,14 +23,10 @@ import java.util.ArrayList;
 public class CreateGroupActivity extends AppCompatActivity {
     private ListView selectedUsers;
     private EditText gName, userEmail;
-    private Button searchButton;
     private ArrayList<String> selectedMembersNames;
     private ArrayList<userInfo> selectedMembers;
     private DatabaseReference databaseReference;
-    private Button createGroupButton;
-    private FirebaseUser user;
     private userInfo currentUser;
-    private boolean userExist;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,11 +38,11 @@ public class CreateGroupActivity extends AppCompatActivity {
         selectedUsers = (ListView) findViewById(R.id.selectedUsers);
         gName = (EditText) findViewById(R.id.gName);
         userEmail = (EditText) findViewById(R.id.userEmail);
-        searchButton = (Button) findViewById(R.id.searchButton);
-        createGroupButton = (Button) findViewById(R.id.createGroupButton);
+        Button searchButton = (Button) findViewById(R.id.searchButton);
+        Button createGroupButton = (Button) findViewById(R.id.createGroupButton);
         selectedMembersNames = new ArrayList<>();
         selectedMembers = new ArrayList<>();
-        user = FirebaseAuth.getInstance().getCurrentUser();
+        FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
         databaseReference.child("users").child(user.getUid()).addValueEventListener(new ValueEventListener() {
             @Override
@@ -112,7 +108,7 @@ public class CreateGroupActivity extends AppCompatActivity {
     }
 
     private void addUsersInGroup(DataSnapshot dataSnapshot) {
-        userExist = false;
+        boolean userExist = false;
         for (DataSnapshot data : dataSnapshot.getChildren()) {
             userInfo u = data.getValue(userInfo.class);
             String email = u.getEmail();

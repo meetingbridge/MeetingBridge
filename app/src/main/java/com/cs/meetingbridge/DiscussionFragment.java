@@ -1,7 +1,5 @@
 package com.cs.meetingbridge;
 
-import android.content.Context;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
@@ -9,96 +7,69 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
-/**
- * A simple {@link Fragment} subclass.
- * Activities that contain this fragment must implement the
- * {@link DiscussionFragment.OnFragmentInteractionListener} interface
- * to handle interaction events.
- * Use the {@link DiscussionFragment#newInstance} factory method to
- * create an instance of this fragment.
- */
+import java.util.ArrayList;
+
 public class DiscussionFragment extends Fragment {
-    // TODO: Rename parameter arguments, choose names that match
-    // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
-    private static final String ARG_PARAM1 = "param1";
-    private static final String ARG_PARAM2 = "param2";
 
-    // TODO: Rename and change types of parameters
-    private String mParam1;
-    private String mParam2;
 
-    private OnFragmentInteractionListener mListener;
+    ArrayList<GroupInfo> groupInfos = new ArrayList<>();
 
     public DiscussionFragment() {
         // Required empty public constructor
     }
 
-    public static DiscussionFragment newInstance() {
+    public static DiscussionFragment newInstance(String id) {
         DiscussionFragment dis = new DiscussionFragment();
+        Bundle bundle = new Bundle();
+        bundle.putString("id", id);
+        dis.setArguments(bundle);
         return dis;
-    }
-
-    @Override
-    public void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        if (getArguments() != null) {
-            mParam1 = getArguments().getString(ARG_PARAM1);
-            mParam2 = getArguments().getString(ARG_PARAM2);
-        }
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View rootView = inflater.inflate(R.layout.fragment_discussion, container, false);
-
+        final View rootView = inflater.inflate(R.layout.fragment_discussion, container, false);
         Bundle bundle = this.getArguments();
         if (bundle != null) {
-            String id = bundle.getString("id");
-            TextView textView = (TextView) rootView.findViewById(R.id.textView);
-            textView.setText(id + "2231");
+
+            final String id = bundle.getString("id");
+            DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
+            databaseReference.child("Groups").addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+
+                    for (DataSnapshot data : dataSnapshot.getChildren()) {
+                        GroupInfo g = data.getValue(GroupInfo.class);
+                        ArrayList<userInfo> userInfos = g.getMembersList();
+                        for (int i = 0; i < userInfos.size(); i++) {
+                            if (FirebaseAuth.getInstance().getCurrentUser().getEmail().equals(userInfos.get(i).getEmail())) {
+                                groupInfos.add(g);
+                            }
+                        }
+                    }
+                    int a = Integer.parseInt(id);
+                    String x = groupInfos.get(a).getGroupName();
+                    TextView textView = (TextView) rootView.findViewById(R.id.textView);
+                    textView.setText(x);
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+
         }
+
         return rootView;
-    }
-
-    // TODO: Rename method, update argument and hook method into UI event
-    public void onButtonPressed(Uri uri) {
-        if (mListener != null) {
-            mListener.onFragmentInteraction(uri);
-        }
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-        if (context instanceof OnFragmentInteractionListener) {
-            mListener = (OnFragmentInteractionListener) context;
-        } else {
-            throw new RuntimeException(context.toString()
-                    + " must implement OnFragmentInteractionListener");
-        }
-    }
-
-    @Override
-    public void onDetach() {
-        super.onDetach();
-        mListener = null;
-    }
-
-    /**
-     * This interface must be implemented by activities that contain this
-     * fragment to allow an interaction in this fragment to be communicated
-     * to the activity and potentially other fragments contained in that
-     * activity.
-     * <p>
-     * See the Android Training lesson <a href=
-     * "http://developer.android.com/training/basics/fragments/communicating.html"
-     * >Communicating with Other Fragments</a> for more information.
-     */
-    public interface OnFragmentInteractionListener {
-        // TODO: Update argument type and name
-        void onFragmentInteraction(Uri uri);
     }
 }

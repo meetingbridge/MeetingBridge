@@ -1,6 +1,5 @@
 package com.cs.meetingbridge;
 
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -24,29 +23,16 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
-public class GroupActivity extends AppCompatActivity implements DiscussionFragment.OnFragmentInteractionListener {
+public class GroupActivity extends AppCompatActivity {
 
-    /**
-     * The {@link android.support.v4.view.PagerAdapter} that will provide
-     * fragments for each of the sections. We use a
-     * {@link FragmentPagerAdapter} derivative, which will keep every
-     * loaded fragment in memory. If this becomes too memory intensive, it
-     * may be best to switch to a
-     * {@link android.support.v4.app.FragmentStatePagerAdapter}.
-     */
     private SectionsPagerAdapter mSectionsPagerAdapter;
-
-    /**
-     * The {@link ViewPager} that will host the section contents.
-     */
     private ViewPager mViewPager;
+    private String ABC;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_group);
-        setTitle("GroupName");
-
 
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
         databaseReference.child("Groups").addValueEventListener(new ValueEventListener() {
@@ -60,7 +46,6 @@ public class GroupActivity extends AppCompatActivity implements DiscussionFragme
 
             }
         });
-
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -86,6 +71,7 @@ public class GroupActivity extends AppCompatActivity implements DiscussionFragme
 
     }
 
+
     private void getCurrentGroup(DataSnapshot dataSnapshot) {
         ArrayList<GroupInfo> groupInfos = new ArrayList<>();
         for (DataSnapshot data : dataSnapshot.getChildren()) {
@@ -100,13 +86,14 @@ public class GroupActivity extends AppCompatActivity implements DiscussionFragme
         String id = getIntent().getExtras().get("id").toString();
         int a = Integer.parseInt(id);
         if (groupInfos.size() > 0) {
-            setTitle(groupInfos.get(a).getGroupName());
-            Bundle bundle = new Bundle();
-            bundle.putString("id", groupInfos.get(a).getGroupId());
-            DiscussionFragment obj = new DiscussionFragment();
-            obj.setArguments(bundle);
+            ABC = groupInfos.get(a).getGroupName();
+            setTitle(ABC);
         }
+    }
 
+
+    public String getKey() {
+        return ABC;
     }
 
     @Override
@@ -131,21 +118,9 @@ public class GroupActivity extends AppCompatActivity implements DiscussionFragme
         return super.onOptionsItemSelected(item);
     }
 
-    @Override
-    public void onFragmentInteraction(Uri uri) {
-
-    }
-
-    /**
-     * A placeholder fragment containing a simple view.
-     */
-
-    /**
-     * A {@link FragmentPagerAdapter} that returns a fragment corresponding to
-     * one of the sections/tabs/pages.
-     */
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
+        String id = getIntent().getExtras().get("id").toString();
         public SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
         }
@@ -156,9 +131,9 @@ public class GroupActivity extends AppCompatActivity implements DiscussionFragme
             // Return a GroupFragment (defined as a static inner class below).
             switch (position) {
                 case 0:
-                    return DiscussionFragment.newInstance();
+                    return DiscussionFragment.newInstance(id);
                 case 1:
-                    return GroupFragment.newInstance(position + 1);
+                    return MembersFragment.newInstance();
             }
             return null;
         }
