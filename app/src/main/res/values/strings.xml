@@ -8,8 +8,7 @@
     <string name="btn_back"><![CDATA[<- Back]]></string>
     <string name="title_activity_group">GroupActivity</string>
     <string name="section_format">Hello World from section: %1$d</string>
+    <string name="title_activity_create_group">Create New Group</string>
+    <string name="title_activity_create_post">New Post</string>
 
-    <!-- TODO: Remove or change this placeholder text -->
-    <string name="hello_blank_fragment">Hello blank fragment</string>
-    <string name="title_activity_main2">Main2Activity</string>
 </resources>

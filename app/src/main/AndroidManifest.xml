@@ -40,7 +40,11 @@
         <activity
             android:name=".SplashScreen"
             android:theme="@style/AppTheme.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
 
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
         <activity
             android:name=".ResetPasswordActivity"
@@ -48,20 +52,18 @@
         <activity
             android:name=".AdditionalInfoActivity"
             android:theme="@style/AppTheme.NoActionBar" />
-        <activity android:name=".CreateGroupActivity" />
+        <activity
+            android:name=".CreateGroupActivity"
+            android:label="@string/title_activity_create_group"
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".GroupActivity"
             android:label="@string/title_activity_group"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name=".PostActivity"
-            android:theme="@style/AppTheme.NoActionBar">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
-        </activity>
+            android:name=".CreatePostActivity"
+            android:label="@string/title_activity_create_post"
+            android:theme="@style/AppTheme.NoActionBar" />
     </application>
 
 </manifest>
