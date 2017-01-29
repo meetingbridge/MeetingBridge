@@ -6,8 +6,11 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.Button;
+import android.widget.ListView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
@@ -43,6 +46,13 @@ public class DiscussionFragment extends Fragment {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_discussion, container, false);
         final TextView textView = (TextView) rootView.findViewById(R.id.textView);
+        ListView postListView = (ListView) rootView.findViewById(R.id.postsListView);
+        post_list_adapter adapter;
+        ArrayList<PostInfo> postList = new ArrayList<>();
+        userInfo u = new userInfo("us", "030273923498", "male", "usama@gmail.com");
+        PostTime pt = new PostTime(12, 10, "AM");
+        PostDate pd = new PostDate("jan", 1, 2017);
+
         DiscussionFragment context = this;
         Bundle bundle = this.getArguments();
         if (bundle != null) {
@@ -63,6 +73,17 @@ public class DiscussionFragment extends Fragment {
             });
 
         }
+        postList.add(new PostInfo(1, "post1", "sgbjdfnfgzh", pt, pd, u));
+        adapter = new post_list_adapter(getContext(), postList);
+        postListView.setAdapter(adapter);
+
+        postListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
+                Toast.makeText(getContext(), "Clicked Product Id is" + view.getTag().toString(), Toast.LENGTH_SHORT).show();
+            }
+        });
+
         Button createPost = (Button) rootView.findViewById(R.id.createPostButton);
         createPost.setOnClickListener(new View.OnClickListener() {
             @Override

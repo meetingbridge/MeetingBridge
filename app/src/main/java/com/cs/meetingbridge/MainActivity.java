@@ -15,11 +15,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Button;
 import android.widget.ImageView;
-import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -43,10 +39,10 @@ public class MainActivity extends AppCompatActivity
 
     private FirebaseAuth.AuthStateListener authListener;
     private FirebaseAuth auth;
-    private ListView groupsListView;
     private ImageView imageView;
-    private TextView uName, uContact, uGender, uEmail;
-
+    private TextView uNameTV, uContactTV, uGenderTV, uEmailTV;
+    private DrawerLayout drawer;
+    private Menu subMenu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -54,17 +50,37 @@ public class MainActivity extends AppCompatActivity
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        drawer = (DrawerLayout) findViewById(R.id.drawer_layout_main);
 
-        final FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
+                        .setAction("Action", null).show();
+            }
+        });
+
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        assert drawer != null;
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView.setNavigationItemSelectedListener(this);
+        Menu menu = navigationView.getMenu();
+        subMenu = menu.addSubMenu("Groups");
+        View headerView = navigationView.getHeaderView(0);
+
+
+        final FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
-        StorageReference storageReference = FirebaseStorage.getInstance().getReference().child("photos").child(user.getUid());
-        uName = (TextView) findViewById(R.id.uName);
-        uContact = (TextView) findViewById(R.id.uContact);
-        uGender = (TextView) findViewById(R.id.uGender);
-        imageView = (ImageView) findViewById(R.id.profileIcon);
-        uEmail = (TextView) findViewById(R.id.uEmail);
-        Button createGroupButton = (Button) findViewById(R.id.createGroupButton);
-        groupsListView = (ListView) findViewById(R.id.groupsListView);
+        StorageReference storageReference = FirebaseStorage.getInstance().getReference().child("photos").child(currentUser.getUid());
+
+        uNameTV = (TextView) headerView.findViewById(R.id.uName);
+        imageView = (ImageView) headerView.findViewById(R.id.profileIcon);
+        uEmailTV = (TextView) headerView.findViewById(R.id.uEmail);
         auth = FirebaseAuth.getInstance();
         authListener = new FirebaseAuth.AuthStateListener() {
             @Override
@@ -76,16 +92,12 @@ public class MainActivity extends AppCompatActivity
                 }
             }
         };
-
-        databaseReference.child("users").child(user.getUid()).addValueEventListener(new ValueEventListener() {
+        databaseReference.child("users").child(currentUser.getUid()).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 userInfo userInfo = dataSnapshot.getValue(userInfo.class);
-                uName.setText(userInfo.getName());
-                uContact.setText(userInfo.getContactNum());
-                uGender.setText(userInfo.getGender());
-                uEmail.setText(userInfo.getEmail());
-                // getUpdates(dataSnapshot);
+                uNameTV.setText(userInfo.getName());
+                uEmailTV.setText(userInfo.getEmail());
             }
 
             @Override
@@ -107,47 +119,13 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-
         storageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
             @Override
             public void onSuccess(Uri uri) {
-                Picasso.with(MainActivity.this).load(uri).resize(200, 200).centerCrop().into(imageView);
-            }
-        });
-        createGroupButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(MainActivity.this, CreateGroupActivity.class));
+                Picasso.with(MainActivity.this).load(uri).resize(200, 200).centerCrop().transform(new CircleTransform()).into(imageView);
             }
         });
 
-        groupsListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
-                Intent intent = new Intent(MainActivity.this, GroupActivity.class);
-                intent.putExtra("id", id);
-                startActivity(intent);
-            }
-        });
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
-        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
-                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
-        assert drawer != null;
-        drawer.setDrawerListener(toggle);
-        toggle.syncState();
-
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
-        navigationView.setNavigationItemSelectedListener(this);
 
     }
 
@@ -160,20 +138,17 @@ public class MainActivity extends AppCompatActivity
             for (int i = 0; i < users.size(); i++) {
                 if (FirebaseAuth.getInstance().getCurrentUser().getEmail().equals(users.get(i).getEmail())) {
                     groupNames.add(g.getGroupName());
-
                 }
             }
         }
-        if (groupNames.size() > 0) {
-            ArrayAdapter<String> adapter = new ArrayAdapter<>(MainActivity.this, android.R.layout.simple_list_item_1, groupNames);
-            groupsListView.setAdapter(adapter);
+        subMenu.clear();
+        for (int i = 0; i < groupNames.size(); i++) {
+            subMenu.add(i, i, i, groupNames.get(i));
         }
-
     }
 
     @Override
     public void onBackPressed() {
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
@@ -212,19 +187,22 @@ public class MainActivity extends AppCompatActivity
         if (id == R.id.signout) {
             auth.signOut();
 
-        } else if (id == R.id.nav_gallery) {
-
         } else if (id == R.id.nav_slideshow) {
 
         } else if (id == R.id.nav_manage) {
 
-        } else if (id == R.id.nav_share) {
-
-        } else if (id == R.id.nav_send) {
+        } else if (id == R.id.create_group) {
+            startActivity(new Intent(MainActivity.this, CreateGroupActivity.class));
 
         }
+        for (int i = 0; i < subMenu.size(); i++) {
+            if (id == i) {
+                Intent intent = new Intent(MainActivity.this, GroupActivity.class);
+                intent.putExtra("id", id);
+                startActivity(intent);
+            }
+        }
 
-        DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         drawer.closeDrawer(GravityCompat.START);
         return true;
     }

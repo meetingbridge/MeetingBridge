@@ -1,13 +1,19 @@
 package com.cs.meetingbridge;
 
+import android.content.Intent;
 import android.os.Bundle;
+import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
+import android.support.design.widget.NavigationView;
 import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -15,6 +21,7 @@ import android.view.MenuItem;
 import android.view.View;
 
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -23,17 +30,30 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
-public class GroupActivity extends AppCompatActivity {
+public class GroupActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
 
-    private SectionsPagerAdapter mSectionsPagerAdapter;
-    private ViewPager mViewPager;
     private String ABC;
+    private FirebaseAuth auth;
+    private FirebaseAuth.AuthStateListener authStateListener;
+    private DrawerLayout drawer;
+    private Menu subMenu;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_group);
-
+        auth = FirebaseAuth.getInstance();
+        authStateListener = new FirebaseAuth.AuthStateListener() {
+            @Override
+            public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
+                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
+                if (user == null) {
+                    startActivity(new Intent(GroupActivity.this, LoginActivity.class));
+                    finish();
+                }
+            }
+        };
+        drawer = (DrawerLayout) findViewById(R.id.drawer_layout_group);
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
         databaseReference.child("Groups").addValueEventListener(new ValueEventListener() {
             @Override
@@ -46,15 +66,16 @@ public class GroupActivity extends AppCompatActivity {
 
             }
         });
-
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+
+
         // Create the adapter that will return a fragment for each of the three
         // primary sections of the activity.
-        mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+        SectionsPagerAdapter mSectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
 
         // Set up the ViewPager with the sections adapter.
-        mViewPager = (ViewPager) findViewById(R.id.container);
+        ViewPager mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
@@ -69,8 +90,54 @@ public class GroupActivity extends AppCompatActivity {
             }
         });
 
+        ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
+                this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
+        drawer.addDrawerListener(toggle);
+        toggle.syncState();
+
+        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view1);
+        navigationView.setNavigationItemSelectedListener(this);
+        subMenu = navigationView.getMenu().addSubMenu("Groups");
+        MenuItem homeItem = navigationView.getMenu().findItem(R.id.homeActivity);
+        homeItem.setVisible(true);
     }
 
+    @SuppressWarnings("StatementWithEmptyBody")
+    @Override
+    public boolean onNavigationItemSelected(MenuItem item) {
+        // Handle navigation view item clicks here.
+        int id = item.getItemId();
+
+
+        if (id == R.id.signout) {
+            auth.signOut();
+        } else if (id == R.id.create_group) {
+            startActivity(new Intent(GroupActivity.this, CreateGroupActivity.class));
+
+        } else if (id == R.id.nav_slideshow) {
+
+        } else if (id == R.id.nav_manage) {
+
+
+        } else if (id == R.id.homeActivity) {
+
+            Intent intent = new Intent(GroupActivity.this, MainActivity.class);
+            startActivity(intent);
+        }
+
+        drawer.closeDrawer(GravityCompat.START);
+        return true;
+    }
+
+    @Override
+    public void onBackPressed() {
+
+        if (drawer.isDrawerOpen(GravityCompat.START)) {
+            drawer.closeDrawer(GravityCompat.START);
+        } else {
+            super.onBackPressed();
+        }
+    }
 
     private void getCurrentGroup(DataSnapshot dataSnapshot) {
         ArrayList<GroupInfo> groupInfos = new ArrayList<>();
@@ -80,6 +147,7 @@ public class GroupActivity extends AppCompatActivity {
             for (int i = 0; i < userInfos.size(); i++) {
                 if (FirebaseAuth.getInstance().getCurrentUser().getEmail().equals(userInfos.get(i).getEmail())) {
                     groupInfos.add(g);
+                    subMenu.add(g.getGroupName());
                 }
             }
         }
@@ -89,6 +157,7 @@ public class GroupActivity extends AppCompatActivity {
             ABC = groupInfos.get(a).getGroupName();
             setTitle(ABC);
         }
+
     }
 
 
@@ -118,9 +187,24 @@ public class GroupActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    public void onStart() {
+        super.onStart();
+        auth.addAuthStateListener(authStateListener);
+    }
+
+    @Override
+    public void onStop() {
+        super.onStop();
+        if (authStateListener != null) {
+            auth.removeAuthStateListener(authStateListener);
+        }
+    }
+
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
         String id = getIntent().getExtras().get("id").toString();
+
         public SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
         }

@@ -26,7 +26,7 @@ public class TimePickerFragment extends DialogFragment implements TimePickerDial
     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
         //Do something with the user chosen time
         //Get reference of host activity (XML Layout File) TextView widget
-        TextView tv = (TextView) getActivity().findViewById(R.id.postTitle);
+        TextView tv = (TextView) getActivity().findViewById(R.id.postTimeTV);
         String min = String.valueOf(minute);
         //Set a message for user
         if (minute < 10) {
@@ -52,10 +52,8 @@ public class TimePickerFragment extends DialogFragment implements TimePickerDial
         if (currentHour < 10) {
             currentH = 0 + currentH;
         }
-        tv.setText("Your chosen time is...\n\n");
         //Display the user changed time on TextView
-        tv.setText(tv.getText() + currentH
-                + " : " + min + " " + aMpM + "\n");
+        tv.setText(currentH + " " + min + " " + aMpM);
     }
 
 }

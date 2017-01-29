@@ -30,8 +30,7 @@ public class DatePickerFragment extends DialogFragment implements DatePickerDial
 
     public void onDateSet(DatePicker view, int year, int month, int day) {
         //Do something with the date chosen by the user
-        TextView tv = (TextView) getActivity().findViewById(R.id.postTitle);
-        tv.setText("Date changed...");
+        TextView tv = (TextView) getActivity().findViewById(R.id.postDateTV);
         String mon = "";
         // tv.setText(tv.getText() + "\nYear: " + year);
         switch (month) {
@@ -72,10 +71,7 @@ public class DatePickerFragment extends DialogFragment implements DatePickerDial
                 mon = "Dec";
                 break;
         }
-        //   tv.setText(tv.getText() + "\nMonth: " + mon);
-        //    tv.setText(tv.getText() + "\nDay of Month: " + day);
 
-        String stringOfDate = day + "/" + mon + "/" + year;
-        tv.setText(tv.getText() + "\n\nFormatted date: " + stringOfDate);
+        tv.setText(day + " " + mon + " " + year);
     }
 }

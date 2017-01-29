@@ -31,11 +31,11 @@ public class CreateGroupActivity extends AppCompatActivity {
     private DatabaseReference databaseReference;
     private userInfo currentUser;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_group);
-
 
         databaseReference = FirebaseDatabase.getInstance().getReference();
         selectedUsers = (ListView) findViewById(R.id.selectedUsers);
@@ -110,7 +110,6 @@ public class CreateGroupActivity extends AppCompatActivity {
         });
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -164,5 +163,7 @@ public class CreateGroupActivity extends AppCompatActivity {
             }
         }
     }
+
+
 }
 

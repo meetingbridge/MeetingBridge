@@ -19,7 +19,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Title"
-        android:inputType="textPersonName" />
+        android:inputType="textPersonName"
+        android:text="acasjidhiua" />
 
     <Button
         android:id="@+id/setTime"
@@ -27,10 +28,31 @@
         android:layout_height="wrap_content"
         android:text="Set Time" />
 
+    <TextView
+        android:id="@+id/postTimeTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
     <Button
         android:id="@+id/setDate"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:text="Set Date" />
 
+    <TextView
+        android:id="@+id/postDateTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content" />
+
+    <EditText
+        android:id="@+id/postDescriptionTV"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:inputType="textMultiLine" />
+
+    <Button
+        android:id="@+id/postButton"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Post" />
 </LinearLayout>
