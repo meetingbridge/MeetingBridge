@@ -98,6 +98,7 @@ public class MainActivity extends AppCompatActivity
                 userInfo userInfo = dataSnapshot.getValue(userInfo.class);
                 uNameTV.setText(userInfo.getName());
                 uEmailTV.setText(userInfo.getEmail());
+                uEmailTV.setText(userInfo.getEmail());
             }
 
             @Override
