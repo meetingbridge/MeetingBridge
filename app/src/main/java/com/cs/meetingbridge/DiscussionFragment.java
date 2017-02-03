@@ -6,10 +6,8 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ListView;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -41,29 +39,36 @@ public class DiscussionFragment extends Fragment {
 
 
     @Override
-    public View onCreateView(LayoutInflater inflater, ViewGroup container,
+    public View onCreateView(final LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(R.layout.fragment_discussion, container, false);
-        final TextView textView = (TextView) rootView.findViewById(R.id.textView);
-        ListView postListView = (ListView) rootView.findViewById(R.id.postsListView);
-        post_list_adapter adapter;
-        ArrayList<PostInfo> postList = new ArrayList<>();
-        userInfo u = new userInfo("us", "030273923498", "male", "usama@gmail.com");
-        PostTime pt = new PostTime(12, 10, "AM");
-        PostDate pd = new PostDate("jan", 1, 2017);
-
-        DiscussionFragment context = this;
+        final ListView postListView = (ListView) rootView.findViewById(R.id.postsListView);
         Bundle bundle = this.getArguments();
         if (bundle != null) {
             final String id = bundle.getString("id");
+            Toast.makeText(getActivity(), id, Toast.LENGTH_SHORT).show();
             databaseReference.child("Groups").addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     groupInfos1 = getCurrentGroup(dataSnapshot);
                     int a = Integer.parseInt(id);
-                    String x = groupInfos1.get(a).getGroupName();
-                    textView.setText(x);
+                    String groupId = groupInfos1.get(a).getGroupId();
+                    databaseReference.child("Posts").child(groupId).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            ArrayList<PostInfo> postInfo = showPosts(dataSnapshot);
+                            if (postInfo.size() > 0) {
+                                PostListAdapter adapter = new PostListAdapter(getActivity(), postInfo);
+                                postListView.setAdapter(adapter);
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
                 }
 
                 @Override
@@ -71,27 +76,29 @@ public class DiscussionFragment extends Fragment {
 
                 }
             });
+            Button createPost = (Button) rootView.findViewById(R.id.createPostButton);
+            createPost.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
 
+                    Intent intent = new Intent(getActivity(), CreatePostActivity.class);
+                    intent.putExtra("id", id);
+                    startActivity(intent);
+                }
+            });
         }
-        postList.add(new PostInfo(1, "post1", "sgbjdfnfgzh", pt, pd, u));
-        adapter = new post_list_adapter(getContext(), postList);
-        postListView.setAdapter(adapter);
 
-        postListView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
-            @Override
-            public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                Toast.makeText(getContext(), "Clicked Product Id is" + view.getTag().toString(), Toast.LENGTH_SHORT).show();
-            }
-        });
 
-        Button createPost = (Button) rootView.findViewById(R.id.createPostButton);
-        createPost.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(getActivity(), CreatePostActivity.class));
-            }
-        });
         return rootView;
+    }
+
+    private ArrayList<PostInfo> showPosts(DataSnapshot dataSnapshot) {
+        ArrayList<PostInfo> postInfo = new ArrayList<>();
+        for (DataSnapshot data : dataSnapshot.getChildren()) {
+            PostInfo p = data.getValue(PostInfo.class);
+            postInfo.add(0, p);
+        }
+        return postInfo;
     }
 
     private ArrayList<GroupInfo> getCurrentGroup(DataSnapshot dataSnapshot) {

@@ -205,6 +205,7 @@ public class GroupActivity extends AppCompatActivity implements NavigationView.O
 
         String id = getIntent().getExtras().get("id").toString();
 
+
         public SectionsPagerAdapter(FragmentManager fm) {
             super(fm);
         }
@@ -217,10 +218,11 @@ public class GroupActivity extends AppCompatActivity implements NavigationView.O
                 case 0:
                     return DiscussionFragment.newInstance(id);
                 case 1:
-                    return MembersFragment.newInstance();
+                    return MembersFragment.newInstance(id);
             }
             return null;
         }
+
 
         @Override
         public int getCount() {

@@ -1,6 +1,6 @@
 package com.cs.meetingbridge;
 
-//PostTime Class
+//postTime Class
 public class PostTime {
     int hours, minutes;
     String ampm;

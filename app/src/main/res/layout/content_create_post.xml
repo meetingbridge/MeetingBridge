@@ -19,8 +19,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Title"
-        android:inputType="textPersonName"
-        android:text="acasjidhiua" />
+        android:inputType="textShortMessage" />
 
     <Button
         android:id="@+id/setTime"
@@ -46,8 +45,9 @@
 
     <EditText
         android:id="@+id/postDescriptionTV"
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:hint="Post Details"
         android:inputType="textMultiLine" />
 
     <Button

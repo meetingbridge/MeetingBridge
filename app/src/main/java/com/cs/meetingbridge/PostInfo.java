@@ -1,31 +1,31 @@
 package com.cs.meetingbridge;
 
 public class PostInfo {
-    int id;
+    String postId;
     userInfo host;
-    String title, description;
-    PostTime PostTime;
+    String postTitle, postDescription;
+    PostTime postTime;
     PostDate postDate;
 
 
     public PostInfo() {
     }
 
-    public PostInfo(int id, String title, String description, PostTime PostTime, PostDate postDate, userInfo host) {
-        this.title = title;
-        this.id = id;
-        this.description = description;
-        this.PostTime = PostTime;
+    public PostInfo(String postId, String postTitle, String postDescription, PostTime postTime, PostDate postDate, userInfo host) {
+        this.postTitle = postTitle;
+        this.postId = postId;
+        this.postDescription = postDescription;
+        this.postTime = postTime;
         this.postDate = postDate;
         this.host = host;
     }
 
-    public int getId() {
-        return id;
+    public String getPostId() {
+        return postId;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setPostId(String postId) {
+        this.postId = postId;
     }
 
     public userInfo getHost() {
@@ -36,28 +36,28 @@ public class PostInfo {
         this.host = host;
     }
 
-    public String getTitle() {
-        return title;
+    public String getPostTitle() {
+        return postTitle;
     }
 
-    public void setTitle(String title) {
-        this.title = title;
+    public void setPostTitle(String postTitle) {
+        this.postTitle = postTitle;
     }
 
-    public String getDescription() {
-        return description;
+    public String getPostDescription() {
+        return postDescription;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setPostDescription(String postDescription) {
+        this.postDescription = postDescription;
     }
 
     public PostTime getPostTime() {
-        return PostTime;
+        return postTime;
     }
 
     public void setPostTime(PostTime PostTime) {
-        this.PostTime = PostTime;
+        this.postTime = PostTime;
     }
 
     public PostDate getPostDate() {

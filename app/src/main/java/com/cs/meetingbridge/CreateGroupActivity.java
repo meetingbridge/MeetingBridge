@@ -128,6 +128,7 @@ public class CreateGroupActivity extends AppCompatActivity {
             if (email.equals(userEmail.getText().toString().trim()) && !searchArray(userEmail.getText().toString().trim())) {
                 selectedMembersNames.add(u.getName());
                 selectedMembers.add(u);
+                userExist = true;
             }
         }
         if (searchArray(userEmail.getText().toString().trim())) {

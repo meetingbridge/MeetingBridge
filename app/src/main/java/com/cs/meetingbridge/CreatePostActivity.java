@@ -1,5 +1,6 @@
 package com.cs.meetingbridge;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -12,7 +13,20 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.ArrayList;
+
 public class CreatePostActivity extends AppCompatActivity {
+
+    DatabaseReference databaseReference;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -21,18 +35,17 @@ public class CreatePostActivity extends AppCompatActivity {
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
-        PostInfo post = new PostInfo();
-        EditText postTitle = (EditText) findViewById(R.id.postTitle);
-        EditText postDescription = (EditText) findViewById(R.id.postDescriptionTV);
+        databaseReference = FirebaseDatabase.getInstance().getReference();
+        final EditText postTitle = (EditText) findViewById(R.id.postTitle);
+        final EditText postDescription = (EditText) findViewById(R.id.postDescriptionTV);
         Button setTimeButton = (Button) findViewById(R.id.setTime);
         Button setDateButton = (Button) findViewById(R.id.setDate);
         final TextView timeView = (TextView) findViewById(R.id.postTimeTV);
         final TextView dateView = (TextView) findViewById(R.id.postDateTV);
         Button postButton = (Button) findViewById(R.id.postButton);
-        PostInfo p = new PostInfo();
-        final PostTime pt = new PostTime();
-        final PostDate pd = new PostDate();
-
+        final PostTime postTime = new PostTime();
+        final PostDate postDate = new PostDate();
+        final FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         setTimeButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -58,30 +71,106 @@ public class CreatePostActivity extends AppCompatActivity {
             }
         });
 
+
+        final String id = getIntent().getStringExtra("id");
+//
+
         postButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
 
+                final String title = postTitle.getText().toString();
+                final String description = postDescription.getText().toString();
                 String timeTemp = timeView.getText().toString();
                 String dateTemp = dateView.getText().toString();
                 String[] timeArray = timeTemp.split(" ");
                 String[] dateArray = dateTemp.split(" ");
-                pt.setHours(Integer.parseInt(timeArray[0]));
-                pt.setMinutes(Integer.parseInt(timeArray[1]));
-                pt.setAmpm(timeArray[2]);
-                pd.setDay(Integer.parseInt(dateArray[0]));
-                pd.setMonth(dateArray[1]);
-                pd.setYear(Integer.parseInt(dateArray[2]));
-                Toast.makeText(getApplicationContext(), String.valueOf(pd.getYear()), Toast.LENGTH_SHORT).show();
+                postTime.setHours(Integer.parseInt(timeArray[0]));
+                postTime.setMinutes(Integer.parseInt(timeArray[1]));
+                postTime.setAmpm(timeArray[2]);
+                postDate.setDay(Integer.parseInt(dateArray[0]));
+                postDate.setMonth(dateArray[1]);
+                postDate.setYear(Integer.parseInt(dateArray[2]));
+                databaseReference.child("users").child(currentUser.getUid()).addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        userInfo user = dataSnapshot.getValue(userInfo.class);
+                        final PostInfo postInfo = new PostInfo("1", title, description, postTime, postDate, user);
+                        databaseReference.child("Groups").addValueEventListener(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                ArrayList<GroupInfo> groupInfos = getCurrentGroup(dataSnapshot);
+                                int temp = Integer.parseInt(id);
+                                final String groupId = groupInfos.get(temp).getGroupId();
+                                databaseReference.child("Posts").child(groupId).push().setValue(postInfo).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                    @Override
+                                    public void onSuccess(Void aVoid) {
+                                        Toast.makeText(CreatePostActivity.this, "Posted!", Toast.LENGTH_SHORT).show();
+
+                                    }
+                                });
+                                databaseReference.child("Posts").child(groupId).addValueEventListener(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(DataSnapshot dataSnapshot) {
+                                        addID(dataSnapshot, groupId);
+                                        Intent intent = new Intent(CreatePostActivity.this, GroupActivity.class);
+                                        intent.putExtra("id", id);
+                                        startActivity(intent);
+                                    }
+
+                                    @Override
+                                    public void onCancelled(DatabaseError databaseError) {
+
+                                    }
+                                });
+                            }
+
+                            @Override
+                            public void onCancelled(DatabaseError databaseError) {
+
+                            }
+                        });
+
+
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+
             }
         });
 
 
-//        Toast.makeText(this,pt.getHours(),Toast.LENGTH_SHORT).show();
-        p.setDescription(postDescription.getText().toString().trim());
-        p.setId(1);
-
-
     }
+
+    private void addID(DataSnapshot dataSnapshot, String groupId) {
+        for (DataSnapshot data : dataSnapshot.getChildren()) {
+            PostInfo p = data.getValue(PostInfo.class);
+            if (String.valueOf(p.getPostId()).equals("1")) {
+                String k = data.getKey();
+                p.setPostId(k);
+                databaseReference.child("Posts").child(groupId).child(k).setValue(p);
+                break;
+            }
+        }
+    }
+
+    private ArrayList<GroupInfo> getCurrentGroup(DataSnapshot dataSnapshot) {
+        ArrayList<GroupInfo> groupInfos = new ArrayList<>();
+        for (DataSnapshot data : dataSnapshot.getChildren()) {
+            GroupInfo g = data.getValue(GroupInfo.class);
+            ArrayList<userInfo> userInfos = g.getMembersList();
+            for (int i = 0; i < userInfos.size(); i++) {
+                if (FirebaseAuth.getInstance().getCurrentUser().getEmail().equals(userInfos.get(i).getEmail())) {
+                    groupInfos.add(g);
+                }
+            }
+        }
+        return groupInfos;
+    }
+
 
 }
