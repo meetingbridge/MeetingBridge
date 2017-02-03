@@ -1,14 +1,8 @@
 package com.cs.meetingbridge;
 
-import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
-import android.net.ConnectivityManager;
-import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v7.app.AlertDialog;
-import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
@@ -21,21 +15,28 @@ import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 
-public class LoginActivity extends AppCompatActivity {
+
+public class LoginActivity extends PermissionClass {
 
 
+    private static final int REQUEST_PERMISSION = 10;
     private EditText etEmail;
     private EditText etPassword;
     private Button btnsignup;
     private Button btnlogin;
     private Button btnForgot;
     private FirebaseAuth auth;
-    // private final long refreshDelay = 5 * 1000;
     private ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+
+        requestAppPermission(new String[]
+                        {android.Manifest.permission.READ_CONTACTS,
+                                android.Manifest.permission.READ_EXTERNAL_STORAGE,},
+                R.string.permission_msg, REQUEST_PERMISSION);
 
         setContentView(R.layout.activity_login);
 
@@ -101,24 +102,11 @@ public class LoginActivity extends AppCompatActivity {
         });
     }
 
-    private boolean isNetworkConnected() {
-        ConnectivityManager conManager = (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
-        NetworkInfo netInfo = conManager.getActiveNetworkInfo();
-        return netInfo != null;
+
+    @Override
+    public void onPermissionGranted(int requestCode) {
+        Toast.makeText(getApplicationContext(), "Permission Granted", Toast.LENGTH_SHORT).show();
     }
 
-    private void showAlertDialog() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(LoginActivity.this);
-        builder.setTitle("Error");
-        builder.setMessage("No Network Connection").setCancelable(false)
-                .setIcon(R.drawable.ic_launcher)
-                .setPositiveButton("OK", new DialogInterface.OnClickListener() {
-                    public void onClick(DialogInterface dialog, int id) {
-                        dialog.cancel();
-                    }
-                });
-        AlertDialog alert = builder.create();
-        alert.show();
-    }
 }
 

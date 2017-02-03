@@ -10,5 +10,6 @@
     <string name="section_format">Hello World from section: %1$d</string>
     <string name="title_activity_create_group">Create New Group</string>
     <string name="title_activity_create_post">New Post</string>
+    <string name="permission_msg">"Please Allow All Permissions"</string>
 
 </resources>

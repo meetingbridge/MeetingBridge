@@ -1,6 +1,10 @@
 package com.cs.meetingbridge;
 
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -10,6 +14,7 @@ import android.support.design.widget.Snackbar;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -40,14 +45,17 @@ public class MainActivity extends AppCompatActivity
     private FirebaseAuth.AuthStateListener authListener;
     private FirebaseAuth auth;
     private ImageView imageView;
-    private TextView uNameTV, uContactTV, uGenderTV, uEmailTV;
+    private TextView uNameTV, uEmailTV;
     private DrawerLayout drawer;
     private Menu subMenu;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        checkNetwork();
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout_main);
@@ -147,6 +155,46 @@ public class MainActivity extends AppCompatActivity
             subMenu.add(i, i, i, groupNames.get(i));
         }
     }
+
+    private void checkNetwork() {
+        if (!IsNetworkAvailable()) {
+            AlertDialog.Builder CheckBuilder = new AlertDialog.Builder(this);
+            CheckBuilder.setTitle("Error!");
+            CheckBuilder.setMessage("Check Your Internet Connection!");
+
+            CheckBuilder.setPositiveButton("Retry", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+
+                    Intent intent = getIntent();
+                    finish();
+                    startActivity(intent);
+                }
+            });
+            CheckBuilder.setNegativeButton("Exit", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    finish();
+                    ;
+                }
+            });
+            AlertDialog alert = CheckBuilder.create();
+            alert.show();
+        } else {
+            if (IsNetworkAvailable()) {
+                Toast.makeText(this, "Internet Available", Toast.LENGTH_SHORT).show();
+            }
+        }
+
+    }
+
+    private boolean IsNetworkAvailable() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null;
+
+    }
+
 
     @Override
     public void onBackPressed() {

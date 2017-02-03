@@ -1,10 +1,10 @@
 package com.cs.meetingbridge;
 
+import android.Manifest;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
-import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
@@ -23,14 +23,14 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
-public class AdditionalInfoActivity extends AppCompatActivity {
+public class AdditionalInfoActivity extends PermissionClass {
     private static final int GALLERY_INTENT = 2;
+    private static final int REQUEST_PERMISSION = 10;
     private EditText fullName, contactNo;
     private FirebaseUser user;
     private DatabaseReference databaseReference;
     private String gender;
     private StorageReference storageReference;
-
     //URI
     private Uri uri;
     private ProgressBar progressBar;
@@ -39,6 +39,12 @@ public class AdditionalInfoActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestAppPermission(new String[]
+                        {android.Manifest.permission.READ_CONTACTS,
+                                Manifest.permission.READ_EXTERNAL_STORAGE,
+                                android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                                android.Manifest.permission.WRITE_CONTACTS},
+                R.string.permission_msg, REQUEST_PERMISSION);
         setContentView(R.layout.activity_additional_info);
 
         FirebaseAuth auth = FirebaseAuth.getInstance();
@@ -57,6 +63,7 @@ public class AdditionalInfoActivity extends AppCompatActivity {
         if (user == null) {
             startActivity(new Intent(AdditionalInfoActivity.this, LoginActivity.class));
         }
+
         assert genderGroup != null;
         genderGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
@@ -125,4 +132,10 @@ public class AdditionalInfoActivity extends AppCompatActivity {
             uri = data.getData();
         }
     }
+
+    @Override
+    public void onPermissionGranted(int requestCode) {
+        Toast.makeText(getApplicationContext(), "Permission Granted", Toast.LENGTH_SHORT).show();
+    }
+
 }

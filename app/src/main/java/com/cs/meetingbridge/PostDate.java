@@ -1,13 +1,12 @@
 package com.cs.meetingbridge;
 
 public class PostDate {
-    int day, year;
-    String month;
+    private String day, month, year;
 
     public PostDate() {
     }
 
-    public PostDate(String month, int day, int year) {
+    public PostDate(String day, String month, String year) {
         this.month = month;
         this.day = day;
         this.year = year;
@@ -21,19 +20,19 @@ public class PostDate {
         this.month = month;
     }
 
-    public int getDay() {
+    public String getDay() {
         return day;
     }
 
-    public void setDay(int day) {
+    public void setDay(String day) {
         this.day = day;
     }
 
-    public int getYear() {
+    public String getYear() {
         return year;
     }
 
-    public void setYear(int year) {
+    public void setYear(String year) {
         this.year = year;
     }
 }

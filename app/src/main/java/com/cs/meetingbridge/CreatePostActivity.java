@@ -22,7 +22,9 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 
 public class CreatePostActivity extends AppCompatActivity {
 
@@ -79,23 +81,24 @@ public class CreatePostActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
+                final String currentTime = new SimpleDateFormat("dd-M-yy hh:mm a").format(new Date());
                 final String title = postTitle.getText().toString();
                 final String description = postDescription.getText().toString();
                 String timeTemp = timeView.getText().toString();
                 String dateTemp = dateView.getText().toString();
                 String[] timeArray = timeTemp.split(" ");
                 String[] dateArray = dateTemp.split(" ");
-                postTime.setHours(Integer.parseInt(timeArray[0]));
-                postTime.setMinutes(Integer.parseInt(timeArray[1]));
+                postTime.setHours(timeArray[0]);
+                postTime.setMinutes(timeArray[1]);
                 postTime.setAmpm(timeArray[2]);
-                postDate.setDay(Integer.parseInt(dateArray[0]));
+                postDate.setDay(dateArray[0]);
                 postDate.setMonth(dateArray[1]);
-                postDate.setYear(Integer.parseInt(dateArray[2]));
+                postDate.setYear(dateArray[2]);
                 databaseReference.child("users").child(currentUser.getUid()).addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         userInfo user = dataSnapshot.getValue(userInfo.class);
-                        final PostInfo postInfo = new PostInfo("1", title, description, postTime, postDate, user);
+                        final PostInfo postInfo = new PostInfo("1", title, description, postTime, postDate, user, currentTime);
                         databaseReference.child("Groups").addValueEventListener(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {

@@ -1,23 +1,30 @@
 package com.cs.meetingbridge;
 
 public class PostInfo {
-    String postId;
-    userInfo host;
-    String postTitle, postDescription;
-    PostTime postTime;
-    PostDate postDate;
-
+    private userInfo host;
+    private String postId, postTitle, postDescription, postingTime;
+    private PostTime postTime;
+    private PostDate postDate;
 
     public PostInfo() {
     }
 
-    public PostInfo(String postId, String postTitle, String postDescription, PostTime postTime, PostDate postDate, userInfo host) {
+    public PostInfo(String postId, String postTitle, String postDescription, PostTime postTime, PostDate postDate, userInfo host, String postingTime) {
         this.postTitle = postTitle;
         this.postId = postId;
         this.postDescription = postDescription;
         this.postTime = postTime;
         this.postDate = postDate;
         this.host = host;
+        this.postingTime = postingTime;
+    }
+
+    public String getPostingTime() {
+        return postingTime;
+    }
+
+    public void setPostingTime(String postingTime) {
+        this.postingTime = postingTime;
     }
 
     public String getPostId() {

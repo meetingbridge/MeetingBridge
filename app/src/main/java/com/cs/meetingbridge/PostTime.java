@@ -2,32 +2,32 @@ package com.cs.meetingbridge;
 
 //postTime Class
 public class PostTime {
-    int hours, minutes;
+    String hours, minutes;
     String ampm;
 
 
     public PostTime() {
     }
 
-    public PostTime(int hours, int minutes, String ampm) {
+    public PostTime(String hours, String minutes, String ampm) {
         this.hours = hours;
         this.minutes = minutes;
         this.ampm = ampm;
     }
 
-    public int getHours() {
+    public String getHours() {
         return this.hours;
     }
 
-    public void setHours(int hours) {
+    public void setHours(String hours) {
         this.hours = hours;
     }
 
-    public int getMinutes() {
+    public String getMinutes() {
         return minutes;
     }
 
-    public void setMinutes(int minutes) {
+    public void setMinutes(String minutes) {
         this.minutes = minutes;
     }
 

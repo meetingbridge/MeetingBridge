@@ -38,8 +38,10 @@ public class PostListAdapter extends BaseAdapter {
         View v = View.inflate(mContext, R.layout.postlayout, null);
         PostTime time = mPostList.get(i).getPostTime();
         PostDate date = mPostList.get(i).getPostDate();
-        String timeString = String.valueOf(time.getHours()) + ":" + String.valueOf(time.getMinutes()) + " " + time.getAmpm();
-        String dateString = String.valueOf(date.getDay()) + "/" + String.valueOf(date.getMonth()) + "/" + String.valueOf(date.getYear());
+        TextView postingTime = (TextView) v.findViewById(R.id.postingTime);
+
+        String timeString = time.getHours() + ":" + time.getMinutes() + " " + time.getAmpm();
+        String dateString = date.getDay() + "/" + date.getMonth() + "/" + date.getYear();
         TextView Name = (TextView) v.findViewById(R.id.hostName);
         ImageView postIcon = (ImageView) v.findViewById(R.id.postIcon);
         TextView Title = (TextView) v.findViewById(R.id.postTitle);
@@ -51,6 +53,7 @@ public class PostListAdapter extends BaseAdapter {
         Discription.setText(mPostList.get(i).getPostDescription());
         TimeView.setText(timeString);
         DateView.setText(dateString);
+        postingTime.setText(mPostList.get(i).getPostingTime());
         v.setTag(mPostList.get(i).getPostId());
 
         return v;

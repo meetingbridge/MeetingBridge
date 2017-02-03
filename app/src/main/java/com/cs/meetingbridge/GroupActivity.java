@@ -1,6 +1,7 @@
 package com.cs.meetingbridge;
 
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -19,7 +20,10 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.ImageView;
+import android.widget.TextView;
 
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -27,6 +31,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
@@ -37,6 +44,8 @@ public class GroupActivity extends AppCompatActivity implements NavigationView.O
     private FirebaseAuth.AuthStateListener authStateListener;
     private DrawerLayout drawer;
     private Menu subMenu;
+    private ImageView imageView;
+    private TextView uNameTV, uEmailTV;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,7 +109,32 @@ public class GroupActivity extends AppCompatActivity implements NavigationView.O
         subMenu = navigationView.getMenu().addSubMenu("Groups");
         MenuItem homeItem = navigationView.getMenu().findItem(R.id.homeActivity);
         homeItem.setVisible(true);
+        View headerView = navigationView.getHeaderView(0);
+        uNameTV = (TextView) headerView.findViewById(R.id.uName);
+        imageView = (ImageView) headerView.findViewById(R.id.profileIcon);
+        uEmailTV = (TextView) headerView.findViewById(R.id.uEmail);
+        databaseReference.child("users").child(FirebaseAuth.getInstance().getCurrentUser().getUid()).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                userInfo userInfo = dataSnapshot.getValue(userInfo.class);
+                uNameTV.setText(userInfo.getName());
+                uEmailTV.setText(userInfo.getEmail());
+                uEmailTV.setText(userInfo.getEmail());
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+            }
+        });
+        StorageReference storageReference = FirebaseStorage.getInstance().getReference().child("photos").child(FirebaseAuth.getInstance().getCurrentUser().getUid());
+        storageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+            @Override
+            public void onSuccess(Uri uri) {
+                Picasso.with(getApplicationContext()).load(uri).resize(200, 200).centerCrop().transform(new CircleTransform()).into(imageView);
+            }
+        });
     }
+
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
@@ -108,21 +142,26 @@ public class GroupActivity extends AppCompatActivity implements NavigationView.O
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
-
         if (id == R.id.signout) {
             auth.signOut();
-        } else if (id == R.id.create_group) {
-            startActivity(new Intent(GroupActivity.this, CreateGroupActivity.class));
 
+        } else if (id == R.id.homeActivity) {
+            Intent intent = new Intent(GroupActivity.this, MainActivity.class);
+            startActivity(intent);
         } else if (id == R.id.nav_slideshow) {
 
         } else if (id == R.id.nav_manage) {
 
+        } else if (id == R.id.create_group) {
+            startActivity(new Intent(GroupActivity.this, CreateGroupActivity.class));
 
-        } else if (id == R.id.homeActivity) {
-
-            Intent intent = new Intent(GroupActivity.this, MainActivity.class);
-            startActivity(intent);
+        }
+        for (int i = 0; i < subMenu.size(); i++) {
+            if (id == i) {
+                Intent intent = new Intent(GroupActivity.this, GroupActivity.class);
+                intent.putExtra("id", id);
+                startActivity(intent);
+            }
         }
 
         drawer.closeDrawer(GravityCompat.START);
@@ -141,15 +180,20 @@ public class GroupActivity extends AppCompatActivity implements NavigationView.O
 
     private void getCurrentGroup(DataSnapshot dataSnapshot) {
         ArrayList<GroupInfo> groupInfos = new ArrayList<>();
+        ArrayList<String> groupNames = new ArrayList<>();
         for (DataSnapshot data : dataSnapshot.getChildren()) {
             GroupInfo g = data.getValue(GroupInfo.class);
             ArrayList<userInfo> userInfos = g.getMembersList();
+
             for (int i = 0; i < userInfos.size(); i++) {
                 if (FirebaseAuth.getInstance().getCurrentUser().getEmail().equals(userInfos.get(i).getEmail())) {
                     groupInfos.add(g);
-                    subMenu.add(g.getGroupName());
+                    groupNames.add(g.getGroupName());
                 }
             }
+        }
+        for (int i = 0; i < groupNames.size(); i++) {
+            subMenu.add(Menu.NONE, i, Menu.NONE, groupNames.get(i));
         }
         String id = getIntent().getExtras().get("id").toString();
         int a = Integer.parseInt(id);
@@ -158,11 +202,6 @@ public class GroupActivity extends AppCompatActivity implements NavigationView.O
             setTitle(ABC);
         }
 
-    }
-
-
-    public String getKey() {
-        return ABC;
     }
 
     @Override

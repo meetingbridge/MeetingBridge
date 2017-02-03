@@ -1,5 +1,6 @@
 package com.cs.meetingbridge;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
@@ -91,7 +92,8 @@ public class CreateGroupActivity extends AppCompatActivity {
                 databaseReference.child("Groups").push().setValue(groupInfo).addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
-                        Toast.makeText(CreateGroupActivity.this, "Group Created", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(CreateGroupActivity.this, "Group Created! Open it from Drawer!", Toast.LENGTH_SHORT).show();
+                        startActivity(new Intent(getApplicationContext(), MainActivity.class));
                     }
                 });
 
