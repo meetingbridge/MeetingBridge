@@ -35,7 +35,7 @@ public class PostListAdapter extends BaseAdapter {
 
     @Override
     public View getView(int i, View view, ViewGroup viewGroup) {
-        View v = View.inflate(mContext, R.layout.postlayout, null);
+        View v = View.inflate(mContext, R.layout.post_layout, null);
         PostTime time = mPostList.get(i).getPostTime();
         PostDate date = mPostList.get(i).getPostDate();
         TextView postingTime = (TextView) v.findViewById(R.id.postingTime);

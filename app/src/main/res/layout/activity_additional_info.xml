@@ -125,6 +125,6 @@
         android:layout_height="30dp"
         android:layout_gravity="center|bottom"
         android:layout_marginBottom="20dp"
-        android:background="@layout/progress"
+        android:background="@layout/progressbar_layout"
         android:visibility="gone" />
 </android.support.design.widget.CoordinatorLayout>
