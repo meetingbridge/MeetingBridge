@@ -11,11 +11,11 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
     app:layout_behavior="@string/appbar_scrolling_view_behavior"
-    tools:context="com.cs.meetingbridge.CreatePostActivity"
+    tools:context=".CreatePostActivity"
     tools:showIn="@layout/activity_create_post">
 
     <EditText
-        android:id="@+id/postTitle"
+        android:id="@+id/postTitleET"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Title"
@@ -30,7 +30,8 @@
     <TextView
         android:id="@+id/postTimeTV"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:text="Event Time A" />
 
     <Button
         android:id="@+id/setDate"
@@ -41,10 +42,11 @@
     <TextView
         android:id="@+id/postDateTV"
         android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        android:layout_height="wrap_content"
+        android:text="Event Date a" />
 
     <EditText
-        android:id="@+id/postDescriptionTV"
+        android:id="@+id/postDescriptionET"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Post Details"

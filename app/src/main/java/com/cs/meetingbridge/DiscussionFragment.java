@@ -37,15 +37,17 @@ public class DiscussionFragment extends Fragment {
         return dis;
     }
 
-
     @Override
     public View onCreateView(final LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View rootView = inflater.inflate(R.layout.fragment_discussion, container, false);
+        final View rootView = inflater.inflate(R.layout.fragment_discussion, container, false);
         final ListView postListView = (ListView) rootView.findViewById(R.id.postsListView);
+
+
         Bundle bundle = this.getArguments();
         if (bundle != null) {
+
             final String id = bundle.getString("id");
             Toast.makeText(getActivity(), id, Toast.LENGTH_SHORT).show();
             databaseReference.child("Groups").addValueEventListener(new ValueEventListener() {
@@ -80,15 +82,13 @@ public class DiscussionFragment extends Fragment {
             createPost.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-
                     Intent intent = new Intent(getActivity(), CreatePostActivity.class);
                     intent.putExtra("id", id);
                     startActivity(intent);
+
                 }
             });
         }
-
-
         return rootView;
     }
 

@@ -5,11 +5,14 @@ public class PostInfo {
     private String postId, postTitle, postDescription, postingTime;
     private PostTime postTime;
     private PostDate postDate;
+    private GroupInfo groupInfo;
+
 
     public PostInfo() {
     }
 
-    public PostInfo(String postId, String postTitle, String postDescription, PostTime postTime, PostDate postDate, userInfo host, String postingTime) {
+    public PostInfo(String postId, String postTitle, String postDescription,
+                    PostTime postTime, PostDate postDate, userInfo host, String postingTime, GroupInfo groupInfo) {
         this.postTitle = postTitle;
         this.postId = postId;
         this.postDescription = postDescription;
@@ -17,6 +20,15 @@ public class PostInfo {
         this.postDate = postDate;
         this.host = host;
         this.postingTime = postingTime;
+        this.groupInfo = groupInfo;
+    }
+
+    public GroupInfo getGroupInfo() {
+        return groupInfo;
+    }
+
+    public void setGroupInfo(GroupInfo groupInfo) {
+        this.groupInfo = groupInfo;
     }
 
     public String getPostingTime() {

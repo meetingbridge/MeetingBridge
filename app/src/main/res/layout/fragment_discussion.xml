@@ -13,6 +13,7 @@
         android:layout_height="wrap_content"
         android:text="New Post" />
 
+
     <ListView
         android:id="@+id/postsListView"
         style="@android:style/Widget.DeviceDefault.ExpandableListView"

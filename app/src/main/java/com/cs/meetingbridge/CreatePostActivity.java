@@ -1,3 +1,4 @@
+
 package com.cs.meetingbridge;
 
 import android.content.Intent;
@@ -38,8 +39,8 @@ public class CreatePostActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         databaseReference = FirebaseDatabase.getInstance().getReference();
-        final EditText postTitle = (EditText) findViewById(R.id.postTitle);
-        final EditText postDescription = (EditText) findViewById(R.id.postDescriptionTV);
+        final EditText postTitle = (EditText) findViewById(R.id.postTitleET);
+        final EditText postDescription = (EditText) findViewById(R.id.postDescriptionET);
         Button setTimeButton = (Button) findViewById(R.id.setTime);
         Button setDateButton = (Button) findViewById(R.id.setDate);
         final TextView timeView = (TextView) findViewById(R.id.postTimeTV);
@@ -97,14 +98,15 @@ public class CreatePostActivity extends AppCompatActivity {
                 databaseReference.child("users").child(currentUser.getUid()).addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
-                        userInfo user = dataSnapshot.getValue(userInfo.class);
-                        final PostInfo postInfo = new PostInfo("1", title, description, postTime, postDate, user, currentTime);
+                        final userInfo user = dataSnapshot.getValue(userInfo.class);
+
                         databaseReference.child("Groups").addValueEventListener(new ValueEventListener() {
                             @Override
                             public void onDataChange(DataSnapshot dataSnapshot) {
                                 ArrayList<GroupInfo> groupInfos = getCurrentGroup(dataSnapshot);
                                 int temp = Integer.parseInt(id);
                                 final String groupId = groupInfos.get(temp).getGroupId();
+                                final PostInfo postInfo = new PostInfo("1", title, description, postTime, postDate, user, currentTime, groupInfos.get(temp));
                                 databaseReference.child("Posts").child(groupId).push().setValue(postInfo).addOnSuccessListener(new OnSuccessListener<Void>() {
                                     @Override
                                     public void onSuccess(Void aVoid) {
@@ -158,6 +160,7 @@ public class CreatePostActivity extends AppCompatActivity {
                 databaseReference.child("Posts").child(groupId).child(k).setValue(p);
                 break;
             }
+
         }
     }
 
