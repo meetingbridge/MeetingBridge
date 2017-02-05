@@ -21,6 +21,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -37,6 +38,8 @@ import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 
 
 public class MainActivity extends AppCompatActivity
@@ -48,6 +51,7 @@ public class MainActivity extends AppCompatActivity
     private TextView uNameTV, uEmailTV;
     private DrawerLayout drawer;
     private Menu subMenu;
+    private ListView postListView;
 
 
     @Override
@@ -83,7 +87,7 @@ public class MainActivity extends AppCompatActivity
 
 
         final FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
+        final DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
         StorageReference storageReference = FirebaseStorage.getInstance().getReference().child("photos").child(currentUser.getUid());
 
         uNameTV = (TextView) headerView.findViewById(R.id.uName);
@@ -114,11 +118,40 @@ public class MainActivity extends AppCompatActivity
                 Toast.makeText(MainActivity.this, databaseError.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
-
+        postListView = (ListView) findViewById(R.id.postListView);
+        final ArrayList<PostInfo> temp = new ArrayList<>();
         databaseReference.child("Groups").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                showGroups(dataSnapshot);
+                final ArrayList<String> groupIds = showGroups(dataSnapshot);
+
+                for (int i = 0; i < groupIds.size(); i++) {
+                    databaseReference.child("Posts").child(groupIds.get(i)).addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            ArrayList<PostInfo> postInfo = showPosts(dataSnapshot);
+                            for (int j = 0; j < postInfo.size(); j++) {
+                                temp.add(postInfo.get(j));
+                            }
+                            if (temp.size() > 0) {
+                                Collections.sort(temp, new Comparator<PostInfo>() {
+                                    @Override
+                                    public int compare(PostInfo lhs, PostInfo rhs) {
+                                        return rhs.getPostingTime().compareTo(lhs.getPostingTime());
+                                    }
+                                });
+                                PostListAdapter adapter = new PostListAdapter(MainActivity.this, temp);
+                                postListView.setAdapter(adapter);
+                            }
+                        }
+
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
+
+                        }
+                    });
+
+                }
 
             }
 
@@ -138,8 +171,18 @@ public class MainActivity extends AppCompatActivity
 
     }
 
-    private void showGroups(DataSnapshot dataSnapshot) {
+    private ArrayList<PostInfo> showPosts(DataSnapshot dataSnapshot) {
+        ArrayList<PostInfo> postInfo = new ArrayList<>();
+        for (DataSnapshot data : dataSnapshot.getChildren()) {
+            PostInfo p = data.getValue(PostInfo.class);
+            postInfo.add(0, p);
+        }
+        return postInfo;
+    }
+
+    private ArrayList<String> showGroups(DataSnapshot dataSnapshot) {
         ArrayList<String> groupNames = new ArrayList<>();
+        ArrayList<String> groupIds = new ArrayList<>();
         for (DataSnapshot data : dataSnapshot.getChildren()) {
             GroupInfo g = data.getValue(GroupInfo.class);
             ArrayList<userInfo> users = g.getMembersList();
@@ -147,6 +190,7 @@ public class MainActivity extends AppCompatActivity
             for (int i = 0; i < users.size(); i++) {
                 if (FirebaseAuth.getInstance().getCurrentUser().getEmail().equals(users.get(i).getEmail())) {
                     groupNames.add(g.getGroupName());
+                    groupIds.add(g.getGroupId());
                 }
             }
         }
@@ -154,6 +198,7 @@ public class MainActivity extends AppCompatActivity
         for (int i = 0; i < groupNames.size(); i++) {
             subMenu.add(i, i, i, groupNames.get(i));
         }
+        return groupIds;
     }
 
     private void checkNetwork() {

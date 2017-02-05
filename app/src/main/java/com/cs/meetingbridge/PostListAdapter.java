@@ -60,6 +60,7 @@ public class PostListAdapter extends BaseAdapter {
         TextView Name = (TextView) v.findViewById(R.id.hostName);
         ImageView postIcon = (ImageView) v.findViewById(R.id.postIcon);
         TextView Title = (TextView) v.findViewById(R.id.postTitle);
+        TextView groupName = (TextView) v.findViewById(R.id.groupName);
         TextView Discription = (TextView) v.findViewById(R.id.postDiscription);
         TextView TimeView = (TextView) v.findViewById(R.id.Time);
         TextView DateView = (TextView) v.findViewById(R.id.Date);
@@ -70,6 +71,12 @@ public class PostListAdapter extends BaseAdapter {
         DateView.setText(dateString);
         postingTime.setText(mPostList.get(i).getPostingTime());
         v.setTag(mPostList.get(i).getPostId());
+        String str = " posted in " + mPostList.get(i).getGroupInfo().getGroupName();
+        groupName.setText(str);
+
+        if (mContext.getClass().toString().equals("class com.cs.meetingbridge.MainActivity")) {
+            groupName.setVisibility(View.VISIBLE);
+        }
 
         Button commentButton = (Button) v.findViewById(R.id.commentsButton);
 
