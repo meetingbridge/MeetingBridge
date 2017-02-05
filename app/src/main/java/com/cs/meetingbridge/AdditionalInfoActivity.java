@@ -49,8 +49,8 @@ public class AdditionalInfoActivity extends PermissionClass {
 
         FirebaseAuth auth = FirebaseAuth.getInstance();
         user = auth.getCurrentUser();
-        storageReference = FirebaseStorage.getInstance().getReference().child("photos").child(user.getUid());
-        databaseReference = FirebaseDatabase.getInstance().getReference().child("users");
+        storageReference = FirebaseStorage.getInstance().getReference();
+        databaseReference = FirebaseDatabase.getInstance().getReference();
         fullName = (EditText) findViewById(R.id.fullname);
         contactNo = (EditText) findViewById(R.id.contactno);
         final RadioGroup genderGroup = (RadioGroup) findViewById(R.id.genderGroup);
@@ -106,9 +106,11 @@ public class AdditionalInfoActivity extends PermissionClass {
                     Toast.makeText(AdditionalInfoActivity.this, "Select Gender", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                storageReference.putFile(uri);
-                userInfo user_Info = new userInfo(name, contact, gender, email);
-                databaseReference.child(user.getUid()).setValue(user_Info).addOnCompleteListener(new OnCompleteListener<Void>() {
+                storageReference.child("Photos").child(user.getUid()).putFile(uri);
+                System.out.println(uri);
+
+                userInfo user_Info = new userInfo(name, contact, gender, email, uri.toString());
+                databaseReference.child("Users").child(user.getUid()).setValue(user_Info).addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {
                         if (!task.isSuccessful()) {
@@ -130,6 +132,7 @@ public class AdditionalInfoActivity extends PermissionClass {
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == GALLERY_INTENT && resultCode == RESULT_OK) {
             uri = data.getData();
+            System.out.println(uri);
         }
     }
 

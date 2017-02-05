@@ -79,7 +79,7 @@ public class MembersFragment extends Fragment {
                         @Override
                         public void onClick(View v) {
                             final String email = emailET.getText().toString();
-                            databaseReference.child("users").addValueEventListener(new ValueEventListener() {
+                            databaseReference.child("Users").addValueEventListener(new ValueEventListener() {
                                 @Override
                                 public void onDataChange(DataSnapshot dataSnapshot1) {
                                     final ArrayList<userInfo> newUsers = addUsersInGroup(dataSnapshot1, email, users);

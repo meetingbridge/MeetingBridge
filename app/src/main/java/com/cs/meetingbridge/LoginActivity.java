@@ -64,6 +64,7 @@ public class LoginActivity extends PermissionClass {
             @Override
             public void onClick(View v) {
                 startActivity(new Intent(LoginActivity.this, ResetPasswordActivity.class));
+
             }
         });
 
@@ -94,6 +95,7 @@ public class LoginActivity extends PermissionClass {
                             }
                         } else {
                             startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                            finish();
                         }
                         progressBar.setVisibility(View.GONE);
                     }

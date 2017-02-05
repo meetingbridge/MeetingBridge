@@ -102,7 +102,7 @@ public class PostListAdapter extends BaseAdapter {
                 });
                 final FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
                 final String currentTime = new SimpleDateFormat("dd-M-yy hh:mm a").format(new Date());
-                databaseReference.child("users").child(currentUser.getUid()).addValueEventListener(new ValueEventListener() {
+                databaseReference.child("Users").child(currentUser.getUid()).addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         final userInfo user = dataSnapshot.getValue(userInfo.class);

@@ -95,7 +95,7 @@ public class CreatePostActivity extends AppCompatActivity {
                 postDate.setDay(dateArray[0]);
                 postDate.setMonth(dateArray[1]);
                 postDate.setYear(dateArray[2]);
-                databaseReference.child("users").child(currentUser.getUid()).addValueEventListener(new ValueEventListener() {
+                databaseReference.child("Users").child(currentUser.getUid()).addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         final userInfo user = dataSnapshot.getValue(userInfo.class);

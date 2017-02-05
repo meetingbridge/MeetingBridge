@@ -5,7 +5,6 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -25,7 +24,6 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -88,7 +86,7 @@ public class MainActivity extends AppCompatActivity
 
         final FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         final DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
-        StorageReference storageReference = FirebaseStorage.getInstance().getReference().child("photos").child(currentUser.getUid());
+        final StorageReference storageReference = FirebaseStorage.getInstance().getReference();
 
         uNameTV = (TextView) headerView.findViewById(R.id.uName);
         imageView = (ImageView) headerView.findViewById(R.id.profileIcon);
@@ -104,13 +102,18 @@ public class MainActivity extends AppCompatActivity
                 }
             }
         };
-        databaseReference.child("users").child(currentUser.getUid()).addValueEventListener(new ValueEventListener() {
+        databaseReference.child("Users").child(currentUser.getUid()).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 userInfo userInfo = dataSnapshot.getValue(userInfo.class);
                 uNameTV.setText(userInfo.getName());
                 uEmailTV.setText(userInfo.getEmail());
                 uEmailTV.setText(userInfo.getEmail());
+                Picasso.with(MainActivity.this)
+                        .load(userInfo.getImageUri())
+                        .resize(200, 200).centerCrop()
+                        .transform(new CircleTransform()).into(imageView);
+
             }
 
             @Override
@@ -158,13 +161,6 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onCancelled(DatabaseError databaseError) {
 
-            }
-        });
-
-        storageReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-            @Override
-            public void onSuccess(Uri uri) {
-                Picasso.with(MainActivity.this).load(uri).resize(200, 200).centerCrop().transform(new CircleTransform()).into(imageView);
             }
         });
 
@@ -246,7 +242,9 @@ public class MainActivity extends AppCompatActivity
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            super.onBackPressed();
+            // super.onBackPressed();
+            finish();
+
         }
     }
 

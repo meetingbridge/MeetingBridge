@@ -48,7 +48,7 @@ public class CreateGroupActivity extends AppCompatActivity {
         selectedMembers = new ArrayList<>();
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
-        databaseReference.child("users").child(user.getUid()).addValueEventListener(new ValueEventListener() {
+        databaseReference.child("Users").child(user.getUid()).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 currentUser = dataSnapshot.getValue(userInfo.class);
