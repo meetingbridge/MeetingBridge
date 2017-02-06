@@ -1,14 +1,19 @@
 package com.cs.meetingbridge;
 
+import android.app.Dialog;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
+import android.view.Window;
+import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -18,6 +23,9 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
@@ -60,7 +68,6 @@ public class MembersFragment extends Fragment {
         });
         Bundle bundle = this.getArguments();
         if (bundle != null) {
-
             final int id = Integer.parseInt(bundle.getString("id"));
 
 
@@ -69,12 +76,37 @@ public class MembersFragment extends Fragment {
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     final GroupInfo currentGroup = getCurrentGroup(dataSnapshot, id);
                     final ArrayList<userInfo> users = currentGroup.getMembersList();
-                    ArrayList<String> userNames = new ArrayList<>();
-                    for (int i = 0; i < users.size(); i++) {
-                        userNames.add(users.get(i).getName());
-                    }
-                    ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1, userNames);
-                    membersLV.setAdapter(adapter);
+
+                    UserListAdapter userListAdapter = new UserListAdapter(getActivity(), users);
+                    membersLV.setAdapter(userListAdapter);
+                    membersLV.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                        @Override
+                        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                            final Dialog dialog = new Dialog(getActivity());
+                            dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+                            dialog.setContentView(R.layout.user_profile_layout);
+                            //dialog.setTitle(users.get(position).getName());
+
+                            final ImageView userProfile = (ImageView) dialog.findViewById(R.id.profileImage);
+                            TextView userName = (TextView) dialog.findViewById(R.id.profileName);
+                            TextView userEmail = (TextView) dialog.findViewById(R.id.profileEmail);
+                            TextView userContact = (TextView) dialog.findViewById(R.id.profileContact);
+                            TextView userGender = (TextView) dialog.findViewById(R.id.profileGender);
+                            userName.setText(users.get(position).getName());
+                            userContact.setText(users.get(position).getContactNum());
+                            userEmail.setText(users.get(position).getEmail());
+                            userGender.setText(users.get(position).getGender());
+                            StorageReference storageReference = FirebaseStorage.getInstance().getReference();
+                            storageReference.child("Photos").child(users.get(position).getId()).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                @Override
+                                public void onSuccess(Uri uri) {
+                                    Picasso.with(dialog.getContext()).load(uri)
+                                            .resize(200, 200).centerCrop().transform(new CircleTransform()).into(userProfile);
+                                }
+                            });
+                            dialog.show();
+                        }
+                    });
                     add.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
@@ -90,12 +122,9 @@ public class MembersFragment extends Fragment {
                                             add.setVisibility(View.GONE);
                                             addMemberssButton.setVisibility(View.VISIBLE);
                                             ArrayList<userInfo> users1 = currentGroup.getMembersList();
-                                            ArrayList<String> userNames1 = new ArrayList<>();
-                                            for (int i = 0; i < users1.size(); i++) {
-                                                userNames1.add(users1.get(i).getName());
-                                            }
-                                            ArrayAdapter<String> adapter = new ArrayAdapter<>(getActivity(), android.R.layout.simple_list_item_1, userNames1);
-                                            membersLV.setAdapter(adapter);
+                                            UserListAdapter userListAdapter = new UserListAdapter(getActivity(), users1);
+                                            membersLV.setAdapter(userListAdapter);
+
                                         }
                                     });
                                 }

@@ -56,10 +56,10 @@ public class DiscussionFragment extends Fragment {
                     groupInfos1 = getCurrentGroup(dataSnapshot);
                     int a = Integer.parseInt(id);
                     String groupId = groupInfos1.get(a).getGroupId();
-                    databaseReference.child("Posts").child(groupId).addListenerForSingleValueEvent(new ValueEventListener() {
+                    databaseReference.child("Posts").child(groupId).addValueEventListener(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
-                            ArrayList<PostInfo> postInfo = showPosts(dataSnapshot);
+                            final ArrayList<PostInfo> postInfo = showPosts(dataSnapshot);
                             if (postInfo.size() > 0) {
                                 PostListAdapter adapter = new PostListAdapter(getActivity(), postInfo);
                                 postListView.setAdapter(adapter);

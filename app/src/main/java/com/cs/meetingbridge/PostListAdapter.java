@@ -5,6 +5,8 @@ import android.content.Context;
 import android.net.Uri;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
+import android.widget.AdapterView;
 import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.EditText;
@@ -13,6 +15,7 @@ import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -20,6 +23,8 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
 
 import java.text.SimpleDateFormat;
@@ -60,17 +65,76 @@ public class PostListAdapter extends BaseAdapter {
         String timeString = time.getHours() + ":" + time.getMinutes() + " " + time.getAmpm();
         String dateString = date.getDay() + "/" + date.getMonth() + "/" + date.getYear();
         TextView Name = (TextView) v.findViewById(R.id.hostName);
-        ImageView postIcon = (ImageView) v.findViewById(R.id.postIcon);
+        final ImageView postIcon = (ImageView) v.findViewById(R.id.postIcon);
         TextView Title = (TextView) v.findViewById(R.id.postTitle);
         TextView groupName = (TextView) v.findViewById(R.id.groupName);
         TextView Discription = (TextView) v.findViewById(R.id.postDiscription);
         TextView TimeView = (TextView) v.findViewById(R.id.Time);
         TextView DateView = (TextView) v.findViewById(R.id.Date);
+        StorageReference storageReference = FirebaseStorage.getInstance().getReference();
+        storageReference.child("Photos").child(mPostList.get(i).getHost().getId()).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+            @Override
+            public void onSuccess(Uri uri) {
+                Picasso.with(v.getContext()).load(uri)
+                        .resize(200, 200).centerCrop().into(postIcon);
+            }
+        });
+        postIcon.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final Dialog dialog = new Dialog(v.getContext());
+                dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+                dialog.setContentView(R.layout.user_profile_layout);
+                //dialog.setTitle(users.get(position).getName());
 
-        Picasso.with(v.getContext())
-                .load(Uri.parse(mPostList.get(i).getHost().getImageUri()))
-                .resize(200, 200).centerCrop().into(postIcon);
+                final ImageView userProfile = (ImageView) dialog.findViewById(R.id.profileImage);
+                TextView userName = (TextView) dialog.findViewById(R.id.profileName);
+                TextView userEmail = (TextView) dialog.findViewById(R.id.profileEmail);
+                TextView userContact = (TextView) dialog.findViewById(R.id.profileContact);
+                TextView userGender = (TextView) dialog.findViewById(R.id.profileGender);
+                userName.setText(mPostList.get(i).getHost().getName());
+                userContact.setText(mPostList.get(i).getHost().getContactNum());
+                userEmail.setText(mPostList.get(i).getHost().getEmail());
+                userGender.setText(mPostList.get(i).getHost().getGender());
+                StorageReference storageReference = FirebaseStorage.getInstance().getReference();
+                storageReference.child("Photos").child(mPostList.get(i).getHost().getId()).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                    @Override
+                    public void onSuccess(Uri uri) {
+                        Picasso.with(dialog.getContext()).load(uri)
+                                .resize(200, 200).centerCrop().transform(new CircleTransform()).into(userProfile);
+                    }
+                });
+                dialog.show();
+            }
+        });
+        Name.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                final Dialog dialog = new Dialog(v.getContext());
+                dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+                dialog.setContentView(R.layout.user_profile_layout);
+                //dialog.setTitle(users.get(position).getName());
 
+                final ImageView userProfile = (ImageView) dialog.findViewById(R.id.profileImage);
+                TextView userName = (TextView) dialog.findViewById(R.id.profileName);
+                TextView userEmail = (TextView) dialog.findViewById(R.id.profileEmail);
+                TextView userContact = (TextView) dialog.findViewById(R.id.profileContact);
+                TextView userGender = (TextView) dialog.findViewById(R.id.profileGender);
+                userName.setText(mPostList.get(i).getHost().getName());
+                userContact.setText(mPostList.get(i).getHost().getContactNum());
+                userEmail.setText(mPostList.get(i).getHost().getEmail());
+                userGender.setText(mPostList.get(i).getHost().getGender());
+                StorageReference storageReference = FirebaseStorage.getInstance().getReference();
+                storageReference.child("Photos").child(mPostList.get(i).getHost().getId()).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                    @Override
+                    public void onSuccess(Uri uri) {
+                        Picasso.with(dialog.getContext()).load(uri)
+                                .resize(200, 200).centerCrop().transform(new CircleTransform()).into(userProfile);
+                    }
+                });
+                dialog.show();
+            }
+        });
         Name.setText(mPostList.get(i).getHost().getName());
         Title.setText(mPostList.get(i).getPostTitle());
         Discription.setText(mPostList.get(i).getPostDescription());
@@ -122,15 +186,45 @@ public class PostListAdapter extends BaseAdapter {
                                         final ArrayList<CommentInfo> commentInfos = showComments(dataSnapshot);
                                         final CommentListAdapter adapter = new CommentListAdapter(v.getContext(), commentInfos);
                                         commentLV.setAdapter(adapter);
+
+
                                         postCommentButton.setOnClickListener(new View.OnClickListener() {
                                             @Override
-                                            public void onClick(View v) {
+                                            public void onClick(final View v) {
                                                 commentInfos.add(0, new CommentInfo(currentTime, user, commentBox.getText().toString(), mPostList.get(i).getGroupInfo()));
                                                 databaseReference.child("Comments")
                                                         .child(mPostList.get(i).getGroupInfo().getGroupId())
                                                         .child(mPostList.get(i).getPostId()).setValue(commentInfos);
                                                 commentBox.setText("");
                                                 commentLV.setAdapter(adapter);
+                                                commentLV.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+                                                    @Override
+                                                    public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                                                        final Dialog dialog = new Dialog(v.getContext());
+                                                        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+                                                        dialog.setContentView(R.layout.user_profile_layout);
+                                                        //dialog.setTitle(users.get(position).getName());
+
+                                                        final ImageView userProfile = (ImageView) dialog.findViewById(R.id.profileImage);
+                                                        TextView userName = (TextView) dialog.findViewById(R.id.profileName);
+                                                        TextView userEmail = (TextView) dialog.findViewById(R.id.profileEmail);
+                                                        TextView userContact = (TextView) dialog.findViewById(R.id.profileContact);
+                                                        TextView userGender = (TextView) dialog.findViewById(R.id.profileGender);
+                                                        userName.setText(commentInfos.get(position).getHost().getName());
+                                                        userContact.setText(commentInfos.get(position).getHost().getContactNum());
+                                                        userEmail.setText(commentInfos.get(position).getHost().getEmail());
+                                                        userGender.setText(commentInfos.get(position).getHost().getGender());
+                                                        StorageReference storageReference = FirebaseStorage.getInstance().getReference();
+                                                        storageReference.child("Photos").child(commentInfos.get(position).getHost().getId()).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                                            @Override
+                                                            public void onSuccess(Uri uri) {
+                                                                Picasso.with(dialog.getContext()).load(uri)
+                                                                        .resize(200, 200).centerCrop().transform(new CircleTransform()).into(userProfile);
+                                                            }
+                                                        });
+                                                        dialog.show();
+                                                    }
+                                                });
 
                                             }
                                         });

@@ -1,12 +1,16 @@
 package com.cs.meetingbridge;
 
 import android.content.Context;
+import android.net.Uri;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -46,9 +50,15 @@ public class CommentListAdapter extends BaseAdapter {
         commentTime.setText(mCommentList.get(i).getCommentTime());
         v.setTag(mCommentList.get(i).getCommentDescription());
         final ImageView hostIcon = (ImageView) v.findViewById(R.id.hostIcon);
+        StorageReference storageReference = FirebaseStorage.getInstance().getReference();
+        storageReference.child("Photos").child(mCommentList.get(i).getHost().getId()).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+            @Override
+            public void onSuccess(Uri uri) {
+                Picasso.with(v.getContext()).load(uri)
+                        .resize(200, 200).centerCrop().into(hostIcon);
+            }
+        });
 
-        Picasso.with(v.getContext()).load(mCommentList.get(i).getHost().getImageUri())
-                .resize(200, 200).centerCrop().into(hostIcon);
         System.out.println(mCommentList.get(i).getHost().getImageUri());
 
         return v;

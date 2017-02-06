@@ -109,7 +109,7 @@ public class AdditionalInfoActivity extends PermissionClass {
                 storageReference.child("Photos").child(user.getUid()).putFile(uri);
                 System.out.println(uri);
 
-                userInfo user_Info = new userInfo(name, contact, gender, email, uri.toString());
+                userInfo user_Info = new userInfo(user.getUid(), name, contact, gender, email, uri.toString());
                 databaseReference.child("Users").child(user.getUid()).setValue(user_Info).addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
                     public void onComplete(@NonNull Task<Void> task) {

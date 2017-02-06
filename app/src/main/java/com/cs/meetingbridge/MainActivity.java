@@ -122,19 +122,24 @@ public class MainActivity extends AppCompatActivity
             }
         });
         postListView = (ListView) findViewById(R.id.postListView);
-        final ArrayList<PostInfo> temp = new ArrayList<>();
+
+
         databaseReference.child("Groups").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+
                 final ArrayList<String> groupIds = showGroups(dataSnapshot);
+                final ArrayList<PostInfo> temp = new ArrayList<>();
 
                 for (int i = 0; i < groupIds.size(); i++) {
+                    final int finalI = i;
                     databaseReference.child("Posts").child(groupIds.get(i)).addValueEventListener(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
-                            ArrayList<PostInfo> postInfo = showPosts(dataSnapshot);
-                            for (int j = 0; j < postInfo.size(); j++) {
-                                temp.add(postInfo.get(j));
+                            ArrayList<PostInfo> postInfos = showPosts(dataSnapshot);
+
+                            for (int j = 0; j < postInfos.size(); j++) {
+                                temp.add(0, postInfos.get(j));
                             }
                             if (temp.size() > 0) {
                                 Collections.sort(temp, new Comparator<PostInfo>() {
@@ -143,8 +148,9 @@ public class MainActivity extends AppCompatActivity
                                         return rhs.getPostingTime().compareTo(lhs.getPostingTime());
                                     }
                                 });
-                                PostListAdapter adapter = new PostListAdapter(MainActivity.this, temp);
-                                postListView.setAdapter(adapter);
+                                PostListAdapter postListAdapter = new PostListAdapter(MainActivity.this, temp);
+                                postListView.setAdapter(postListAdapter);
+
                             }
                         }
 
@@ -153,9 +159,7 @@ public class MainActivity extends AppCompatActivity
 
                         }
                     });
-
                 }
-
             }
 
             @Override
@@ -164,14 +168,15 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-
     }
 
     private ArrayList<PostInfo> showPosts(DataSnapshot dataSnapshot) {
         ArrayList<PostInfo> postInfo = new ArrayList<>();
+
         for (DataSnapshot data : dataSnapshot.getChildren()) {
             PostInfo p = data.getValue(PostInfo.class);
             postInfo.add(0, p);
+
         }
         return postInfo;
     }
