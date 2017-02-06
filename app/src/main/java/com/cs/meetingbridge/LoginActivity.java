@@ -1,8 +1,13 @@
 package com.cs.meetingbridge;
 
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
@@ -108,6 +113,45 @@ public class LoginActivity extends PermissionClass {
     @Override
     public void onPermissionGranted(int requestCode) {
         Toast.makeText(getApplicationContext(), "Permission Granted", Toast.LENGTH_SHORT).show();
+    }
+
+    private void checkNetwork() {
+        if (!IsNetworkAvailable()) {
+            AlertDialog.Builder CheckBuilder = new AlertDialog.Builder(this);
+            CheckBuilder.setTitle("Error!");
+            CheckBuilder.setMessage("Check Your Internet Connection!");
+
+            CheckBuilder.setPositiveButton("Retry", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+
+                    Intent intent = getIntent();
+                    finish();
+                    startActivity(intent);
+                }
+            });
+            CheckBuilder.setNegativeButton("Exit", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    finish();
+                    ;
+                }
+            });
+            AlertDialog alert = CheckBuilder.create();
+            alert.show();
+        } else {
+            if (IsNetworkAvailable()) {
+                Toast.makeText(this, "Internet Available", Toast.LENGTH_SHORT).show();
+            }
+        }
+
+    }
+
+    private boolean IsNetworkAvailable() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null;
+
     }
 
 }

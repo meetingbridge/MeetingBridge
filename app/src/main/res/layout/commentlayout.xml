@@ -10,25 +10,47 @@
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin">
 
-    <TextView
-        android:id="@+id/hostNameTV"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Name"
-        android:textColor="#00a7f5"
-        android:textSize="20sp" />
+        android:orientation="horizontal">
 
-    <TextView
-        android:id="@+id/commentTimeTV"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" />
+        <ImageView
+            android:id="@+id/hostIcon"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:paddingRight="5dp" />
 
-    <TextView
-        android:id="@+id/commentDescriptionTV"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Description"
-        android:textColor="#f92a3f"
-        android:textSize="18dp" />
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <TextView
+                android:id="@+id/hostNameTV"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Name"
+                android:textColor="#00a7f5"
+                android:textSize="15sp" />
+
+            <TextView
+                android:id="@+id/commentDescriptionTV"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Description"
+                android:textColor="#f92a3f"
+                android:textSize="15dp" />
+
+            <TextView
+                android:id="@+id/commentTimeTV"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:textSize="8sp" />
+
+        </LinearLayout>
+
+    </LinearLayout>
+
 
 </LinearLayout>

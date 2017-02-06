@@ -2,6 +2,7 @@ package com.cs.meetingbridge;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.net.Uri;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -19,6 +20,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.squareup.picasso.Picasso;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -49,7 +51,7 @@ public class PostListAdapter extends BaseAdapter {
     }
 
     @Override
-    public View getView(final int i, View view, ViewGroup viewGroup) {
+    public View getView(final int i, View view, final ViewGroup viewGroup) {
         final View v = View.inflate(mContext, R.layout.post_layout, null);
         PostTime time = mPostList.get(i).getPostTime();
         final PostDate date = mPostList.get(i).getPostDate();
@@ -64,6 +66,11 @@ public class PostListAdapter extends BaseAdapter {
         TextView Discription = (TextView) v.findViewById(R.id.postDiscription);
         TextView TimeView = (TextView) v.findViewById(R.id.Time);
         TextView DateView = (TextView) v.findViewById(R.id.Date);
+
+        Picasso.with(v.getContext())
+                .load(Uri.parse(mPostList.get(i).getHost().getImageUri()))
+                .resize(200, 200).centerCrop().into(postIcon);
+
         Name.setText(mPostList.get(i).getHost().getName());
         Title.setText(mPostList.get(i).getPostTitle());
         Discription.setText(mPostList.get(i).getPostDescription());
@@ -87,7 +94,7 @@ public class PostListAdapter extends BaseAdapter {
                 Toast.makeText(v.getContext(), mPostList.get(i).getGroupInfo().getGroupId(), Toast.LENGTH_SHORT).show();
                 final Dialog dialog = new Dialog(v.getContext());
                 dialog.setContentView(R.layout.comment_dialog_layout);
-                dialog.setTitle(mPostList.get(i).getGroupInfo().getGroupName());
+                dialog.setTitle(mPostList.get(i).getPostTitle());
                 final EditText commentBox = (EditText) dialog.findViewById(R.id.postCommentET);
                 final ListView commentLV = (ListView) dialog.findViewById(R.id.commentsLV);
                 Button dismissButton = (Button) dialog.findViewById(R.id.dismiss);

@@ -4,7 +4,10 @@ import android.content.Context;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
@@ -33,8 +36,8 @@ public class CommentListAdapter extends BaseAdapter {
         return i;
     }
 
-    public View getView(int i, View view, ViewGroup viewGroup) {
-        View v = View.inflate(mContext, R.layout.commentlayout, null);
+    public View getView(final int i, View view, ViewGroup viewGroup) {
+        final View v = View.inflate(mContext, R.layout.commentlayout, null);
         TextView commentTime = (TextView) v.findViewById(R.id.commentTimeTV);
         TextView commentHost = (TextView) v.findViewById(R.id.hostNameTV);
         TextView commentDiscription = (TextView) v.findViewById(R.id.commentDescriptionTV);
@@ -42,6 +45,12 @@ public class CommentListAdapter extends BaseAdapter {
         commentDiscription.setText(mCommentList.get(i).getCommentDescription());
         commentTime.setText(mCommentList.get(i).getCommentTime());
         v.setTag(mCommentList.get(i).getCommentDescription());
+        final ImageView hostIcon = (ImageView) v.findViewById(R.id.hostIcon);
+
+        Picasso.with(v.getContext()).load(mCommentList.get(i).getHost().getImageUri())
+                .resize(200, 200).centerCrop().into(hostIcon);
+        System.out.println(mCommentList.get(i).getHost().getImageUri());
+
         return v;
     }
 }
