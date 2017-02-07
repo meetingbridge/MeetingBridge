@@ -101,6 +101,7 @@ public class DiscussionFragment extends Fragment {
         return postInfo;
     }
 
+
     private ArrayList<GroupInfo> getCurrentGroup(DataSnapshot dataSnapshot) {
         ArrayList<GroupInfo> groupInfos = new ArrayList<>();
         for (DataSnapshot data : dataSnapshot.getChildren()) {

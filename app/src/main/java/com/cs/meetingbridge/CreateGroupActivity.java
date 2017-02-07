@@ -25,7 +25,7 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 
 public class CreateGroupActivity extends AppCompatActivity {
-    private ListView selectedUsers;
+    private ListView selectedUsersLV;
     private EditText gName, userEmail;
     private ArrayList<String> selectedMembersNames;
     private ArrayList<userInfo> selectedMembers;
@@ -39,7 +39,7 @@ public class CreateGroupActivity extends AppCompatActivity {
         setContentView(R.layout.activity_create_group);
 
         databaseReference = FirebaseDatabase.getInstance().getReference();
-        selectedUsers = (ListView) findViewById(R.id.selectedUsers);
+        selectedUsersLV = (ListView) findViewById(R.id.selectedUsers);
         gName = (EditText) findViewById(R.id.gName);
         userEmail = (EditText) findViewById(R.id.userEmail);
         Button searchButton = (Button) findViewById(R.id.searchButton);
@@ -67,7 +67,7 @@ public class CreateGroupActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                databaseReference.child("users").addValueEventListener(new ValueEventListener() {
+                databaseReference.child("Users").addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         addUsersInGroup(dataSnapshot);
@@ -127,6 +127,7 @@ public class CreateGroupActivity extends AppCompatActivity {
         for (DataSnapshot data : dataSnapshot.getChildren()) {
             userInfo u = data.getValue(userInfo.class);
             String email = u.getEmail();
+            System.out.println(u.getEmail());
             if (email.equals(userEmail.getText().toString().trim()) && !searchArray(userEmail.getText().toString().trim())) {
                 selectedMembersNames.add(u.getName());
                 selectedMembers.add(u);
@@ -136,12 +137,13 @@ public class CreateGroupActivity extends AppCompatActivity {
         if (searchArray(userEmail.getText().toString().trim())) {
             Toast.makeText(CreateGroupActivity.this, "User of this Email is added!", Toast.LENGTH_SHORT).show();
         } else if (!userExist) {
+
             Toast.makeText(CreateGroupActivity.this, "No User of this Email!", Toast.LENGTH_SHORT).show();
         }
 
         if (selectedMembersNames.size() > 0) {
-            ArrayAdapter adapter = new ArrayAdapter(CreateGroupActivity.this, android.R.layout.simple_list_item_1, selectedMembersNames);
-            selectedUsers.setAdapter(adapter);
+            ArrayAdapter adapter = new ArrayAdapter<>(CreateGroupActivity.this, android.R.layout.simple_list_item_1, selectedMembersNames);
+            selectedUsersLV.setAdapter(adapter);
         }
         userEmail.setText(null);
     }

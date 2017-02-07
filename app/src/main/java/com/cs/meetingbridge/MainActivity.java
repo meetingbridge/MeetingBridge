@@ -130,16 +130,21 @@ public class MainActivity extends AppCompatActivity
 
                 final ArrayList<String> groupIds = showGroups(dataSnapshot);
                 final ArrayList<PostInfo> temp = new ArrayList<>();
-
+                final PostListAdapter postListAdapter = new PostListAdapter(MainActivity.this, temp);
                 for (int i = 0; i < groupIds.size(); i++) {
-                    final int finalI = i;
+
                     databaseReference.child("Posts").child(groupIds.get(i)).addValueEventListener(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             ArrayList<PostInfo> postInfos = showPosts(dataSnapshot);
 
                             for (int j = 0; j < postInfos.size(); j++) {
-                                temp.add(0, postInfos.get(j));
+                                if (!searchArray(postInfos.get(j).getPostId(), temp)) {
+                                    temp.add(postInfos.get(j));
+                                } else {
+                                    System.out.println(postInfos.get(j).getPostTitle());
+                                    System.out.println(temp.size());
+                                }
                             }
                             if (temp.size() > 0) {
                                 Collections.sort(temp, new Comparator<PostInfo>() {
@@ -148,7 +153,7 @@ public class MainActivity extends AppCompatActivity
                                         return rhs.getPostingTime().compareTo(lhs.getPostingTime());
                                     }
                                 });
-                                PostListAdapter postListAdapter = new PostListAdapter(MainActivity.this, temp);
+
                                 postListView.setAdapter(postListAdapter);
 
                             }
@@ -179,6 +184,15 @@ public class MainActivity extends AppCompatActivity
 
         }
         return postInfo;
+    }
+
+    private boolean searchArray(String posrId, ArrayList<PostInfo> postInfos) {
+        for (int i = 0; i < postInfos.size(); i++) {
+            if (posrId.equals(postInfos.get(i).getPostId())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private ArrayList<String> showGroups(DataSnapshot dataSnapshot) {
@@ -297,6 +311,7 @@ public class MainActivity extends AppCompatActivity
                 Intent intent = new Intent(MainActivity.this, GroupActivity.class);
                 intent.putExtra("id", id);
                 startActivity(intent);
+
             }
         }
 

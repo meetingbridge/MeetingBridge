@@ -165,7 +165,9 @@ public class GroupActivity extends AppCompatActivity implements NavigationView.O
         if (drawer.isDrawerOpen(GravityCompat.START)) {
             drawer.closeDrawer(GravityCompat.START);
         } else {
-            super.onBackPressed();
+            //super.onBackPressed();
+            startActivity(new Intent(GroupActivity.this, MainActivity.class));
+            finish();
         }
     }
 
