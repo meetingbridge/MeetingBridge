@@ -1,10 +1,12 @@
 package com.cs.meetingbridge;
 
+import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -19,11 +21,13 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.Window;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -105,14 +109,46 @@ public class MainActivity extends AppCompatActivity
         databaseReference.child("Users").child(currentUser.getUid()).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                userInfo userInfo = dataSnapshot.getValue(userInfo.class);
+                final userInfo userInfo = dataSnapshot.getValue(userInfo.class);
                 uNameTV.setText(userInfo.getName());
                 uEmailTV.setText(userInfo.getEmail());
                 uEmailTV.setText(userInfo.getEmail());
-                Picasso.with(MainActivity.this)
-                        .load(userInfo.getImageUri())
-                        .resize(200, 200).centerCrop()
-                        .transform(new CircleTransform()).into(imageView);
+                StorageReference storageReference = FirebaseStorage.getInstance().getReference();
+                storageReference.child("Photos").child(userInfo.getId()).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                    @Override
+                    public void onSuccess(Uri uri) {
+                        Picasso.with(MainActivity.this).load(uri)
+                                .resize(200, 200).centerCrop().transform(new CircleTransform()).into(imageView);
+                    }
+                });
+                imageView.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        final Dialog dialog = new Dialog(MainActivity.this);
+                        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+                        dialog.setContentView(R.layout.user_profile_layout);
+                        //dialog.setTitle(users.get(position).getName());
+
+                        final ImageView userProfile = (ImageView) dialog.findViewById(R.id.profileImage);
+                        TextView userName = (TextView) dialog.findViewById(R.id.profileName);
+                        TextView userEmail = (TextView) dialog.findViewById(R.id.profileEmail);
+                        TextView userContact = (TextView) dialog.findViewById(R.id.profileContact);
+                        TextView userGender = (TextView) dialog.findViewById(R.id.profileGender);
+                        userName.setText(userInfo.getName());
+                        userContact.setText(userInfo.getContactNum());
+                        userEmail.setText(userInfo.getEmail());
+                        userGender.setText(userInfo.getGender());
+                        StorageReference storageReference = FirebaseStorage.getInstance().getReference();
+                        storageReference.child("Photos").child(userInfo.getId()).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                            @Override
+                            public void onSuccess(Uri uri) {
+                                Picasso.with(dialog.getContext()).load(uri)
+                                        .resize(200, 200).centerCrop().transform(new CircleTransform()).into(userProfile);
+                            }
+                        });
+                        dialog.show();
+                    }
+                });
 
             }
 
@@ -121,8 +157,8 @@ public class MainActivity extends AppCompatActivity
                 Toast.makeText(MainActivity.this, databaseError.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
-        postListView = (ListView) findViewById(R.id.postListView);
 
+        postListView = (ListView) findViewById(R.id.postListView);
 
         databaseReference.child("Groups").addValueEventListener(new ValueEventListener() {
             @Override

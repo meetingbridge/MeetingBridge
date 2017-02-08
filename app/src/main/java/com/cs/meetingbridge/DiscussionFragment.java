@@ -102,7 +102,7 @@ public class DiscussionFragment extends Fragment {
         ArrayList<PostInfo> postInfo = new ArrayList<>();
         for (DataSnapshot data : dataSnapshot.getChildren()) {
             PostInfo p = data.getValue(PostInfo.class);
-            postInfo.add(0, p);
+            postInfo.add(p);
         }
         return postInfo;
     }

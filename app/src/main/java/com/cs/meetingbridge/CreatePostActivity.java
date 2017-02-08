@@ -2,8 +2,6 @@ package com.cs.meetingbridge;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
@@ -33,22 +31,21 @@ public class CreatePostActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_create_post);
+        setContentView(R.layout.content_create_post);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
         databaseReference = FirebaseDatabase.getInstance().getReference();
         final EditText postTitle = (EditText) findViewById(R.id.postTitleET);
         final EditText postDescription = (EditText) findViewById(R.id.postDescriptionET);
-        Button setTimeButton = (Button) findViewById(R.id.setTime);
-        Button setDateButton = (Button) findViewById(R.id.setDate);
         final TextView timeView = (TextView) findViewById(R.id.postTimeTV);
         final TextView dateView = (TextView) findViewById(R.id.postDateTV);
         Button postButton = (Button) findViewById(R.id.postButton);
         final PostTime postTime = new PostTime();
         final PostDate postDate = new PostDate();
         final FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        setTimeButton.setOnClickListener(new View.OnClickListener() {
+
+        timeView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 DialogFragment newFragment = new TimePickerFragment();
@@ -56,23 +53,13 @@ public class CreatePostActivity extends AppCompatActivity {
                 //(getFragmentManager(),"post_layout");
             }
         });
-        setDateButton.setOnClickListener(new View.OnClickListener() {
+        dateView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 DialogFragment newFragment = new DatePickerFragment();
                 newFragment.show(getSupportFragmentManager(), "content_post_create");
             }
         });
-
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
-
 
         final String id = getIntent().getStringExtra("id");
 //

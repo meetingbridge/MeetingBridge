@@ -69,6 +69,7 @@ public class PostListAdapter extends BaseAdapter {
         TextView Title = (TextView) v.findViewById(R.id.postTitle);
         TextView groupName = (TextView) v.findViewById(R.id.groupName);
         TextView Discription = (TextView) v.findViewById(R.id.postDiscription);
+        ImageView postedIn = (ImageView) v.findViewById(R.id.postedIn);
         TextView TimeView = (TextView) v.findViewById(R.id.Time);
         TextView DateView = (TextView) v.findViewById(R.id.Date);
         StorageReference storageReference = FirebaseStorage.getInstance().getReference();
@@ -79,6 +80,7 @@ public class PostListAdapter extends BaseAdapter {
                         .resize(200, 200).centerCrop().into(postIcon);
             }
         });
+
         postIcon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -135,18 +137,20 @@ public class PostListAdapter extends BaseAdapter {
                 dialog.show();
             }
         });
-        Name.setText(mPostList.get(i).getHost().getName());
+        String ab = mPostList.get(i).getHost().getName() + " ";
+        Name.setText(ab);
         Title.setText(mPostList.get(i).getPostTitle());
         Discription.setText(mPostList.get(i).getPostDescription());
         TimeView.setText(timeString);
         DateView.setText(dateString);
         postingTime.setText(mPostList.get(i).getPostingTime());
         v.setTag(mPostList.get(i).getPostId());
-        String str = " posted in " + mPostList.get(i).getGroupInfo().getGroupName();
+        String str = " " + mPostList.get(i).getGroupInfo().getGroupName();
         groupName.setText(str);
 
         if (mContext.getClass().toString().equals("class com.cs.meetingbridge.MainActivity")) {
             groupName.setVisibility(View.VISIBLE);
+            postedIn.setVisibility(View.VISIBLE);
         }
 
         Button commentButton = (Button) v.findViewById(R.id.commentsButton);
