@@ -18,6 +18,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:paddingBottom="2dp"
+        android:text="Name"
         android:textColor="@color/colorPrimaryDark"
         android:textSize="30dp"
         android:textStyle="bold" />
@@ -26,18 +27,21 @@
         android:id="@+id/profileEmail"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:text="Email"
         android:textSize="15dp" />
 
     <TextView
         android:id="@+id/profileContact"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:text="Contact Number"
         android:textSize="20dp" />
 
     <TextView
         android:id="@+id/profileGender"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:text="Gender"
         android:textSize="20dp" />
 
 </LinearLayout>

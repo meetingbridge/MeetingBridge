@@ -5,10 +5,12 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.RadioGroup;
 import android.widget.TextView;
@@ -22,6 +24,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.squareup.picasso.Picasso;
 
 public class AdditionalInfoActivity extends PermissionClass {
     private static final int GALLERY_INTENT = 2;
@@ -55,7 +58,6 @@ public class AdditionalInfoActivity extends PermissionClass {
         contactNo = (EditText) findViewById(R.id.contactno);
         final RadioGroup genderGroup = (RadioGroup) findViewById(R.id.genderGroup);
         Button submit = (Button) findViewById(R.id.submit);
-        Button pickImage = (Button) findViewById(R.id.pickImage);
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
 
         TextView welcome = (TextView) findViewById(R.id.welcome);
@@ -76,6 +78,7 @@ public class AdditionalInfoActivity extends PermissionClass {
             }
         });
 
+        FloatingActionButton pickImage = (FloatingActionButton) findViewById(R.id.fabInfo);
         pickImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -84,6 +87,7 @@ public class AdditionalInfoActivity extends PermissionClass {
                 startActivityForResult(intent, GALLERY_INTENT);
             }
         });
+
         assert submit != null;
         submit.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -109,6 +113,7 @@ public class AdditionalInfoActivity extends PermissionClass {
                 storageReference.child("Photos").child(user.getUid()).putFile(uri);
                 System.out.println(uri);
 
+
                 userInfo user_Info = new userInfo(user.getUid(), name, contact, gender, email, uri.toString());
                 databaseReference.child("Users").child(user.getUid()).setValue(user_Info).addOnCompleteListener(new OnCompleteListener<Void>() {
                     @Override
@@ -133,6 +138,11 @@ public class AdditionalInfoActivity extends PermissionClass {
         if (requestCode == GALLERY_INTENT && resultCode == RESULT_OK) {
             uri = data.getData();
             System.out.println(uri);
+            ImageView profilePic = (ImageView) findViewById(R.id.icon);
+            Picasso.with(AdditionalInfoActivity.this)
+                    .load(uri)
+                    .resize(200, 200).centerCrop()
+                    .transform(new CircleTransform()).into(profilePic);
         }
     }
 

@@ -53,10 +53,13 @@
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".AdditionalInfoActivity"
-            android:theme="@style/AppTheme.NoActionBar" />
+            android:theme="@style/AppTheme.NoActionBar">
+
+        </activity>
         <activity
             android:name=".CreateGroupActivity"
             android:label="@string/title_activity_create_group"
+
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
             android:name=".GroupActivity"

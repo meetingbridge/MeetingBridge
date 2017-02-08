@@ -2,12 +2,9 @@ package com.cs.meetingbridge;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
@@ -24,6 +21,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
+//
 public class CreateGroupActivity extends AppCompatActivity {
     private ListView selectedUsersLV;
     private EditText gName, userEmail;
@@ -36,7 +34,7 @@ public class CreateGroupActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_create_group);
+        setContentView(R.layout.content_create_group);
 
         databaseReference = FirebaseDatabase.getInstance().getReference();
         selectedUsersLV = (ListView) findViewById(R.id.selectedUsers);
@@ -52,8 +50,7 @@ public class CreateGroupActivity extends AppCompatActivity {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 currentUser = dataSnapshot.getValue(userInfo.class);
-                selectedMembers.add(currentUser);
-                selectedMembersNames.add(currentUser.getName());
+                selectedMembers.add(0, currentUser);
             }
 
             @Override
@@ -112,14 +109,6 @@ public class CreateGroupActivity extends AppCompatActivity {
         });
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
-        fab.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
-            }
-        });
     }
 
     private void addUsersInGroup(DataSnapshot dataSnapshot) {
@@ -129,8 +118,7 @@ public class CreateGroupActivity extends AppCompatActivity {
             String email = u.getEmail();
             System.out.println(u.getEmail());
             if (email.equals(userEmail.getText().toString().trim()) && !searchArray(userEmail.getText().toString().trim())) {
-                selectedMembersNames.add(u.getName());
-                selectedMembers.add(u);
+                selectedMembers.add(0, u);
                 userExist = true;
             }
         }
@@ -141,8 +129,8 @@ public class CreateGroupActivity extends AppCompatActivity {
             Toast.makeText(CreateGroupActivity.this, "No User of this Email!", Toast.LENGTH_SHORT).show();
         }
 
-        if (selectedMembersNames.size() > 0) {
-            ArrayAdapter adapter = new ArrayAdapter<>(CreateGroupActivity.this, android.R.layout.simple_list_item_1, selectedMembersNames);
+        if (selectedMembers.size() > 0) {
+            UserListAdapter adapter = new UserListAdapter(CreateGroupActivity.this, selectedMembers);
             selectedUsersLV.setAdapter(adapter);
         }
         userEmail.setText(null);
