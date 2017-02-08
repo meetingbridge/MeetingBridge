@@ -55,13 +55,20 @@ public class DiscussionFragment extends Fragment {
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     groupInfos1 = getCurrentGroup(dataSnapshot);
                     int a = Integer.parseInt(id);
-                    String groupId = groupInfos1.get(a).getGroupId();
-                    databaseReference.child("Posts").child(groupId).addValueEventListener(new ValueEventListener() {
+                    final String groupId = groupInfos1.get(a).getGroupId();
+
+                    databaseReference.child("Posts").addValueEventListener(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             final ArrayList<PostInfo> postInfo = showPosts(dataSnapshot);
-                            if (postInfo.size() > 0) {
-                                PostListAdapter adapter = new PostListAdapter(getActivity(), postInfo);
+                            final ArrayList<PostInfo> posts = new ArrayList<>();
+                            for (int i = 0; i < postInfo.size(); i++) {
+                                if (postInfo.get(i).getGroupInfo().getGroupId().equals(groupId)) {
+                                    posts.add(0, postInfo.get(i));
+                                }
+                            }
+                            if (posts.size() > 0) {
+                                PostListAdapter adapter = new PostListAdapter(getActivity(), posts);
                                 postListView.setAdapter(adapter);
                             }
                         }
@@ -85,7 +92,6 @@ public class DiscussionFragment extends Fragment {
                     Intent intent = new Intent(getActivity(), CreatePostActivity.class);
                     intent.putExtra("id", id);
                     startActivity(intent);
-
                 }
             });
         }

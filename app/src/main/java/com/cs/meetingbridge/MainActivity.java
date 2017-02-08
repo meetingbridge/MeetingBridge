@@ -127,44 +127,41 @@ public class MainActivity extends AppCompatActivity
         databaseReference.child("Groups").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-
                 final ArrayList<String> groupIds = showGroups(dataSnapshot);
-                final ArrayList<PostInfo> temp = new ArrayList<>();
-                final PostListAdapter postListAdapter = new PostListAdapter(MainActivity.this, temp);
-                for (int i = 0; i < groupIds.size(); i++) {
-
-                    databaseReference.child("Posts").child(groupIds.get(i)).addValueEventListener(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            ArrayList<PostInfo> postInfos = showPosts(dataSnapshot);
-
+                databaseReference.child("Posts").addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot1) {
+                        ArrayList<PostInfo> postInfos = showPosts(dataSnapshot1);
+                        final ArrayList<PostInfo> temp = new ArrayList<>();
+                        final PostListAdapter postListAdapter = new PostListAdapter(MainActivity.this, temp);
+                        for (int i = 0; i < groupIds.size(); i++) {
                             for (int j = 0; j < postInfos.size(); j++) {
-                                if (!searchArray(postInfos.get(j).getPostId(), temp)) {
-                                    temp.add(postInfos.get(j));
+                                if (!searchArray(postInfos.get(j).getPostId(), temp) && postInfos.get(j).getGroupInfo().getGroupId().equals(groupIds.get(i))) {
+                                    temp.add(0, postInfos.get(j));
                                 } else {
                                     System.out.println(postInfos.get(j).getPostTitle());
                                     System.out.println(temp.size());
                                 }
                             }
-                            if (temp.size() > 0) {
-                                Collections.sort(temp, new Comparator<PostInfo>() {
-                                    @Override
-                                    public int compare(PostInfo lhs, PostInfo rhs) {
-                                        return rhs.getPostingTime().compareTo(lhs.getPostingTime());
-                                    }
-                                });
-
-                                postListView.setAdapter(postListAdapter);
-
-                            }
                         }
+                        if (temp.size() > 0) {
+                            Collections.sort(temp, new Comparator<PostInfo>() {
+                                @Override
+                                public int compare(PostInfo lhs, PostInfo rhs) {
+                                    return rhs.getPostingTime().compareTo(lhs.getPostingTime());
+                                }
+                            });
 
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
+                            postListView.setAdapter(postListAdapter);
 
                         }
-                    });
-                }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
             }
 
             @Override
@@ -235,7 +232,6 @@ public class MainActivity extends AppCompatActivity
                 @Override
                 public void onClick(DialogInterface dialogInterface, int i) {
                     finish();
-                    ;
                 }
             });
             AlertDialog alert = CheckBuilder.create();

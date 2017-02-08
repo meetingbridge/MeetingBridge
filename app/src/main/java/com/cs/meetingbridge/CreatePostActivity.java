@@ -1,4 +1,3 @@
-
 package com.cs.meetingbridge;
 
 import android.content.Intent;
@@ -105,27 +104,28 @@ public class CreatePostActivity extends AppCompatActivity {
                             public void onDataChange(DataSnapshot dataSnapshot) {
                                 ArrayList<GroupInfo> groupInfos = getCurrentGroup(dataSnapshot);
                                 int temp = Integer.parseInt(id);
-                                final String groupId = groupInfos.get(temp).getGroupId();
+
                                 final PostInfo postInfo = new PostInfo("1", title, description, postTime, postDate, user, currentTime, groupInfos.get(temp));
-                                databaseReference.child("Posts").child(groupId).push().setValue(postInfo).addOnSuccessListener(new OnSuccessListener<Void>() {
+
+                                databaseReference.child("Posts").push().setValue(postInfo).addOnSuccessListener(new OnSuccessListener<Void>() {
                                     @Override
                                     public void onSuccess(Void aVoid) {
                                         Toast.makeText(CreatePostActivity.this, "Posted!", Toast.LENGTH_SHORT).show();
+                                        databaseReference.child("Posts").addValueEventListener(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(DataSnapshot dataSnapshot) {
+                                                addID(dataSnapshot);
+                                                Intent intent = new Intent(CreatePostActivity.this, GroupActivity.class);
+                                                intent.putExtra("id", id);
+                                                startActivity(intent);
+                                                finish();
+                                            }
 
-                                    }
-                                });
-                                databaseReference.child("Posts").child(groupId).addValueEventListener(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(DataSnapshot dataSnapshot) {
-                                        addID(dataSnapshot, groupId);
-                                        Intent intent = new Intent(CreatePostActivity.this, GroupActivity.class);
-                                        intent.putExtra("id", id);
-                                        startActivity(intent);
-                                    }
+                                            @Override
+                                            public void onCancelled(DatabaseError databaseError) {
 
-                                    @Override
-                                    public void onCancelled(DatabaseError databaseError) {
-
+                                            }
+                                        });
                                     }
                                 });
                             }
@@ -151,13 +151,13 @@ public class CreatePostActivity extends AppCompatActivity {
 
     }
 
-    private void addID(DataSnapshot dataSnapshot, String groupId) {
+    private void addID(DataSnapshot dataSnapshot) {
         for (DataSnapshot data : dataSnapshot.getChildren()) {
             PostInfo p = data.getValue(PostInfo.class);
             if (String.valueOf(p.getPostId()).equals("1")) {
                 String k = data.getKey();
                 p.setPostId(k);
-                databaseReference.child("Posts").child(groupId).child(k).setValue(p);
+                databaseReference.child("Posts").child(k).setValue(p);
                 break;
             }
 
