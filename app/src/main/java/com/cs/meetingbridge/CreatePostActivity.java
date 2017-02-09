@@ -39,11 +39,14 @@ public class CreatePostActivity extends AppCompatActivity {
         final EditText postTitle = (EditText) findViewById(R.id.postTitleET);
         final EditText postDescription = (EditText) findViewById(R.id.postDescriptionET);
         final TextView timeView = (TextView) findViewById(R.id.postTimeTV);
+        final TextView groupNameTV = (TextView) findViewById(R.id.groupNameTV);
         final TextView dateView = (TextView) findViewById(R.id.postDateTV);
         Button postButton = (Button) findViewById(R.id.postButton);
         final PostTime postTime = new PostTime();
         final PostDate postDate = new PostDate();
         final FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        Button backbutton = (Button) findViewById(R.id.btnback);
+        final EditText postLocation = (EditText) findViewById(R.id.postLocationET);
 
         timeView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -62,6 +65,28 @@ public class CreatePostActivity extends AppCompatActivity {
         });
 
         final String id = getIntent().getStringExtra("id");
+        backbutton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Intent intent = new Intent(CreatePostActivity.this, GroupActivity.class);
+                intent.putExtra("id", id);
+                startActivity(intent);
+            }
+        });
+
+        databaseReference.child("Groups").addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                ArrayList<GroupInfo> groupInfos = getCurrentGroup(dataSnapshot);
+                int temp = Integer.parseInt(id);
+                groupNameTV.setText(groupInfos.get(temp).getGroupName());
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
 //
 
         postButton.setOnClickListener(new View.OnClickListener() {
@@ -71,6 +96,7 @@ public class CreatePostActivity extends AppCompatActivity {
                 final String currentTime = new SimpleDateFormat("dd-M-yy hh:mm a").format(new Date());
                 final String title = postTitle.getText().toString();
                 final String description = postDescription.getText().toString();
+                final String location = postLocation.getText().toString();
                 String timeTemp = timeView.getText().toString();
                 String dateTemp = dateView.getText().toString();
                 String[] timeArray = timeTemp.split(" ");
@@ -92,7 +118,7 @@ public class CreatePostActivity extends AppCompatActivity {
                                 ArrayList<GroupInfo> groupInfos = getCurrentGroup(dataSnapshot);
                                 int temp = Integer.parseInt(id);
 
-                                final PostInfo postInfo = new PostInfo("1", title, description, postTime, postDate, user, currentTime, groupInfos.get(temp));
+                                final PostInfo postInfo = new PostInfo("1", title, description, location, postTime, postDate, user, currentTime, groupInfos.get(temp));
 
                                 databaseReference.child("Posts").push().setValue(postInfo).addOnSuccessListener(new OnSuccessListener<Void>() {
                                     @Override

@@ -44,7 +44,8 @@
                     android:layout_width="10dp"
                     android:layout_height="10dp"
                     android:layout_gravity="center"
-                    android:src="@drawable/ic_post" />
+                    android:src="@drawable/ic_post"
+                    android:visibility="gone" />
 
                 <TextView
                     android:id="@+id/groupName"
@@ -67,14 +68,15 @@
 
     </LinearLayout>
 
-
     <TextView
         android:id="@+id/postTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_gravity="center"
         android:text="Title"
         android:textColor="#f92a3f"
-        android:textSize="18dp" />
+        android:textSize="18dp"
+        android:textStyle="bold" />
 
     <TextView
         android:id="@+id/postDiscription"
@@ -84,23 +86,54 @@
         android:textSize="15dp" />
 
     <TextView
-        android:id="@+id/Time"
+        android:id="@+id/postLocationTV"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Time"
-        android:textSize="18dp" />
+        android:drawableLeft="@drawable/ic_location_blue"
+        android:drawableTint="@color/colorPrimary"
 
-    <TextView
-        android:id="@+id/Date"
-        android:layout_width="wrap_content"
+        android:text="Location"
+        android:textSize="18dp"
+        android:textStyle="bold" />
+
+
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Date"
-        android:textSize="15dp" />
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/Time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="5dp"
+            android:drawableLeft="@drawable/ic_clock_blue"
+            android:gravity="center"
+            android:text="Time"
+            android:textSize="15dp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/Date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:drawableLeft="@drawable/ic_date_blue"
+            android:gravity="center"
+            android:text="Date"
+            android:textSize="15dp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
 
     <Button
         android:id="@+id/commentsButton"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginBottom="-5dp"
-        android:text="Comments" />
+        android:layout_gravity="center"
+        android:background="@null"
+        android:drawableLeft="@drawable/ic_comment"
+        android:gravity="center"
+        android:text="Comments"
+        android:textColor="@color/colorPrimary"
+        android:textStyle="bold" />
 </LinearLayout>

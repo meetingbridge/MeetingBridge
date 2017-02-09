@@ -72,6 +72,7 @@ public class PostListAdapter extends BaseAdapter {
         ImageView postedIn = (ImageView) v.findViewById(R.id.postedIn);
         TextView TimeView = (TextView) v.findViewById(R.id.Time);
         TextView DateView = (TextView) v.findViewById(R.id.Date);
+        TextView locationTV = (TextView) v.findViewById(R.id.postLocationTV);
         StorageReference storageReference = FirebaseStorage.getInstance().getReference();
         storageReference.child("Photos").child(mPostList.get(i).getHost().getId()).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
             @Override
@@ -139,7 +140,9 @@ public class PostListAdapter extends BaseAdapter {
         });
         String ab = mPostList.get(i).getHost().getName() + " ";
         Name.setText(ab);
+
         Title.setText(mPostList.get(i).getPostTitle());
+        locationTV.setText(mPostList.get(i).getPostLocation());
         Discription.setText(mPostList.get(i).getPostDescription());
         TimeView.setText(timeString);
         DateView.setText(dateString);

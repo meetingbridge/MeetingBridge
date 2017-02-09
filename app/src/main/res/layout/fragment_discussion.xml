@@ -11,7 +11,9 @@
         android:id="@+id/createPostButton"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="New Post" />
+        android:background="@color/colorPrimary"
+        android:text="New Event"
+        android:textColor="@color/colorText" />
 
 
     <ListView
