@@ -71,7 +71,7 @@ public class MembersFragment extends Fragment {
             final int id = Integer.parseInt(bundle.getString("id"));
 
 
-            databaseReference.child("Groups").addListenerForSingleValueEvent(new ValueEventListener() {
+            databaseReference.child("Groups").addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(DataSnapshot dataSnapshot) {
                     final GroupInfo currentGroup = getCurrentGroup(dataSnapshot, id);
@@ -85,7 +85,6 @@ public class MembersFragment extends Fragment {
                             final Dialog dialog = new Dialog(getActivity());
                             dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
                             dialog.setContentView(R.layout.user_profile_layout);
-                            //dialog.setTitle(users.get(position).getName());
 
                             final ImageView userProfile = (ImageView) dialog.findViewById(R.id.profileImage);
                             TextView userName = (TextView) dialog.findViewById(R.id.profileName);

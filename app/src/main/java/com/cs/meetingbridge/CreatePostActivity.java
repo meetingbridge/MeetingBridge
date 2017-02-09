@@ -8,6 +8,7 @@ import android.support.v7.widget.Toolbar;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -41,7 +42,7 @@ public class CreatePostActivity extends AppCompatActivity {
         final TextView timeView = (TextView) findViewById(R.id.postTimeTV);
         final TextView groupNameTV = (TextView) findViewById(R.id.groupNameTV);
         final TextView dateView = (TextView) findViewById(R.id.postDateTV);
-        Button postButton = (Button) findViewById(R.id.postButton);
+        final Button postButton = (Button) findViewById(R.id.postButton);
         final PostTime postTime = new PostTime();
         final PostDate postDate = new PostDate();
         final FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
@@ -87,47 +88,49 @@ public class CreatePostActivity extends AppCompatActivity {
 
             }
         });
-//
 
-        postButton.setOnClickListener(new View.OnClickListener() {
+
+        databaseReference.child("Users").child(currentUser.getUid()).addValueEventListener(new ValueEventListener() {
             @Override
-            public void onClick(View view) {
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                final userInfo user = dataSnapshot.getValue(userInfo.class);
 
-                final String currentTime = new SimpleDateFormat("dd-M-yy hh:mm a").format(new Date());
-                final String title = postTitle.getText().toString();
-                final String description = postDescription.getText().toString();
-                final String location = postLocation.getText().toString();
-                String timeTemp = timeView.getText().toString();
-                String dateTemp = dateView.getText().toString();
-                String[] timeArray = timeTemp.split(" ");
-                String[] dateArray = dateTemp.split(" ");
-                postTime.setHours(timeArray[0]);
-                postTime.setMinutes(timeArray[1]);
-                postTime.setAmpm(timeArray[2]);
-                postDate.setDay(dateArray[0]);
-                postDate.setMonth(dateArray[1]);
-                postDate.setYear(dateArray[2]);
-                databaseReference.child("Users").child(currentUser.getUid()).addValueEventListener(new ValueEventListener() {
+                databaseReference.child("Groups").addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
-                        final userInfo user = dataSnapshot.getValue(userInfo.class);
-
-                        databaseReference.child("Groups").addValueEventListener(new ValueEventListener() {
+                        final ArrayList<GroupInfo> groupInfos = getCurrentGroup(dataSnapshot);
+                        final int temp = Integer.parseInt(id);
+                        postButton.setOnClickListener(new View.OnClickListener() {
                             @Override
-                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                ArrayList<GroupInfo> groupInfos = getCurrentGroup(dataSnapshot);
-                                int temp = Integer.parseInt(id);
-
+                            public void onClick(View v) {
+                                final ProgressBar progressBar = (ProgressBar) findViewById(R.id.progressBar);
+                                progressBar.setVisibility(View.VISIBLE);
+                                final String currentTime = new SimpleDateFormat("dd-M-yy hh:mm a").format(new Date());
+                                final String title = postTitle.getText().toString();
+                                final String description = postDescription.getText().toString();
+                                final String location = postLocation.getText().toString();
+                                String timeTemp = timeView.getText().toString();
+                                String dateTemp = dateView.getText().toString();
+                                String[] timeArray = timeTemp.split(" ");
+                                String[] dateArray = dateTemp.split(" ");
+                                postTime.setHours(timeArray[0]);
+                                postTime.setMinutes(timeArray[1]);
+                                postTime.setAmpm(timeArray[2]);
+                                postDate.setDay(dateArray[0]);
+                                postDate.setMonth(dateArray[1]);
+                                postDate.setYear(dateArray[2]);
                                 final PostInfo postInfo = new PostInfo("1", title, description, location, postTime, postDate, user, currentTime, groupInfos.get(temp));
 
                                 databaseReference.child("Posts").push().setValue(postInfo).addOnSuccessListener(new OnSuccessListener<Void>() {
                                     @Override
                                     public void onSuccess(Void aVoid) {
                                         Toast.makeText(CreatePostActivity.this, "Posted!", Toast.LENGTH_SHORT).show();
+
                                         databaseReference.child("Posts").addValueEventListener(new ValueEventListener() {
                                             @Override
                                             public void onDataChange(DataSnapshot dataSnapshot) {
                                                 addID(dataSnapshot);
+                                                progressBar.setVisibility(View.GONE);
                                                 Intent intent = new Intent(CreatePostActivity.this, GroupActivity.class);
                                                 intent.putExtra("id", id);
                                                 startActivity(intent);
@@ -142,13 +145,7 @@ public class CreatePostActivity extends AppCompatActivity {
                                     }
                                 });
                             }
-
-                            @Override
-                            public void onCancelled(DatabaseError databaseError) {
-
-                            }
                         });
-
 
                     }
 
@@ -157,6 +154,12 @@ public class CreatePostActivity extends AppCompatActivity {
 
                     }
                 });
+
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
 
             }
         });
@@ -190,6 +193,4 @@ public class CreatePostActivity extends AppCompatActivity {
         }
         return groupInfos;
     }
-
-
 }

@@ -10,15 +10,6 @@
     android:orientation="vertical"
     android:padding="@dimen/activity_horizontal_margin">
 
-    <ProgressBar
-        android:id="@+id/progressBar"
-        android:layout_width="30dp"
-        android:layout_height="30dp"
-        android:layout_gravity="center|bottom"
-        android:layout_marginBottom="20dp"
-        android:background="@layout/progressbar_layout"
-        android:visibility="gone" />
-
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -121,5 +112,14 @@
         android:textAllCaps="false"
         android:textColor="@color/colorText"
         android:textSize="24sp" />
+
+    <ProgressBar
+        android:id="@+id/progressBar"
+        android:layout_width="30dp"
+        android:layout_height="30dp"
+        android:layout_gravity="center|bottom"
+        android:layout_marginBottom="20dp"
+        android:background="@layout/progressbar_layout"
+        android:visibility="gone" />
 
 </LinearLayout><!--</LinearLayout>-->

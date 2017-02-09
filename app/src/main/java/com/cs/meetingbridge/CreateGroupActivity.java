@@ -8,6 +8,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -25,7 +26,6 @@ import java.util.ArrayList;
 public class CreateGroupActivity extends AppCompatActivity {
     private ListView selectedUsersLV;
     private EditText gName, userEmail;
-    private ArrayList<String> selectedMembersNames;
     private ArrayList<userInfo> selectedMembers;
     private DatabaseReference databaseReference;
     private userInfo currentUser;
@@ -42,8 +42,8 @@ public class CreateGroupActivity extends AppCompatActivity {
         userEmail = (EditText) findViewById(R.id.userEmail);
         Button searchButton = (Button) findViewById(R.id.searchButton);
         Button createGroupButton = (Button) findViewById(R.id.createGroupButton);
-        selectedMembersNames = new ArrayList<>();
         selectedMembers = new ArrayList<>();
+        final ProgressBar progressBar = (ProgressBar) findViewById(R.id.progressBar);
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
 
         databaseReference.child("Users").child(user.getUid()).addValueEventListener(new ValueEventListener() {
@@ -85,12 +85,15 @@ public class CreateGroupActivity extends AppCompatActivity {
                 groupInfo.setGroupName(gName.getText().toString());
                 groupInfo.setMembersList(selectedMembers);
                 groupInfo.setGroupId("1");
+                progressBar.setVisibility(View.VISIBLE);
 
                 databaseReference.child("Groups").push().setValue(groupInfo).addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
                         Toast.makeText(CreateGroupActivity.this, "Group Created! Open it from Drawer!", Toast.LENGTH_SHORT).show();
-                        startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                        startActivity(new Intent(CreateGroupActivity.this, MainActivity.class));
+                        progressBar.setVisibility(View.GONE);
+                        finish();
                     }
                 });
 
