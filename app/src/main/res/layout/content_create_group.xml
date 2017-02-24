@@ -6,7 +6,7 @@
     android:layout_gravity="center"
     android:background="@color/colorPrimaryDark"
     android:theme="@style/AppTheme.NoActionBar"
-    tools:context="com.cs.meetingbridge.CreateGroupActivity">
+    tools:context="com.android.meetingbridge.CreateGroupActivity">
 
     <ScrollView
         android:layout_width="match_parent"
