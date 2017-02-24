@@ -55,7 +55,7 @@ public class MainActivity extends AppCompatActivity
     private Menu subMenu;
     private ListView postListView;
 
-
+    //nnjnjn
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
