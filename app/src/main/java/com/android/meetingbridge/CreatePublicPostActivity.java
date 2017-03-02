@@ -1,5 +1,6 @@
 package com.android.meetingbridge;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 import android.support.v7.app.AppCompatActivity;
@@ -97,7 +98,7 @@ public class CreatePublicPostActivity extends AppCompatActivity {
                                     public void onDataChange(DataSnapshot dataSnapshot) {
                                         addID(dataSnapshot);
                                         progressBar.setVisibility(View.GONE);
-                                        onBackPressed();
+                                        startActivity(new Intent(CreatePublicPostActivity.this, HomeActivity.class));
                                     }
 
                                     @Override

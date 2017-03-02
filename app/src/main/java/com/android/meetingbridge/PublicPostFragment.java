@@ -63,7 +63,7 @@ public class PublicPostFragment extends Fragment {
                         }
                     });
                 }
-                PostListAdapter adapter = new PostListAdapter(getActivity(), postInfos);
+                PublicPostListAdapter adapter = new PublicPostListAdapter(getActivity(), postInfos);
                 postListView.setAdapter(adapter);
             }
 

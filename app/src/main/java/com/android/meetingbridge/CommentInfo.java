@@ -1,8 +1,5 @@
 package com.android.meetingbridge;
 
-/**
- * Created by UsAmA on 2/4/2017.
- */
 
 public class CommentInfo {
     private userInfo host;
@@ -17,6 +14,12 @@ public class CommentInfo {
         this.host = host;
         this.commentDescription = commentDescription;
         this.group = group;
+    }
+
+    public CommentInfo(String currentTime, userInfo user, String commentDescription) {
+        this.commentTime = currentTime;
+        this.host = user;
+        this.commentDescription = commentDescription;
     }
 
     public userInfo getHost() {
