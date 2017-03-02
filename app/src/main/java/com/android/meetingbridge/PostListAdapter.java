@@ -150,7 +150,6 @@ public class PostListAdapter extends BaseAdapter {
         v.setTag(mPostList.get(i).getPostId());
         String str = " " + mPostList.get(i).getGroupInfo().getGroupName();
         groupName.setText(str);
-        System.out.println(mContext.getClass().toString());
         if (mContext.getClass().toString().equals("class com.android.meetingbridge.HomeActivity")) {
             groupName.setVisibility(View.VISIBLE);
             postedIn.setVisibility(View.VISIBLE);

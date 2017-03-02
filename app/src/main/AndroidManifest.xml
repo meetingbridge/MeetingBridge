@@ -18,7 +18,7 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity
-            android:name="com.android.meetingbridge.HomeActivity"
+            android:name=".HomeActivity"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
@@ -28,7 +28,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.android.meetingbridge.SignupActivity"
+            android:name=".SignupActivity"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -37,10 +37,10 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.android.meetingbridge.LoginActivity"
+            android:name=".LoginActivity"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name="com.android.meetingbridge.SplashScreen"
+            android:name=".SplashScreen"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -49,27 +49,26 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="com.android.meetingbridge.ResetPasswordActivity"
+            android:name=".ResetPasswordActivity"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name="com.android.meetingbridge.AdditionalInfoActivity"
-            android:theme="@style/AppTheme.NoActionBar">
-
-        </activity>
+            android:name=".AdditionalInfoActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name="com.android.meetingbridge.CreateGroupActivity"
+            android:name=".CreateGroupActivity"
             android:label="@string/title_activity_create_group"
-
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name="com.android.meetingbridge.GroupActivity"
+            android:name=".GroupActivity"
             android:label="@string/title_activity_group"
             android:theme="@style/AppTheme.NoActionBar" />
         <activity
-            android:name="com.android.meetingbridge.CreatePostActivity"
+            android:name=".CreatePostActivity"
             android:label="@string/title_activity_create_post"
             android:theme="@style/AppTheme.NoActionBar" />
-
+        <activity
+            android:name=".CreatePublicPostActivity"
+            android:theme="@style/AppTheme.NoActionBar" />
     </application>
 
 </manifest>

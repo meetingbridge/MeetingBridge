@@ -8,6 +8,19 @@ public class PostInfo {
     private GroupInfo groupInfo;
 
     public PostInfo() {
+        //Null Constructor
+    }
+
+    public PostInfo(String postId, String postTitle, String postDescription,
+                    String postLocation, PostTime postTime, PostDate postDate, userInfo host, String postingTime) {
+        this.host = host;
+        this.postId = postId;
+        this.postTitle = postTitle;
+        this.postDescription = postDescription;
+        this.postingTime = postingTime;
+        this.postLocation = postLocation;
+        this.postTime = postTime;
+        this.postDate = postDate;
     }
 
     public PostInfo(String postId, String postTitle, String postDescription, String postLocation,

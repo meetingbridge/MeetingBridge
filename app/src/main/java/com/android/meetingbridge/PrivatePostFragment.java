@@ -51,9 +51,6 @@ public class PrivatePostFragment extends Fragment {
                             for (int j = 0; j < postInfos.size(); j++) {
                                 if (!searchArray(postInfos.get(j).getPostId(), temp) && postInfos.get(j).getGroupInfo().getGroupId().equals(groupIds.get(i))) {
                                     temp.add(0, postInfos.get(j));
-                                } else {
-                                    System.out.println(postInfos.get(j).getPostTitle());
-                                    System.out.println(temp.size());
                                 }
                             }
                         }
