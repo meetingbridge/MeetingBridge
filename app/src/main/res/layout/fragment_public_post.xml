@@ -9,10 +9,12 @@
         android:id="@+id/newPublicMeetup"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="New Public Meetup" />
+        android:background="@color/colorPrimary"
+        android:text="New Public Meetup"
+        android:textColor="@color/colorText" />
 
     <ListView
         android:id="@+id/postListView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="394dp" />
 </LinearLayout>
