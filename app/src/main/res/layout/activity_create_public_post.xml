@@ -74,20 +74,16 @@
             android:textColor="@color/colorText"
             android:textStyle="bold" />
 
-        <android.support.design.widget.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <EditText
-                android:id="@+id/postLocationET"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:drawableLeft="@drawable/ic_location"
-                android:hint="Event Location"
-                android:inputType="textMultiLine"
-                android:textColor="@color/colorText"
-                android:textColorHint="@color/colorText" />
-        </android.support.design.widget.TextInputLayout>
+        <Button
+            android:id="@+id/postLocationBtn"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:background="@null"
+            android:drawableStart="@drawable/ic_location"
+            android:inputType="textMultiLine"
+            android:text="Select Meetup Location"
+            android:textColor="@color/colorText"
+            android:textColorHint="@color/colorText" />
 
         <android.support.design.widget.TextInputLayout
             android:layout_width="match_parent"

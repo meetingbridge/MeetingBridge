@@ -1,5 +1,6 @@
 package com.android.meetingbridge;
 
+import android.Manifest;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -36,11 +37,13 @@ public class LoginActivity extends PermissionClass {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
+        checkNetwork();
 
         requestAppPermission(new String[]
-                        {android.Manifest.permission.READ_CONTACTS,
-                                android.Manifest.permission.READ_EXTERNAL_STORAGE,},
+                        {Manifest.permission.READ_CONTACTS,
+                                Manifest.permission.ACCESS_FINE_LOCATION,
+                                Manifest.permission.ACCESS_COARSE_LOCATION,
+                                Manifest.permission.READ_EXTERNAL_STORAGE},
                 R.string.permission_msg, REQUEST_PERMISSION);
 
         setContentView(R.layout.activity_login);

@@ -10,6 +10,11 @@ import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -24,24 +29,34 @@ import java.util.Date;
 
 public class CreatePublicPostActivity extends AppCompatActivity {
 
+    int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
     private DatabaseReference databaseReference;
+    private Button postLocation;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_public_post);
+
         databaseReference = FirebaseDatabase.getInstance().getReference();
         final EditText postTitle = (EditText) findViewById(R.id.postTitleET);
         final EditText postDescription = (EditText) findViewById(R.id.postDescriptionET);
         final TextView timeView = (TextView) findViewById(R.id.postTimeTV);
-        final TextView groupNameTV = (TextView) findViewById(R.id.groupNameTV);
         final TextView dateView = (TextView) findViewById(R.id.postDateTV);
         final Button postButton = (Button) findViewById(R.id.postButton);
         final PostTime postTime = new PostTime();
         final PostDate postDate = new PostDate();
         final FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         Button backbutton = (Button) findViewById(R.id.btnback);
-        final EditText postLocation = (EditText) findViewById(R.id.postLocationET);
+        postLocation = (Button) findViewById(R.id.postLocationBtn);
+
+        postLocation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                callPlaceAutocompleteActivityIntent();
+            }
+        });
+
 
         timeView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -132,6 +147,35 @@ public class CreatePublicPostActivity extends AppCompatActivity {
                 break;
             }
 
+        }
+    }
+
+    private void callPlaceAutocompleteActivityIntent() {
+        try {
+            Intent intent =
+                    new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_OVERLAY)
+                            .build(this);
+            startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE);
+        } catch (GooglePlayServicesRepairableException | GooglePlayServicesNotAvailableException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        //autocompleteFragment.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == PLACE_AUTOCOMPLETE_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                Place place = PlaceAutocomplete.getPlace(this, data);
+                String str = place.getName().toString() + " " + place.getAddress().toString();
+                postLocation.setText(str);
+            } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {
+                Status status = PlaceAutocomplete.getStatus(this, data);
+            } else if (requestCode == RESULT_CANCELED) {
+
+            }
         }
     }
 }
