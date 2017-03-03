@@ -31,7 +31,8 @@ public class CreatePublicPostActivity extends AppCompatActivity {
 
     int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
     private DatabaseReference databaseReference;
-    private Button postLocation;
+    private Button getPostLocation;
+    private Place postPlace;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -48,9 +49,9 @@ public class CreatePublicPostActivity extends AppCompatActivity {
         final PostDate postDate = new PostDate();
         final FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         Button backbutton = (Button) findViewById(R.id.btnback);
-        postLocation = (Button) findViewById(R.id.postLocationBtn);
+        getPostLocation = (Button) findViewById(R.id.getPostLocation);
 
-        postLocation.setOnClickListener(new View.OnClickListener() {
+        getPostLocation.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 callPlaceAutocompleteActivityIntent();
@@ -93,7 +94,6 @@ public class CreatePublicPostActivity extends AppCompatActivity {
                         final String currentTime = new SimpleDateFormat("dd-M-yy hh:mm a").format(new Date());
                         final String title = postTitle.getText().toString();
                         final String description = postDescription.getText().toString();
-                        final String location = postLocation.getText().toString();
                         String timeTemp = timeView.getText().toString();
                         String dateTemp = dateView.getText().toString();
                         String[] timeArray = timeTemp.split(" ");
@@ -104,10 +104,16 @@ public class CreatePublicPostActivity extends AppCompatActivity {
                         postDate.setDay(dateArray[0]);
                         postDate.setMonth(dateArray[1]);
                         postDate.setYear(dateArray[2]);
-                        PostInfo postInfo = new PostInfo("1", title, description, location, postTime, postDate, user, currentTime);
+                        PostPlaceInfo postPlaceInfo = new PostPlaceInfo(postPlace.getId(),
+                                postPlace.getName().toString(),
+                                postPlace.getLatLng().toString(),
+                                postPlace.getAddress().toString(),
+                                postPlace.getPhoneNumber().toString());
+                        PostInfo postInfo = new PostInfo("1", title, description, postPlaceInfo, postTime, postDate, user, currentTime);
                         databaseReference.child("publicmeetup").push().setValue(postInfo).addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void aVoid) {
+
                                 databaseReference.child("publicmeetup").addValueEventListener(new ValueEventListener() {
                                     @Override
                                     public void onDataChange(DataSnapshot dataSnapshot) {
@@ -168,9 +174,9 @@ public class CreatePublicPostActivity extends AppCompatActivity {
         //autocompleteFragment.onActivityResult(requestCode, resultCode, data);
         if (requestCode == PLACE_AUTOCOMPLETE_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
-                Place place = PlaceAutocomplete.getPlace(this, data);
-                String str = place.getName().toString() + " " + place.getAddress().toString();
-                postLocation.setText(str);
+                postPlace = PlaceAutocomplete.getPlace(this, data);
+                String str = postPlace.getName().toString() + " " + postPlace.getAddress().toString();
+                getPostLocation.setText(str);
             } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {
                 Status status = PlaceAutocomplete.getStatus(this, data);
             } else if (requestCode == RESULT_CANCELED) {

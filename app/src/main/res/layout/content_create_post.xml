@@ -74,20 +74,18 @@
             android:textColor="@color/colorText"
             android:textStyle="bold" />
 
-        <android.support.design.widget.TextInputLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+        <Button
+            android:id="@+id/getPostLocation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="start"
+            android:background="@null"
+            android:drawableLeft="@drawable/ic_location"
+            android:hint="Select Event Venue"
+            android:inputType="textMultiLine"
+            android:textColor="@color/colorText"
+            android:textColorHint="@color/colorText" />
 
-            <EditText
-                android:id="@+id/postLocationET"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:drawableLeft="@drawable/ic_location"
-                android:hint="Event Location"
-                android:inputType="textMultiLine"
-                android:textColor="@color/colorText"
-                android:textColorHint="@color/colorText" />
-        </android.support.design.widget.TextInputLayout>
 
         <android.support.design.widget.TextInputLayout
             android:layout_width="match_parent"

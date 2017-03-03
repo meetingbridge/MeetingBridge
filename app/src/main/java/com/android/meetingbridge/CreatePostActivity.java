@@ -12,6 +12,11 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -27,7 +32,10 @@ import java.util.Date;
 
 public class CreatePostActivity extends AppCompatActivity {
 
-    DatabaseReference databaseReference;
+    private DatabaseReference databaseReference;
+    private Button getPostLocation;
+    private int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
+    private Place postPlace;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,7 +55,15 @@ public class CreatePostActivity extends AppCompatActivity {
         final PostDate postDate = new PostDate();
         final FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         Button backbutton = (Button) findViewById(R.id.btnback);
-        final EditText postLocation = (EditText) findViewById(R.id.postLocationET);
+        getPostLocation = (Button) findViewById(R.id.getPostLocation);
+
+        getPostLocation.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                callPlaceAutocompleteActivityIntent();
+            }
+        });
+
 
         timeView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -108,7 +124,6 @@ public class CreatePostActivity extends AppCompatActivity {
                                 final String currentTime = new SimpleDateFormat("dd-M-yy hh:mm a").format(new Date());
                                 final String title = postTitle.getText().toString();
                                 final String description = postDescription.getText().toString();
-                                final String location = postLocation.getText().toString();
                                 String timeTemp = timeView.getText().toString();
                                 String dateTemp = dateView.getText().toString();
                                 String[] timeArray = timeTemp.split(" ");
@@ -119,7 +134,12 @@ public class CreatePostActivity extends AppCompatActivity {
                                 postDate.setDay(dateArray[0]);
                                 postDate.setMonth(dateArray[1]);
                                 postDate.setYear(dateArray[2]);
-                                final PostInfo postInfo = new PostInfo("1", title, description, location, postTime, postDate, user, currentTime, groupInfos.get(temp));
+                                PostPlaceInfo postPlaceInfo = new PostPlaceInfo(postPlace.getId(),
+                                        postPlace.getName().toString(),
+                                        postPlace.getLatLng().toString(),
+                                        postPlace.getAddress().toString(),
+                                        postPlace.getPhoneNumber().toString());
+                                final PostInfo postInfo = new PostInfo("1", title, description, postPlaceInfo, postTime, postDate, user, currentTime, groupInfos.get(temp));
 
                                 databaseReference.child("Posts").push().setValue(postInfo).addOnSuccessListener(new OnSuccessListener<Void>() {
                                     @Override
@@ -165,6 +185,35 @@ public class CreatePostActivity extends AppCompatActivity {
         });
 
 
+    }
+
+    private void callPlaceAutocompleteActivityIntent() {
+        try {
+            Intent intent =
+                    new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_OVERLAY)
+                            .build(this);
+            startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE);
+        } catch (GooglePlayServicesRepairableException | GooglePlayServicesNotAvailableException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        //autocompleteFragment.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == PLACE_AUTOCOMPLETE_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                postPlace = PlaceAutocomplete.getPlace(this, data);
+                String str = postPlace.getName().toString() + " " + postPlace.getAddress().toString();
+                getPostLocation.setText(str);
+            } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {
+                Status status = PlaceAutocomplete.getStatus(this, data);
+            } else if (requestCode == RESULT_CANCELED) {
+
+            }
+        }
     }
 
     private void addID(DataSnapshot dataSnapshot) {

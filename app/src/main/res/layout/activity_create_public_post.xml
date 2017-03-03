@@ -75,13 +75,14 @@
             android:textStyle="bold" />
 
         <Button
-            android:id="@+id/postLocationBtn"
+            android:id="@+id/getPostLocation"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_gravity="start"
             android:background="@null"
             android:drawableStart="@drawable/ic_location"
             android:inputType="textMultiLine"
-            android:text="Select Meetup Location"
+            android:text="Select Event Venue"
             android:textColor="@color/colorText"
             android:textColorHint="@color/colorText" />
 

@@ -2,7 +2,8 @@ package com.android.meetingbridge;
 
 public class PostInfo {
     private userInfo host;
-    private String postId, postTitle, postDescription, postingTime, postLocation;
+    private String postId, postTitle, postDescription, postingTime;
+    private PostPlaceInfo postLocation;
     private PostTime postTime;
     private PostDate postDate;
     private GroupInfo groupInfo;
@@ -12,7 +13,7 @@ public class PostInfo {
     }
 
     public PostInfo(String postId, String postTitle, String postDescription,
-                    String postLocation, PostTime postTime, PostDate postDate, userInfo host, String postingTime) {
+                    PostPlaceInfo postLocation, PostTime postTime, PostDate postDate, userInfo host, String postingTime) {
         this.host = host;
         this.postId = postId;
         this.postTitle = postTitle;
@@ -23,7 +24,7 @@ public class PostInfo {
         this.postDate = postDate;
     }
 
-    public PostInfo(String postId, String postTitle, String postDescription, String postLocation,
+    public PostInfo(String postId, String postTitle, String postDescription, PostPlaceInfo postLocation,
                     PostTime postTime, PostDate postDate, userInfo host, String postingTime, GroupInfo groupInfo) {
         this.postTitle = postTitle;
         this.postId = postId;
@@ -36,11 +37,11 @@ public class PostInfo {
         this.groupInfo = groupInfo;
     }
 
-    public String getPostLocation() {
+    public PostPlaceInfo getPostLocation() {
         return postLocation;
     }
 
-    public void setPostLocation(String postLocation) {
+    public void setPostLocation(PostPlaceInfo postLocation) {
         this.postLocation = postLocation;
     }
 

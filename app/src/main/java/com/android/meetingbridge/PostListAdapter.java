@@ -142,7 +142,8 @@ public class PostListAdapter extends BaseAdapter {
         Name.setText(ab);
 
         Title.setText(mPostList.get(i).getPostTitle());
-        locationTV.setText(mPostList.get(i).getPostLocation());
+        String location = mPostList.get(i).getPostLocation().getName() + " " + mPostList.get(i).getPostLocation().getAddress();
+        locationTV.setText(location);
         Discription.setText(mPostList.get(i).getPostDescription());
         TimeView.setText(timeString);
         DateView.setText(dateString);
