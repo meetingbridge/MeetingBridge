@@ -3,6 +3,7 @@ package com.android.meetingbridge;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.view.View;
 import android.view.ViewGroup;
@@ -80,6 +81,17 @@ public class PublicPostListAdapter extends BaseAdapter {
             public void onSuccess(Uri uri) {
                 Picasso.with(v.getContext()).load(uri)
                         .resize(200, 200).centerCrop().into(postIcon);
+            }
+        });
+        locationTV.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Intent intent = new Intent(android.content.Intent.ACTION_VIEW,
+                        Uri.parse("geo:0,0?q=" + mPostList.get(i).getPostLocation().getLat()
+                                + "," + mPostList.get(i).getPostLocation().getLng() + " ("
+                                + mPostList.get(i).getPostLocation().getName() + ")"));
+                mContext.startActivity(intent);
+
             }
         });
 

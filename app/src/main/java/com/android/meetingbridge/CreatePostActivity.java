@@ -136,7 +136,8 @@ public class CreatePostActivity extends AppCompatActivity {
                                 postDate.setYear(dateArray[2]);
                                 PostPlaceInfo postPlaceInfo = new PostPlaceInfo(postPlace.getId(),
                                         postPlace.getName().toString(),
-                                        postPlace.getLatLng().toString(),
+                                        String.valueOf(postPlace.getLatLng().latitude),
+                                        String.valueOf(postPlace.getLatLng().longitude),
                                         postPlace.getAddress().toString(),
                                         postPlace.getPhoneNumber().toString());
                                 final PostInfo postInfo = new PostInfo("1", title, description, postPlaceInfo, postTime, postDate, user, currentTime, groupInfos.get(temp));

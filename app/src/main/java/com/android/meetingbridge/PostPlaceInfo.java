@@ -1,17 +1,20 @@
 package com.android.meetingbridge;
 
 public class PostPlaceInfo {
-    private String id, name, latLng, address, phoneNumber;
+    private String id, name, lat, lng, address, phoneNumber;
 
-    public PostPlaceInfo() {
-    }
 
-    public PostPlaceInfo(String id, String name, String latLng, String address, String phoneNumber) {
+    public PostPlaceInfo(String id, String name, String lat, String lng, String address, String phoneNumber) {
         this.id = id;
         this.name = name;
-        this.latLng = latLng;
+        this.lat = lat;
+        this.lng = lng;
         this.address = address;
         this.phoneNumber = phoneNumber;
+    }
+
+    public PostPlaceInfo() {
+
     }
 
     public String getId() {
@@ -30,12 +33,20 @@ public class PostPlaceInfo {
         this.name = name;
     }
 
-    public String getLatLng() {
-        return latLng;
+    public String getLat() {
+        return lat;
     }
 
-    public void setLatLng(String latLng) {
-        this.latLng = latLng;
+    public void setLat(String lat) {
+        this.lat = lat;
+    }
+
+    public String getLng() {
+        return lng;
+    }
+
+    public void setLng(String lng) {
+        this.lng = lng;
     }
 
     public String getAddress() {
