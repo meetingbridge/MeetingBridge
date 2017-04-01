@@ -294,6 +294,8 @@ public class GroupActivity extends AppCompatActivity implements NavigationView.O
                     return DiscussionFragment.newInstance(id);
                 case 1:
                     return MembersFragment.newInstance(id);
+                case 2:
+                    return new MapsFragment();
             }
             return null;
         }
@@ -302,7 +304,7 @@ public class GroupActivity extends AppCompatActivity implements NavigationView.O
         @Override
         public int getCount() {
 
-            return 2;
+            return 3;
         }
 
         @Override
@@ -312,7 +314,8 @@ public class GroupActivity extends AppCompatActivity implements NavigationView.O
                     return "Discussion";
                 case 1:
                     return "Members";
-
+                case 2:
+                    return "Location";
             }
             return null;
         }
