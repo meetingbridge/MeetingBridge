@@ -295,7 +295,7 @@ public class GroupActivity extends AppCompatActivity implements NavigationView.O
                 case 1:
                     return MembersFragment.newInstance(id);
                 case 2:
-                    return new MapsFragment();
+                    return MapsFragment.newInstance(id);
             }
             return null;
         }

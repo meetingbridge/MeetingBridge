@@ -2,10 +2,14 @@ package com.android.meetingbridge;
 
 import android.Manifest;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
+import android.support.v4.content.ContextCompat;
 import android.text.TextUtils;
 import android.view.View;
 import android.widget.Button;
@@ -16,6 +20,12 @@ import android.widget.RadioGroup;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
+import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -26,14 +36,18 @@ import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
 
-public class AdditionalInfoActivity extends PermissionClass {
+public class AdditionalInfoActivity extends PermissionClass implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
     private static final int GALLERY_INTENT = 2;
     private static final int REQUEST_PERMISSION = 10;
+    Location mLastLocation;
+    Marker mCurrLocationMarker;
+    GoogleApiClient mGoogleApiClient;
     private EditText fullName, contactNo;
     private FirebaseUser user;
     private DatabaseReference databaseReference;
     private String gender;
     private StorageReference storageReference;
+    private LocationRequest mLocationRequest;
     //URI
     private Uri uri;
     private ProgressBar progressBar;
@@ -42,6 +56,7 @@ public class AdditionalInfoActivity extends PermissionClass {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        buildGoogleApiClient();
         requestAppPermission(new String[]
                         {android.Manifest.permission.READ_CONTACTS,
                                 Manifest.permission.READ_EXTERNAL_STORAGE,
@@ -112,24 +127,40 @@ public class AdditionalInfoActivity extends PermissionClass {
                 }
                 storageReference.child("Photos").child(user.getUid()).putFile(uri);
                 System.out.println(uri);
-
-
-                userInfo user_Info = new userInfo(user.getUid(), name, contact, gender, email, uri.toString());
-                databaseReference.child("Users").child(user.getUid()).setValue(user_Info).addOnCompleteListener(new OnCompleteListener<Void>() {
-                    @Override
-                    public void onComplete(@NonNull Task<Void> task) {
-                        if (!task.isSuccessful()) {
-                            Toast.makeText(AdditionalInfoActivity.this, "oops", Toast.LENGTH_SHORT).show();
-                        } else {
-                            progressBar.setVisibility(View.GONE);
-                            Toast.makeText(AdditionalInfoActivity.this, "Great " + name + "! Your Profile has been Updated", Toast.LENGTH_SHORT).show();
-                            startActivity(new Intent(AdditionalInfoActivity.this, HomeActivity.class));
+                mLocationRequest = new LocationRequest();
+                mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+                if (ContextCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                    LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, new LocationListener() {
+                        @Override
+                        public void onLocationChanged(Location location) {
+                            userInfo user_Info = new userInfo(user.getUid(), name, contact, gender, email, uri.toString(), location.getLatitude(), location.getLongitude());
+                            databaseReference.child("Users").child(user.getUid()).setValue(user_Info).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                @Override
+                                public void onComplete(@NonNull Task<Void> task) {
+                                    if (!task.isSuccessful()) {
+                                        Toast.makeText(AdditionalInfoActivity.this, "oops", Toast.LENGTH_SHORT).show();
+                                    } else {
+                                        progressBar.setVisibility(View.GONE);
+                                        Toast.makeText(AdditionalInfoActivity.this, "Great " + name + "! Your Profile has been Updated", Toast.LENGTH_SHORT).show();
+                                        startActivity(new Intent(AdditionalInfoActivity.this, HomeActivity.class));
+                                    }
+                                }
+                            });
                         }
-                    }
-                });
+                    });
+                }
             }
         });
 
+    }
+
+    protected synchronized void buildGoogleApiClient() {
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
+        mGoogleApiClient.connect();
     }
 
     @Override
@@ -151,4 +182,18 @@ public class AdditionalInfoActivity extends PermissionClass {
         Toast.makeText(getApplicationContext(), "Permission Granted", Toast.LENGTH_SHORT).show();
     }
 
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+    }
 }
