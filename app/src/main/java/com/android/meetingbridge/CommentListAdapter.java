@@ -59,8 +59,6 @@ public class CommentListAdapter extends BaseAdapter {
             }
         });
 
-        System.out.println(mCommentList.get(i).getHost().getImageUri());
-
         return v;
     }
 }

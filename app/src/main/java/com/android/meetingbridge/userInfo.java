@@ -6,16 +6,14 @@ class userInfo {
     private String contactNum;
     private String gender;
     private String email;
-    private String imageUri;
     private double lat, lng;
 
-    userInfo(String id, String name, String contactNum, String gender, String email, String imageUri, double lat, double lng) {
+    userInfo(String id, String name, String contactNum, String gender, String email, double lat, double lng) {
         this.contactNum = contactNum;
         this.gender = gender;
         this.name = name;
         this.email = email;
         this.id = id;
-        this.imageUri = imageUri;
         this.lat = lat;
         this.lng = lng;
     }
@@ -45,14 +43,6 @@ class userInfo {
 
     public void setId(String id) {
         this.id = id;
-    }
-
-    public String getImageUri() {
-        return imageUri;
-    }
-
-    public void setImageUri(String imageUri) {
-        this.imageUri = imageUri;
     }
 
     public String getName() {

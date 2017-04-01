@@ -125,15 +125,15 @@ public class AdditionalInfoActivity extends PermissionClass implements GoogleApi
                     Toast.makeText(AdditionalInfoActivity.this, "Select Gender", Toast.LENGTH_SHORT).show();
                     return;
                 }
-                storageReference.child("Photos").child(user.getUid()).putFile(uri);
-                System.out.println(uri);
+
+
                 mLocationRequest = new LocationRequest();
                 mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
                 if (ContextCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
                     LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, new LocationListener() {
                         @Override
                         public void onLocationChanged(Location location) {
-                            userInfo user_Info = new userInfo(user.getUid(), name, contact, gender, email, uri.toString(), location.getLatitude(), location.getLongitude());
+                            userInfo user_Info = new userInfo(user.getUid(), name, contact, gender, email, location.getLatitude(), location.getLongitude());
                             databaseReference.child("Users").child(user.getUid()).setValue(user_Info).addOnCompleteListener(new OnCompleteListener<Void>() {
                                 @Override
                                 public void onComplete(@NonNull Task<Void> task) {
@@ -174,6 +174,7 @@ public class AdditionalInfoActivity extends PermissionClass implements GoogleApi
                     .load(uri)
                     .resize(200, 200).centerCrop()
                     .transform(new CircleTransform()).into(profilePic);
+            storageReference.child("Photos").child(user.getUid()).putFile(uri);
         }
     }
 

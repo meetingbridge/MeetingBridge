@@ -53,6 +53,9 @@ public class MapsFragment extends SupportMapFragment
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
         mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+        mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(30.3753, 69.3451)));
+        mMap.animateCamera(CameraUpdateFactory.zoomTo(5));
+
         Bundle bundle = this.getArguments();
         if (bundle != null) {
 
@@ -68,6 +71,7 @@ public class MapsFragment extends SupportMapFragment
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             showMarkers(dataSnapshot);
+
                         }
 
                         @Override
@@ -83,7 +87,7 @@ public class MapsFragment extends SupportMapFragment
                 }
             });
 
-            mMap.animateCamera(CameraUpdateFactory.zoomTo(15));
+
         }
     }
 
@@ -101,7 +105,6 @@ public class MapsFragment extends SupportMapFragment
                 BitmapDescriptorFactory.HUE_VIOLET,
                 BitmapDescriptorFactory.HUE_YELLOW};
         for (int i = 0; i < membersList.size(); i++) {
-
             createMarker(membersList.get(i).getLat(), membersList.get(i).getLng(), membersList.get(i).getName(),
                     BitmapDescriptorFactory.defaultMarker(colours[new Random().nextInt(colours.length)]));
         }
