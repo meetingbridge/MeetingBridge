@@ -21,12 +21,15 @@ import com.google.android.gms.maps.model.BitmapDescriptorFactory;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.maps.model.MarkerOptions;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 public class MapsFragment extends SupportMapFragment
         implements OnMapReadyCallback,
         GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener,
         LocationListener {
+    DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
     Location mLastLocation;
     Marker mCurrLocationMarker;
     GoogleApiClient mGoogleApiClient;
@@ -106,7 +109,7 @@ public class MapsFragment extends SupportMapFragment
         MarkerOptions markerOptions = new MarkerOptions();
         markerOptions.position(latLng);
         markerOptions.title("Current Position");
-        markerOptions.icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_MAGENTA));
+        markerOptions.icon(BitmapDescriptorFactory.defaultMarker());
         mCurrLocationMarker = mMap.addMarker(markerOptions);
 
         //move map camera
