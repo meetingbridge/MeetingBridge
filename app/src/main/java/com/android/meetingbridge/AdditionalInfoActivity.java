@@ -107,7 +107,7 @@ public class AdditionalInfoActivity extends PermissionClass implements GoogleApi
         submit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                progressBar.setVisibility(View.VISIBLE);
+
                 final String name = fullName.getText().toString().trim();
                 final String contact = contactNo.getText().toString().trim();
                 final String email = user.getEmail();
@@ -125,7 +125,11 @@ public class AdditionalInfoActivity extends PermissionClass implements GoogleApi
                     Toast.makeText(AdditionalInfoActivity.this, "Select Gender", Toast.LENGTH_SHORT).show();
                     return;
                 }
-
+                if (uri == null) {
+                    Toast.makeText(AdditionalInfoActivity.this, "Select Profile Picture", Toast.LENGTH_SHORT).show();
+                    return;
+                }
+                progressBar.setVisibility(View.VISIBLE);
 
                 mLocationRequest = new LocationRequest();
                 mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
@@ -148,6 +152,8 @@ public class AdditionalInfoActivity extends PermissionClass implements GoogleApi
                             });
                         }
                     });
+                } else {
+                    Toast.makeText(getApplicationContext(), "Allow Application to Check your Location!", Toast.LENGTH_LONG).show();
                 }
             }
         });

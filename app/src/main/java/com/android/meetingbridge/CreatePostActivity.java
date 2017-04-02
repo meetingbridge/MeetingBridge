@@ -181,7 +181,6 @@ public class CreatePostActivity extends AppCompatActivity {
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
             }
         });
 
