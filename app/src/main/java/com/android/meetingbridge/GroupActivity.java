@@ -23,6 +23,7 @@ import android.view.View;
 import android.view.Window;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -58,6 +59,7 @@ public class GroupActivity extends AppCompatActivity implements NavigationView.O
     private int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
     private Place destination;
     private DatabaseReference databaseReference;
+    private ProgressBar progressBar;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,6 +76,7 @@ public class GroupActivity extends AppCompatActivity implements NavigationView.O
                 }
             }
         };
+
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout_group);
         databaseReference = FirebaseDatabase.getInstance().getReference();
         databaseReference.child("Groups").addValueEventListener(new ValueEventListener() {
@@ -218,6 +221,7 @@ public class GroupActivity extends AppCompatActivity implements NavigationView.O
         super.onActivityResult(requestCode, resultCode, data);
         if (requestCode == PLACE_AUTOCOMPLETE_REQUEST_CODE) {
             if (resultCode == RESULT_OK) {
+
                 destination = PlaceAutocomplete.getPlace(this, data);
                 databaseReference.child("Groups").addValueEventListener(new ValueEventListener() {
                     @Override
@@ -229,14 +233,16 @@ public class GroupActivity extends AppCompatActivity implements NavigationView.O
                             locationInfos.add(0, locationInfo);
                         }
                         LocationListAdapter locationListAdapter = new LocationListAdapter(getApplicationContext(), locationInfos);
+
                         Dialog dialog = new Dialog(GroupActivity.this);
-                        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
                         dialog.setContentView(R.layout.locationlistlayout);
-                        //dialog.setTitle(users.get(position).getName());
+                        progressBar = (ProgressBar) dialog.findViewById(R.id.progressBar);
+                        progressBar.setVisibility(View.VISIBLE);
+                        dialog.setTitle(g.getGroupName());
                         ListView listView = (ListView) dialog.findViewById(R.id.locList);
                         listView.setAdapter(locationListAdapter);
-
                         dialog.show();
+                        progressBar.setVisibility(View.GONE);
                     }
 
                     @Override
@@ -247,6 +253,7 @@ public class GroupActivity extends AppCompatActivity implements NavigationView.O
 
                 String str = destination.getName().toString() + " " + destination.getAddress().toString();
                 Toast.makeText(getApplicationContext(), str, Toast.LENGTH_LONG).show();
+
             } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {
                 Status status = PlaceAutocomplete.getStatus(this, data);
                 Toast.makeText(getApplicationContext(), status.getStatusMessage(), Toast.LENGTH_LONG).show();

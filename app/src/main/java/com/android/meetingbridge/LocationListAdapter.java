@@ -59,7 +59,7 @@ public class LocationListAdapter extends BaseAdapter {
         String dest = String.valueOf(locationList.get(i).getDest().getName()) + String.valueOf(locationList.get(i).getDest().getAddress());
         destination.setText(dest);
         String t = String.valueOf(distance(locationList.get(i).getLat(), locationList.get(i).getLng(),
-                locationList.get(i).getDest().getLatLng().latitude, locationList.get(i).getDest().getLatLng().longitude, "K")) + "KM away from destination";
+                locationList.get(i).getDest().getLatLng().latitude, locationList.get(i).getDest().getLatLng().longitude, "K")) + " KM away from destination";
         time.setText(t);
 
         StorageReference storageReference = FirebaseStorage.getInstance().getReference();
@@ -68,8 +68,7 @@ public class LocationListAdapter extends BaseAdapter {
             public void onSuccess(Uri uri) {
                 Picasso.with(v.getContext())
                         .load(uri)
-                        .resize(200, 200).centerCrop()
-                        .transform(new CircleTransform()).into(userIcon);
+                        .resize(200, 200).centerCrop().into(userIcon);
             }
         });
         v.setTag(locationList.get(i).getId());
@@ -95,8 +94,7 @@ public class LocationListAdapter extends BaseAdapter {
         } else if (unit == "N") {
             dist = dist * 0.8684;
         }
-
-        return (dist);
+        return Math.round(dist);
     }
 
     private String getAddress(double lat, double lng) {
