@@ -181,6 +181,7 @@ public class AdditionalInfoActivity extends PermissionClass implements GoogleApi
                     .resize(200, 200).centerCrop()
                     .transform(new CircleTransform()).into(profilePic);
             storageReference.child("Photos").child(user.getUid()).putFile(uri);
+            //Ahh
         }
     }
 
