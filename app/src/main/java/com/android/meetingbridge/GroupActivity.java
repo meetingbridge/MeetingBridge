@@ -7,7 +7,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
-import android.support.design.widget.Snackbar;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
@@ -23,9 +22,15 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
+import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.places.Place;
+import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -49,6 +54,10 @@ public class GroupActivity extends AppCompatActivity implements NavigationView.O
     private Menu subMenu;
     private ImageView imageView;
     private TextView uNameTV, uEmailTV;
+    private FloatingActionButton fab;
+    private int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
+    private Place destination;
+    private DatabaseReference databaseReference;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -66,11 +75,11 @@ public class GroupActivity extends AppCompatActivity implements NavigationView.O
             }
         };
         drawer = (DrawerLayout) findViewById(R.id.drawer_layout_group);
-        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
+        databaseReference = FirebaseDatabase.getInstance().getReference();
         databaseReference.child("Groups").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                getCurrentGroup(dataSnapshot);
+                getNavPopulated(dataSnapshot);
             }
 
             @Override
@@ -93,15 +102,38 @@ public class GroupActivity extends AppCompatActivity implements NavigationView.O
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
 
-        FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
+        fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                        .setAction("Action", null).show();
+                callPlaceAutocompleteActivityIntent();
             }
         });
+        mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+                if (position == 2) {
+                    fab.show();
+                    Toast.makeText(getApplicationContext(), "Tap Direction Button", Toast.LENGTH_SHORT).show();
+                } else {
+                    fab.hide();
+                }
+            }
 
+            @Override
+            public void onPageSelected(int position) {
+                if (position == 2) {
+                    fab.show();
+                } else {
+                    fab.hide();
+                }
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+
+            }
+        });
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
         drawer.addDrawerListener(toggle);
@@ -169,6 +201,61 @@ public class GroupActivity extends AppCompatActivity implements NavigationView.O
         });
     }
 
+    private void callPlaceAutocompleteActivityIntent() {
+        try {
+            Intent intent =
+                    new PlaceAutocomplete.IntentBuilder(PlaceAutocomplete.MODE_OVERLAY)
+                            .build(this);
+            startActivityForResult(intent, PLACE_AUTOCOMPLETE_REQUEST_CODE);
+        } catch (GooglePlayServicesRepairableException | GooglePlayServicesNotAvailableException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == PLACE_AUTOCOMPLETE_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                destination = PlaceAutocomplete.getPlace(this, data);
+                databaseReference.child("Groups").addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        GroupInfo g = getCurrentGroup(dataSnapshot);
+                        ArrayList<LocationInfo> locationInfos = new ArrayList<>();
+                        for (int i = 0; i < g.getMembersList().size(); i++) {
+                            LocationInfo locationInfo = new LocationInfo(g.getMembersList().get(i), destination);
+                            locationInfos.add(0, locationInfo);
+                        }
+                        LocationListAdapter locationListAdapter = new LocationListAdapter(getApplicationContext(), locationInfos);
+                        Dialog dialog = new Dialog(GroupActivity.this);
+                        dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
+                        dialog.setContentView(R.layout.locationlistlayout);
+                        //dialog.setTitle(users.get(position).getName());
+                        ListView listView = (ListView) dialog.findViewById(R.id.locList);
+                        listView.setAdapter(locationListAdapter);
+
+                        dialog.show();
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+
+                String str = destination.getName().toString() + " " + destination.getAddress().toString();
+                Toast.makeText(getApplicationContext(), str, Toast.LENGTH_LONG).show();
+            } else if (resultCode == PlaceAutocomplete.RESULT_ERROR) {
+                Status status = PlaceAutocomplete.getStatus(this, data);
+                Toast.makeText(getApplicationContext(), status.getStatusMessage(), Toast.LENGTH_LONG).show();
+            } else if (requestCode == RESULT_CANCELED) {
+
+            }
+        }
+    }
+
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
@@ -214,7 +301,28 @@ public class GroupActivity extends AppCompatActivity implements NavigationView.O
         }
     }
 
-    private void getCurrentGroup(DataSnapshot dataSnapshot) {
+    private GroupInfo getCurrentGroup(DataSnapshot dataSnapshot) {
+        ArrayList<GroupInfo> groupInfos = new ArrayList<>();
+        for (DataSnapshot data : dataSnapshot.getChildren()) {
+            GroupInfo g = data.getValue(GroupInfo.class);
+            ArrayList<userInfo> userInfos = g.getMembersList();
+
+            for (int i = 0; i < userInfos.size(); i++) {
+                if (FirebaseAuth.getInstance().getCurrentUser().getEmail().equals(userInfos.get(i).getEmail())) {
+                    groupInfos.add(g);
+                }
+            }
+        }
+        String id = getIntent().getExtras().get("id").toString();
+        int a = Integer.parseInt(id);
+        GroupInfo g = new GroupInfo();
+        if (groupInfos.size() > 0) {
+            g = groupInfos.get(a);
+        }
+        return g;
+    }
+
+    private void getNavPopulated(DataSnapshot dataSnapshot) {
         ArrayList<GroupInfo> groupInfos = new ArrayList<>();
         ArrayList<String> groupNames = new ArrayList<>();
         for (DataSnapshot data : dataSnapshot.getChildren()) {
@@ -279,7 +387,6 @@ public class GroupActivity extends AppCompatActivity implements NavigationView.O
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
         String id = getIntent().getExtras().get("id").toString();
-
 
         public SectionsPagerAdapter(FragmentManager fm) {
             super(fm);

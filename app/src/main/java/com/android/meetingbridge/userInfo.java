@@ -8,7 +8,8 @@ class userInfo {
     private String email;
     private double lat, lng;
 
-    userInfo(String id, String name, String contactNum, String gender, String email, double lat, double lng) {
+
+    public userInfo(String id, String name, String contactNum, String gender, String email, double lat, double lng) {
         this.contactNum = contactNum;
         this.gender = gender;
         this.name = name;
@@ -16,6 +17,16 @@ class userInfo {
         this.id = id;
         this.lat = lat;
         this.lng = lng;
+    }
+
+    public userInfo(userInfo u) {
+        this.contactNum = u.getContactNum();
+        this.gender = u.getGender();
+        this.name = u.getName();
+        this.email = u.getEmail();
+        this.id = u.getId();
+        this.lat = u.getLat();
+        this.lng = u.getLng();
     }
 
     public userInfo() {
