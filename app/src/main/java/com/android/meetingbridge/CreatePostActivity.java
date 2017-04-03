@@ -53,6 +53,7 @@ public class CreatePostActivity extends AppCompatActivity {
         final Button postButton = (Button) findViewById(R.id.postButton);
         final PostTime postTime = new PostTime();
         final PostDate postDate = new PostDate();
+        TextView typeText = (TextView) findViewById(R.id.typeText);
         final FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
         Button backbutton = (Button) findViewById(R.id.btnback);
         getPostLocation = (Button) findViewById(R.id.getPostLocation);
@@ -82,6 +83,11 @@ public class CreatePostActivity extends AppCompatActivity {
         });
 
         final String id = getIntent().getStringExtra("id");
+        final String type = getIntent().getStringExtra("type");
+        System.out.println(type);
+        if (type.equals("2")) {
+            typeText.setVisibility(View.VISIBLE);
+        }
         backbutton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -140,7 +146,9 @@ public class CreatePostActivity extends AppCompatActivity {
                                         String.valueOf(postPlace.getLatLng().longitude),
                                         postPlace.getAddress().toString(),
                                         postPlace.getPhoneNumber().toString());
-                                final PostInfo postInfo = new PostInfo("1", title, description, postPlaceInfo, postTime, postDate, user, currentTime, groupInfos.get(temp));
+                                final PostInfo postInfo = new PostInfo("1", "2", title, description, postPlaceInfo, postTime,
+                                        postDate, user, currentTime, groupInfos.get(temp));
+                                postInfo.setPostType(type);
 
                                 databaseReference.child("Posts").push().setValue(postInfo).addOnSuccessListener(new OnSuccessListener<Void>() {
                                     @Override

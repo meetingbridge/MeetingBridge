@@ -2,6 +2,7 @@ package com.android.meetingbridge;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.graphics.Color;
 import android.net.Uri;
 import android.view.View;
 import android.view.ViewGroup;
@@ -155,8 +156,11 @@ public class PostListAdapter extends BaseAdapter {
             groupName.setVisibility(View.VISIBLE);
             postedIn.setVisibility(View.VISIBLE);
         }
+        if (mPostList.get(i).getPostType().equals("2")) {
+            v.setBackgroundColor(Color.parseColor("#B3E5FC"));
+        }
 
-        Button commentButton = (Button) v.findViewById(R.id.commentsButton);
+        final Button commentButton = (Button) v.findViewById(R.id.commentsButton);
 
 
         commentButton.setOnClickListener(new View.OnClickListener() {
@@ -190,10 +194,13 @@ public class PostListAdapter extends BaseAdapter {
                                 .addValueEventListener(new ValueEventListener() {
                                     @Override
                                     public void onDataChange(DataSnapshot dataSnapshot) {
-                                        final ArrayList<CommentInfo> commentInfos = showComments(dataSnapshot);
-                                        final CommentListAdapter adapter = new CommentListAdapter(v.getContext(), commentInfos);
-                                        commentLV.setAdapter(adapter);
+                                        final ArrayList<CommentInfo> commentInfos = new ArrayList<>();
 
+                                        for (DataSnapshot data : dataSnapshot.getChildren()) {
+                                            CommentInfo c = data.getValue(CommentInfo.class);
+                                            commentInfos.add(c);
+                                        }
+                                        commentLV.setAdapter(makeAdapter(v.getContext(), commentInfos));
 
                                         postCommentButton.setOnClickListener(new View.OnClickListener() {
                                             @Override
@@ -203,7 +210,7 @@ public class PostListAdapter extends BaseAdapter {
                                                         .child(mPostList.get(i).getGroupInfo().getGroupId())
                                                         .child(mPostList.get(i).getPostId()).setValue(commentInfos);
                                                 commentBox.setText("");
-                                                commentLV.setAdapter(adapter);
+                                                commentLV.setAdapter(makeAdapter(v.getContext(), commentInfos));
                                                 commentLV.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                                                     @Override
                                                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -257,12 +264,7 @@ public class PostListAdapter extends BaseAdapter {
         return v;
     }
 
-    private ArrayList<CommentInfo> showComments(DataSnapshot dataSnapshot) {
-        ArrayList<CommentInfo> commentInfo = new ArrayList<>();
-        for (DataSnapshot data : dataSnapshot.getChildren()) {
-            CommentInfo c = data.getValue(CommentInfo.class);
-            commentInfo.add(c);
-        }
-        return commentInfo;
+    private CommentListAdapter makeAdapter(Context context, ArrayList<CommentInfo> commentInfos) {
+        return new CommentListAdapter(context, commentInfos);
     }
 }

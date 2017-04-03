@@ -2,32 +2,35 @@ package com.android.meetingbridge;
 
 public class PostInfo {
     private userInfo host;
-    private String postId, postTitle, postDescription, postingTime;
+    private String postId, postTitle, postDescription, postingTime, postType;
     private PostPlaceInfo postLocation;
     private PostTime postTime;
     private PostDate postDate;
     private GroupInfo groupInfo;
 
+
     public PostInfo() {
         //Null Constructor
     }
 
-    public PostInfo(String postId, String postTitle, String postDescription,
-                    PostPlaceInfo postLocation, PostTime postTime, PostDate postDate, userInfo host, String postingTime) {
+    public PostInfo(String postId, String postType, String postTitle, String postDescription, PostPlaceInfo postLocation,
+                    PostTime postTime, PostDate postDate, userInfo host, String postingTime) {
         this.host = host;
         this.postId = postId;
         this.postTitle = postTitle;
         this.postDescription = postDescription;
         this.postingTime = postingTime;
+        this.postType = postType;
         this.postLocation = postLocation;
         this.postTime = postTime;
         this.postDate = postDate;
     }
 
-    public PostInfo(String postId, String postTitle, String postDescription, PostPlaceInfo postLocation,
+    public PostInfo(String postId, String postType, String postTitle, String postDescription, PostPlaceInfo postLocation,
                     PostTime postTime, PostDate postDate, userInfo host, String postingTime, GroupInfo groupInfo) {
         this.postTitle = postTitle;
         this.postId = postId;
+        this.postType = postType;
         this.postDescription = postDescription;
         this.postTime = postTime;
         this.postDate = postDate;
@@ -35,6 +38,14 @@ public class PostInfo {
         this.postLocation = postLocation;
         this.postingTime = postingTime;
         this.groupInfo = groupInfo;
+    }
+
+    public String getPostType() {
+        return postType;
+    }
+
+    public void setPostType(String postType) {
+        this.postType = postType;
     }
 
     public PostPlaceInfo getPostLocation() {

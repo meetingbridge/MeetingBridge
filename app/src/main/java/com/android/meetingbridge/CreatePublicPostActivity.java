@@ -110,7 +110,7 @@ public class CreatePublicPostActivity extends AppCompatActivity {
                                 String.valueOf(postPlace.getLatLng().longitude),
                                 postPlace.getAddress().toString(),
                                 postPlace.getPhoneNumber().toString());
-                        PostInfo postInfo = new PostInfo("1", title, description, postPlaceInfo, postTime, postDate, user, currentTime);
+                        PostInfo postInfo = new PostInfo("1", "1", title, description, postPlaceInfo, postTime, postDate, user, currentTime);
                         databaseReference.child("publicmeetup").push().setValue(postInfo).addOnSuccessListener(new OnSuccessListener<Void>() {
                             @Override
                             public void onSuccess(Void aVoid) {

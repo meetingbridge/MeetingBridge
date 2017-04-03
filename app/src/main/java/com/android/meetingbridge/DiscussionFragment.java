@@ -91,6 +91,17 @@ public class DiscussionFragment extends Fragment {
                 public void onClick(View v) {
                     Intent intent = new Intent(getActivity(), CreatePostActivity.class);
                     intent.putExtra("id", id);
+                    intent.putExtra("type", "1");
+                    startActivity(intent);
+                }
+            });
+            Button createSecretPost = (Button) rootView.findViewById(R.id.createSecretPostButton);
+            createSecretPost.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    Intent intent = new Intent(getActivity(), CreatePostActivity.class);
+                    intent.putExtra("id", id);
+                    intent.putExtra("type", "2");
                     startActivity(intent);
                 }
             });

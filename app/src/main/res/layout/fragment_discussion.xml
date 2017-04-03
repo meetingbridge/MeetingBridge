@@ -7,13 +7,29 @@
     android:weightSum="1"
     tools:context="com.android.meetingbridge.DiscussionFragment">
 
-    <Button
-        android:id="@+id/createPostButton"
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/colorPrimary"
-        android:text="New Event"
-        android:textColor="@color/colorText" />
+        android:orientation="horizontal"
+        android:weightSum="1">
+
+        <Button
+            android:id="@+id/createPostButton"
+            android:layout_width="178dp"
+            android:layout_height="wrap_content"
+            android:background="@color/colorPrimary"
+            android:text="New Event"
+            android:textColor="@color/colorText" />
+
+        <Button
+            android:id="@+id/createSecretPostButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end"
+            android:background="@color/colorPrimary"
+            android:text="New Secret Meetup"
+            android:textColor="@color/colorText" />
+    </LinearLayout>
 
 
     <ListView
