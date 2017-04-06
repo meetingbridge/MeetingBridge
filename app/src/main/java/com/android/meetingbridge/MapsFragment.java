@@ -28,7 +28,7 @@ public class MapsFragment extends SupportMapFragment
     DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
     ArrayList<GroupInfo> groupInfos1 = new ArrayList<>();
     private GoogleMap mMap;
-    private String id;
+
 
     public MapsFragment() {
     }
@@ -55,6 +55,7 @@ public class MapsFragment extends SupportMapFragment
         mMap.getUiSettings().setMapToolbarEnabled(false);
         mMap.moveCamera(CameraUpdateFactory.newLatLng(new LatLng(31.1704, 72.7097)));
         mMap.animateCamera(CameraUpdateFactory.zoomTo(6.77f));
+
         Bundle bundle = this.getArguments();
         if (bundle != null) {
 
@@ -69,6 +70,7 @@ public class MapsFragment extends SupportMapFragment
                     databaseReference.child("Groups").child(groupId).addValueEventListener(new ValueEventListener() {
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
+                            mMap.clear();
                             showMarkers(dataSnapshot);
 
                         }
@@ -103,6 +105,7 @@ public class MapsFragment extends SupportMapFragment
                 BitmapDescriptorFactory.HUE_ROSE,
                 BitmapDescriptorFactory.HUE_VIOLET,
                 BitmapDescriptorFactory.HUE_YELLOW};
+
         for (int i = 0; i < membersList.size(); i++) {
             createMarker(membersList.get(i).getLat(), membersList.get(i).getLng(), membersList.get(i).getName(),
                     BitmapDescriptorFactory.defaultMarker(colours[new Random().nextInt(colours.length)]));

@@ -4,16 +4,20 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
@@ -29,6 +33,11 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
+import com.google.android.gms.common.api.GoogleApiClient;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
@@ -45,7 +54,8 @@ import java.util.ArrayList;
 
 
 public class HomeActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener {
+        implements NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.ConnectionCallbacks,
+        GoogleApiClient.OnConnectionFailedListener {
 
     private FirebaseAuth.AuthStateListener authListener;
     private FirebaseAuth auth;
@@ -53,6 +63,11 @@ public class HomeActivity extends AppCompatActivity
     private TextView uNameTV, uEmailTV;
     private DrawerLayout drawer;
     private Menu subMenu;
+    private LocationRequest mLocationRequest;
+    private GoogleApiClient mGoogleApiClient;
+    private DatabaseReference databaseReference;
+    private StorageReference storageReference;
+    private FirebaseUser currentUser;
 
     //nnjnjn
     @Override
@@ -60,6 +75,10 @@ public class HomeActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
         checkNetwork();
+        buildGoogleApiClient();
+        databaseReference = FirebaseDatabase.getInstance().getReference();
+        storageReference = FirebaseStorage.getInstance().getReference();
+        currentUser = FirebaseAuth.getInstance().getCurrentUser();
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -87,10 +106,6 @@ public class HomeActivity extends AppCompatActivity
         View headerView = navigationView.getHeaderView(0);
 
 
-        final FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
-        final DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
-        final StorageReference storageReference = FirebaseStorage.getInstance().getReference();
-
         uNameTV = (TextView) headerView.findViewById(R.id.uName);
         imageView = (ImageView) headerView.findViewById(R.id.profileIcon);
         uEmailTV = (TextView) headerView.findViewById(R.id.uEmail);
@@ -108,12 +123,11 @@ public class HomeActivity extends AppCompatActivity
         databaseReference.child("Users").child(currentUser.getUid()).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                final userInfo userInfo = dataSnapshot.getValue(userInfo.class);
-                uNameTV.setText(userInfo.getName());
-                uEmailTV.setText(userInfo.getEmail());
-                uEmailTV.setText(userInfo.getEmail());
-                StorageReference storageReference = FirebaseStorage.getInstance().getReference();
-                storageReference.child("Photos").child(userInfo.getId()).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                final userInfo user = dataSnapshot.getValue(userInfo.class);
+                uNameTV.setText(user.getName());
+                uEmailTV.setText(user.getEmail());
+                uEmailTV.setText(user.getEmail());
+                storageReference.child("Photos").child(user.getId()).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                     @Override
                     public void onSuccess(Uri uri) {
                         Picasso.with(HomeActivity.this).load(uri)
@@ -133,12 +147,11 @@ public class HomeActivity extends AppCompatActivity
                         TextView userEmail = (TextView) dialog.findViewById(R.id.profileEmail);
                         TextView userContact = (TextView) dialog.findViewById(R.id.profileContact);
                         TextView userGender = (TextView) dialog.findViewById(R.id.profileGender);
-                        userName.setText(userInfo.getName());
-                        userContact.setText(userInfo.getContactNum());
-                        userEmail.setText(userInfo.getEmail());
-                        userGender.setText(userInfo.getGender());
-                        StorageReference storageReference = FirebaseStorage.getInstance().getReference();
-                        storageReference.child("Photos").child(userInfo.getId()).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                        userName.setText(user.getName());
+                        userContact.setText(user.getContactNum());
+                        userEmail.setText(user.getEmail());
+                        userGender.setText(user.getGender());
+                        storageReference.child("Photos").child(user.getId()).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                             @Override
                             public void onSuccess(Uri uri) {
                                 Picasso.with(dialog.getContext()).load(uri)
@@ -157,17 +170,28 @@ public class HomeActivity extends AppCompatActivity
             }
         });
 
-        databaseReference.child("Groups").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                final ArrayList<String> groupIds = showGroups(dataSnapshot);
-            }
+        databaseReference.child("Groups").
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
+                addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        final ArrayList<String> groupIds = showGroups(dataSnapshot);
+                    }
 
-            }
-        });
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+    }
+
+    protected synchronized void buildGoogleApiClient() {
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
+        mGoogleApiClient.connect();
     }
 
     private ArrayList<String> showGroups(DataSnapshot dataSnapshot) {
@@ -194,6 +218,7 @@ public class HomeActivity extends AppCompatActivity
     private void checkNetwork() {
         if (!IsNetworkAvailable()) {
             AlertDialog.Builder CheckBuilder = new AlertDialog.Builder(this);
+            CheckBuilder.setCancelable(false);
             CheckBuilder.setTitle("Error!");
             CheckBuilder.setMessage("Check Your Internet Connection!");
 
@@ -305,6 +330,61 @@ public class HomeActivity extends AppCompatActivity
         if (authListener != null) {
             auth.removeAuthStateListener(authListener);
         }
+        if (!mGoogleApiClient.isConnected()) {
+            buildGoogleApiClient();
+        }
+    }
+
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+
+        databaseReference.child("Users").child(currentUser.getUid()).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                final userInfo user = dataSnapshot.getValue(userInfo.class);
+                try {
+
+                    mLocationRequest = LocationRequest.create();
+                    mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+                    mLocationRequest.setFastestInterval(3000);
+                    mLocationRequest.setInterval(10000);
+                    if (ContextCompat.checkSelfPermission(getApplicationContext(),
+                            android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+
+                        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, new LocationListener() {
+                            @Override
+                            public void onLocationChanged(Location location) {
+                                userInfo user_Info = new userInfo(currentUser.getUid(), user.getName(), user.getContactNum(),
+                                        user.getGender(), user.getEmail(), location.getLatitude(), location.getLongitude());
+                                databaseReference.child("Users").child(currentUser.getUid()).setValue(user_Info);
+
+                            }
+
+                        });
+                    }
+
+                } catch (Exception e) {
+                    e.printStackTrace();
+
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
     }
 
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
@@ -340,7 +420,6 @@ public class HomeActivity extends AppCompatActivity
                     return "Private Posts";
                 case 1:
                     return "Public Meetups";
-
             }
             return null;
         }

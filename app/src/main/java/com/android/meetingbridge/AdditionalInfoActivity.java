@@ -25,7 +25,6 @@ import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationServices;
-import com.google.android.gms.maps.model.Marker;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
@@ -39,8 +38,7 @@ import com.squareup.picasso.Picasso;
 public class AdditionalInfoActivity extends PermissionClass implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
     private static final int GALLERY_INTENT = 2;
     private static final int REQUEST_PERMISSION = 10;
-    Location mLastLocation;
-    Marker mCurrLocationMarker;
+
     GoogleApiClient mGoogleApiClient;
     private EditText fullName, contactNo;
     private FirebaseUser user;

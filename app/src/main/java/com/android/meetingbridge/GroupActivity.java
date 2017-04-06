@@ -2,15 +2,19 @@ package com.android.meetingbridge;
 
 import android.app.Dialog;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Location;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
@@ -27,9 +31,14 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 import com.google.android.gms.tasks.OnSuccessListener;
@@ -46,7 +55,7 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
-public class GroupActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class GroupActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener {
 
     private String ABC;
     private FirebaseAuth auth;
@@ -60,17 +69,21 @@ public class GroupActivity extends AppCompatActivity implements NavigationView.O
     private Place destination;
     private DatabaseReference databaseReference;
     private ProgressBar progressBar;
+    private LocationRequest mLocationRequest;
+    private FirebaseUser currentUser;
+    private GoogleApiClient mGoogleApiClient;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_group);
         auth = FirebaseAuth.getInstance();
+        buildGoogleApiClient();
+        currentUser = FirebaseAuth.getInstance().getCurrentUser();
         authStateListener = new FirebaseAuth.AuthStateListener() {
             @Override
             public void onAuthStateChanged(@NonNull FirebaseAuth firebaseAuth) {
-                FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-                if (user == null) {
+                if (currentUser == null) {
                     startActivity(new Intent(GroupActivity.this, LoginActivity.class));
                     finish();
                 }
@@ -216,6 +229,81 @@ public class GroupActivity extends AppCompatActivity implements NavigationView.O
 
     }
 
+    protected synchronized void buildGoogleApiClient() {
+        mGoogleApiClient = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
+        mGoogleApiClient.connect();
+    }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+
+        databaseReference.child("Users").child(currentUser.getUid()).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                final userInfo user = dataSnapshot.getValue(userInfo.class);
+                databaseReference.child("Groups").addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot1) {
+                        final GroupInfo g = getCurrentGroup(dataSnapshot1);
+
+                        try {
+
+                            mLocationRequest = LocationRequest.create();
+                            mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+                            mLocationRequest.setInterval(10000);
+                            if (ContextCompat.checkSelfPermission(getApplicationContext(),
+                                    android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+
+                                LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, new LocationListener() {
+                                    @Override
+                                    public void onLocationChanged(Location location) {
+
+                                        userInfo user_Info = new userInfo(currentUser.getUid(), user.getName(), user.getContactNum(),
+                                                user.getGender(), user.getEmail(), location.getLatitude(), location.getLongitude());
+                                        for (int i = 0; i < g.getMembersList().size(); i++) {
+                                            if (currentUser.getEmail().equals(g.getMembersList().get(i).getEmail())) {
+                                                g.getMembersList().get(i).setLat(location.getLatitude());
+                                                g.getMembersList().get(i).setLng(location.getLongitude());
+                                            }
+                                        }
+                                        databaseReference.child("Groups").child(g.getGroupId()).setValue(g);
+                                        databaseReference.child("Users").child(currentUser.getUid()).setValue(user_Info);
+
+                                    }
+
+                                });
+                            }
+
+                        } catch (Exception e) {
+                            e.printStackTrace();
+
+                        }
+                    }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -236,6 +324,10 @@ public class GroupActivity extends AppCompatActivity implements NavigationView.O
 
                         Dialog dialog = new Dialog(GroupActivity.this);
                         dialog.setContentView(R.layout.locationlistlayout);
+
+                        if (dialog.isShowing()) {
+                            dialog.dismiss();
+                        }
                         progressBar = (ProgressBar) dialog.findViewById(R.id.progressBar);
                         progressBar.setVisibility(View.VISIBLE);
                         dialog.setTitle(g.getGroupName());
@@ -389,6 +481,11 @@ public class GroupActivity extends AppCompatActivity implements NavigationView.O
         if (authStateListener != null) {
             auth.removeAuthStateListener(authStateListener);
         }
+    }
+
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
     }
 
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
