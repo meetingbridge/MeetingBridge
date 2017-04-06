@@ -194,23 +194,26 @@ public class PostListAdapter extends BaseAdapter {
                                 .addValueEventListener(new ValueEventListener() {
                                     @Override
                                     public void onDataChange(DataSnapshot dataSnapshot) {
-                                        final ArrayList<CommentInfo> commentInfos = new ArrayList<>();
-
-                                        for (DataSnapshot data : dataSnapshot.getChildren()) {
-                                            CommentInfo c = data.getValue(CommentInfo.class);
-                                            commentInfos.add(c);
+                                        final ArrayList<CommentInfo> commentInfos;
+                                        if (mPostList.get(i).getPostType().equals("2")) {
+                                            if (mPostList.get(i).getHost().getEmail().equals(user.getEmail())) {
+                                                commentInfos = fetchComments(dataSnapshot);
+                                            } else {
+                                                commentInfos = fetchSecretComments(dataSnapshot, user, mPostList.get(i).getHost());
+                                            }
+                                        } else {
+                                            commentInfos = fetchComments(dataSnapshot);
                                         }
                                         commentLV.setAdapter(makeAdapter(v.getContext(), commentInfos));
-
                                         postCommentButton.setOnClickListener(new View.OnClickListener() {
                                             @Override
                                             public void onClick(final View v) {
-                                                commentInfos.add(0, new CommentInfo(currentTime, user, commentBox.getText().toString(), mPostList.get(i).getGroupInfo()));
+                                                CommentInfo commentInfo = new CommentInfo(currentTime, user, commentBox.getText().toString(), mPostList.get(i).getGroupInfo());
+
                                                 databaseReference.child("Comments")
                                                         .child(mPostList.get(i).getGroupInfo().getGroupId())
-                                                        .child(mPostList.get(i).getPostId()).setValue(commentInfos);
+                                                        .child(mPostList.get(i).getPostId()).push().setValue(commentInfo);
                                                 commentBox.setText("");
-                                                commentLV.setAdapter(makeAdapter(v.getContext(), commentInfos));
                                                 commentLV.setOnItemClickListener(new AdapterView.OnItemClickListener() {
                                                     @Override
                                                     public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -262,6 +265,28 @@ public class PostListAdapter extends BaseAdapter {
         });
 
         return v;
+    }
+
+    private ArrayList<CommentInfo> fetchComments(DataSnapshot dataSnapshot) {
+        final ArrayList<CommentInfo> commentInfos = new ArrayList<>();
+
+        for (DataSnapshot data : dataSnapshot.getChildren()) {
+            CommentInfo c = data.getValue(CommentInfo.class);
+            commentInfos.add(0, c);
+        }
+        return commentInfos;
+    }
+
+    private ArrayList<CommentInfo> fetchSecretComments(DataSnapshot dataSnapshot, userInfo user, userInfo host) {
+        final ArrayList<CommentInfo> commentInfos = new ArrayList<>();
+
+        for (DataSnapshot data : dataSnapshot.getChildren()) {
+            CommentInfo c = data.getValue(CommentInfo.class);
+            if (c.getHost().getEmail().equals(user.getEmail()) || c.getHost().getEmail().equals(host.getEmail())) {
+                commentInfos.add(0, c);
+            }
+        }
+        return commentInfos;
     }
 
     private CommentListAdapter makeAdapter(Context context, ArrayList<CommentInfo> commentInfos) {

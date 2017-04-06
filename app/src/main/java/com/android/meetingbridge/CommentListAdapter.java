@@ -51,13 +51,18 @@ public class CommentListAdapter extends BaseAdapter {
         v.setTag(mCommentList.get(i).getCommentDescription());
         final ImageView hostIcon = (ImageView) v.findViewById(R.id.hostIcon);
         StorageReference storageReference = FirebaseStorage.getInstance().getReference();
-        storageReference.child("Photos").child(mCommentList.get(i).getHost().getId()).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-            @Override
-            public void onSuccess(Uri uri) {
-                Picasso.with(v.getContext()).load(uri)
-                        .resize(200, 200).centerCrop().into(hostIcon);
-            }
-        });
+
+        try {
+            storageReference.child("Photos").child(mCommentList.get(i).getHost().getId()).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                @Override
+                public void onSuccess(Uri uri) {
+                    Picasso.with(v.getContext()).load(uri)
+                            .resize(200, 200).centerCrop().into(hostIcon);
+                }
+            });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         return v;
     }

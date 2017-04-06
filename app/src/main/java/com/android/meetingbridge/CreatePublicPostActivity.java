@@ -121,6 +121,7 @@ public class CreatePublicPostActivity extends AppCompatActivity {
                                         addID(dataSnapshot);
                                         progressBar.setVisibility(View.GONE);
                                         startActivity(new Intent(CreatePublicPostActivity.this, HomeActivity.class));
+                                        finish();
                                     }
 
                                     @Override
