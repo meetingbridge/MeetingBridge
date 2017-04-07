@@ -218,7 +218,7 @@ public class DiscussionFragment extends Fragment implements GoogleApiClient.Conn
                                             }
 
                                         });
-                                    }
+                                    }//
                                 }
                             } catch (Exception e) {
                                 e.printStackTrace();
