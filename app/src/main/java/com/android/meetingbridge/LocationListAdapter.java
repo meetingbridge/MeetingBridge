@@ -10,7 +10,6 @@ import android.view.ViewGroup;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
@@ -108,7 +107,7 @@ public class LocationListAdapter extends BaseAdapter {
 
         } catch (IOException e) {
             e.printStackTrace();
-            Toast.makeText(mContext, e.getMessage(), Toast.LENGTH_SHORT).show();
+            // Toast.makeText(mContext, e.getMessage(), Toast.LENGTH_SHORT).show();
         }
         return null;
     }

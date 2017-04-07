@@ -1,11 +1,16 @@
 package com.android.meetingbridge;
 
 import android.Manifest;
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
+import android.location.LocationManager;
 import android.net.Uri;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
@@ -128,30 +133,66 @@ public class AdditionalInfoActivity extends PermissionClass implements GoogleApi
                     return;
                 }
                 progressBar.setVisibility(View.VISIBLE);
+                LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+                boolean gps_enabled = false;
+                boolean network_enabled = false;
 
-                mLocationRequest = new LocationRequest();
-                mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-                if (ContextCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                    LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, new LocationListener() {
+                try {
+                    gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+
+                try {
+                    network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+                if (!gps_enabled && !network_enabled) {
+                    AlertDialog.Builder dialog = new AlertDialog.Builder(getApplicationContext());
+                    dialog.setMessage("Location Services not enabled!");
+                    dialog.setPositiveButton("Enable Location Services", new DialogInterface.OnClickListener() {
                         @Override
-                        public void onLocationChanged(Location location) {
-                            userInfo user_Info = new userInfo(user.getUid(), name, contact, gender, email, location.getLatitude(), location.getLongitude());
-                            databaseReference.child("Users").child(user.getUid()).setValue(user_Info).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                @Override
-                                public void onComplete(@NonNull Task<Void> task) {
-                                    if (!task.isSuccessful()) {
-                                        Toast.makeText(AdditionalInfoActivity.this, "oops", Toast.LENGTH_SHORT).show();
-                                    } else {
-                                        progressBar.setVisibility(View.GONE);
-                                        Toast.makeText(AdditionalInfoActivity.this, "Great " + name + "! Your Profile has been Updated", Toast.LENGTH_SHORT).show();
-                                        startActivity(new Intent(AdditionalInfoActivity.this, HomeActivity.class));
-                                    }
-                                }
-                            });
+                        public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                            Intent myIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                            startActivity(myIntent);
+                            //get gps
                         }
                     });
+                    dialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+
+                        @Override
+                        public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                            // TODO Auto-generated method stub
+
+                        }
+                    });
+                    dialog.show();
                 } else {
-                    Toast.makeText(getApplicationContext(), "Allow Application to Check your Location!", Toast.LENGTH_LONG).show();
+                    mLocationRequest = new LocationRequest();
+                    mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+                    if (ContextCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, new LocationListener() {
+                            @Override
+                            public void onLocationChanged(Location location) {
+                                userInfo user_Info = new userInfo(user.getUid(), name, contact, gender, email, location.getLatitude(), location.getLongitude());
+                                databaseReference.child("Users").child(user.getUid()).setValue(user_Info).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                    @Override
+                                    public void onComplete(@NonNull Task<Void> task) {
+                                        if (!task.isSuccessful()) {
+                                            Toast.makeText(AdditionalInfoActivity.this, "oops", Toast.LENGTH_SHORT).show();
+                                        } else {
+                                            progressBar.setVisibility(View.GONE);
+                                            Toast.makeText(AdditionalInfoActivity.this, "Great " + name + "! Your Profile has been Updated", Toast.LENGTH_SHORT).show();
+                                            startActivity(new Intent(AdditionalInfoActivity.this, HomeActivity.class));
+                                        }
+                                    }
+                                });
+                            }
+                        });
+                    } else {
+                        Toast.makeText(getApplicationContext(), "Allow Application to Check your Location!", Toast.LENGTH_LONG).show();
+                    }
                 }
             }
         });
