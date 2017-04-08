@@ -187,13 +187,14 @@ public class HomeActivity extends AppCompatActivity
                 Toast.makeText(HomeActivity.this, databaseError.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
-
+//getNavPopulated
         databaseReference.child("Groups").
 
                 addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
-                        final ArrayList<String> groupIds = showGroups(dataSnapshot);
+                        subMenu.clear();
+                        getUserGroups(dataSnapshot);
                     }
 
                     @Override
@@ -212,9 +213,9 @@ public class HomeActivity extends AppCompatActivity
         mGoogleApiClient.connect();
     }
 
-    private ArrayList<String> showGroups(DataSnapshot dataSnapshot) {
+    private ArrayList<GroupInfo> getUserGroups(DataSnapshot dataSnapshot) {
         ArrayList<String> groupNames = new ArrayList<>();
-        ArrayList<String> groupIds = new ArrayList<>();
+        ArrayList<GroupInfo> groupInfos = new ArrayList<>();
         for (DataSnapshot data : dataSnapshot.getChildren()) {
             GroupInfo g = data.getValue(GroupInfo.class);
             ArrayList<userInfo> users = g.getMembersList();
@@ -222,7 +223,7 @@ public class HomeActivity extends AppCompatActivity
             for (int i = 0; i < users.size(); i++) {
                 if (FirebaseAuth.getInstance().getCurrentUser().getEmail().equals(users.get(i).getEmail())) {
                     groupNames.add(g.getGroupName());
-                    groupIds.add(g.getGroupId());
+                    groupInfos.add(g);
                 }
             }
         }
@@ -230,7 +231,7 @@ public class HomeActivity extends AppCompatActivity
         for (int i = 0; i < groupNames.size(); i++) {
             subMenu.add(i, i, i, groupNames.get(i));
         }
-        return groupIds;
+        return groupInfos;
     }
 
     private void checkNetwork() {
@@ -352,76 +353,99 @@ public class HomeActivity extends AppCompatActivity
         }
     }
 
-
     @Override
     public void onConnected(@Nullable Bundle bundle) {
+
 
         databaseReference.child("Users").child(currentUser.getUid()).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 final userInfo user = dataSnapshot.getValue(userInfo.class);
-                try {
-                    LocationManager lm = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
-                    boolean gps_enabled = false;
-                    boolean network_enabled = false;
+                databaseReference.child("Groups").addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot1) {
+                        final ArrayList<GroupInfo> groupInfos = getUserGroups(dataSnapshot1);
 
-                    try {
-                        gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                    }
+                        try {
+                            LocationManager lm = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
+                            boolean gps_enabled = false;
+                            boolean network_enabled = false;
 
-                    try {
-                        network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                    }
-                    if (!gps_enabled && !network_enabled) {
-                        AlertDialog.Builder dialog = new AlertDialog.Builder(getApplicationContext());
-                        dialog.setMessage("Location Services not enabled!");
-                        dialog.setCancelable(false);
-                        dialog.setPositiveButton("Enable Location Services", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface paramDialogInterface, int paramInt) {
-                                Intent myIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                                startActivity(myIntent);
-                                //get gps
+                            try {
+                                gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+                            } catch (Exception ex) {
+                                ex.printStackTrace();
                             }
-                        });
-                        dialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
 
-                            @Override
-                            public void onClick(DialogInterface paramDialogInterface, int paramInt) {
-                                // TODO Auto-generated method stub
-
+                            try {
+                                network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+                            } catch (Exception ex) {
+                                ex.printStackTrace();
                             }
-                        });
-                        dialog.show();
-                    } else {
+                            if (!gps_enabled && !network_enabled) {
+                                android.app.AlertDialog.Builder dialog = new android.app.AlertDialog.Builder(getApplicationContext());
+                                dialog.setMessage("Location Services not enabled!");
+                                dialog.setCancelable(false);
+                                dialog.setPositiveButton("Enable Location Services", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                                        Intent myIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                                        startActivity(myIntent);
+                                        //get gps
+                                    }
+                                });
+                                dialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
 
-                        mLocationRequest = LocationRequest.create();
-                        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-                        mLocationRequest.setFastestInterval(3000);
-                        mLocationRequest.setInterval(10000);
-                        if (ContextCompat.checkSelfPermission(getApplicationContext(),
-                                android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                                    @Override
+                                    public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                                        // TODO Auto-generated method stub
 
-                            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, new LocationListener() {
-                                @Override
-                                public void onLocationChanged(Location location) {
-                                    userInfo user_Info = new userInfo(currentUser.getUid(), user.getName(), user.getContactNum(),
-                                            user.getGender(), user.getEmail(), location.getLatitude(), location.getLongitude());
-                                    databaseReference.child("Users").child(currentUser.getUid()).setValue(user_Info);
+                                    }
+                                });
+                                dialog.show();
+                            } else {
 
-                                }
+                                mLocationRequest = LocationRequest.create();
+                                mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+                                mLocationRequest.setInterval(10000);
+                                if (ContextCompat.checkSelfPermission(getApplicationContext(),
+                                        android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 
-                            });
+                                    LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, new LocationListener() {
+                                        @Override
+                                        public void onLocationChanged(Location location) {
+
+                                            userInfo user_Info = new userInfo(currentUser.getUid(), user.getName(), user.getContactNum(),
+                                                    user.getGender(), user.getEmail(), location.getLatitude(), location.getLongitude());
+                                            for (int j = 0; j < groupInfos.size(); j++) {
+                                                for (int i = 0; i < groupInfos.get(j).getMembersList().size(); i++) {
+                                                    if (currentUser.getEmail().equals(groupInfos.get(j).getMembersList().get(i).getEmail())) {
+                                                        groupInfos.get(j).getMembersList().get(i).setLat(location.getLatitude());
+                                                        groupInfos.get(j).getMembersList().get(i).setLng(location.getLongitude());
+                                                    }
+                                                }
+                                                databaseReference.child("Groups").child(groupInfos.get(j).getGroupId()).setValue(groupInfos.get(j));
+                                            }
+                                            databaseReference.child("Users").child(currentUser.getUid()).setValue(user_Info);
+
+                                        }
+
+                                    });
+                                }//
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+
                         }
                     }
-                } catch (Exception e) {
-                    e.printStackTrace();
 
-                }
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
+
             }
 
             @Override
