@@ -3,11 +3,13 @@ package com.android.meetingbridge;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -35,7 +37,8 @@ public class PublicPostFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
-        View rootView = inflater.inflate(R.layout.fragment_public_post, container, false);
+
+        final View rootView = inflater.inflate(R.layout.fragment_public_post, container, false);
         Button button = (Button) rootView.findViewById(R.id.newPublicMeetup);
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -44,6 +47,8 @@ public class PublicPostFragment extends Fragment {
             }
         });
         final ListView postListView = (ListView) rootView.findViewById(R.id.postListView);
+
+
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
         databaseReference.child("publicmeetup").addValueEventListener(new ValueEventListener() {
             @Override
@@ -83,6 +88,15 @@ public class PublicPostFragment extends Fragment {
             postInfos.add(0, postInfo);
         }
         return postInfos;
+    }
+
+    private TextView emptyView() {
+        TextView emptyView = new TextView(getActivity());
+        emptyView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+        emptyView.setText("Public Meetups will appear here!");
+        emptyView.setTextColor(getResources().getColor(R.color.colorPrimaryDark));
+        emptyView.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL);
+        return emptyView;
     }
 
     private boolean searchArray(String postId, ArrayList<PostInfo> postInfos) {

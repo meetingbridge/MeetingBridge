@@ -1,7 +1,12 @@
 package com.android.meetingbridge;
 
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.View;
@@ -35,6 +40,7 @@ public class CreateGroupActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.content_create_group);
+        checkNetwork();
 
         databaseReference = FirebaseDatabase.getInstance().getReference();
         selectedUsersLV = (ListView) findViewById(R.id.selectedUsers);
@@ -63,7 +69,7 @@ public class CreateGroupActivity extends AppCompatActivity {
         searchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                checkNetwork();
                 databaseReference.child("Users").addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
@@ -81,37 +87,80 @@ public class CreateGroupActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 GroupInfo groupInfo = new GroupInfo();
+                if (isNetworkAvailable()) {
+                    groupInfo.setGroupName(gName.getText().toString());
+                    groupInfo.setMembersList(selectedMembers);
+                    groupInfo.setGroupId("1");
+                    progressBar.setVisibility(View.VISIBLE);
 
-                groupInfo.setGroupName(gName.getText().toString());
-                groupInfo.setMembersList(selectedMembers);
-                groupInfo.setGroupId("1");
-                progressBar.setVisibility(View.VISIBLE);
+                    databaseReference.child("Groups").push().setValue(groupInfo).addOnSuccessListener(new OnSuccessListener<Void>() {
+                        @Override
+                        public void onSuccess(Void aVoid) {
+                            Toast.makeText(CreateGroupActivity.this, "Group Created! Open it from Drawer!", Toast.LENGTH_SHORT).show();
+                            startActivity(new Intent(CreateGroupActivity.this, HomeActivity.class));
+                            progressBar.setVisibility(View.GONE);
+                            finish();
+                        }
+                    });
 
-                databaseReference.child("Groups").push().setValue(groupInfo).addOnSuccessListener(new OnSuccessListener<Void>() {
-                    @Override
-                    public void onSuccess(Void aVoid) {
-                        Toast.makeText(CreateGroupActivity.this, "Group Created! Open it from Drawer!", Toast.LENGTH_SHORT).show();
-                        startActivity(new Intent(CreateGroupActivity.this, HomeActivity.class));
-                        progressBar.setVisibility(View.GONE);
-                        finish();
-                    }
-                });
+                    databaseReference.child("Groups").addValueEventListener(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            addID(dataSnapshot);
+                        }
 
-                databaseReference.child("Groups").addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        addID(dataSnapshot);
-                    }
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
 
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
-                    }
-                });
+                        }
+                    });
+                } else {
+                    checkNetwork();
+                }
             }
         });
+
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+
         setSupportActionBar(toolbar);
+    }
+
+    private void checkNetwork() {
+        if (!isNetworkAvailable()) {
+            AlertDialog.Builder CheckBuilder = new AlertDialog.Builder(this);
+            CheckBuilder.setCancelable(false);
+            CheckBuilder.setTitle("Error!");
+            CheckBuilder.setMessage("Check Your Internet Connection!");
+
+            CheckBuilder.setPositiveButton("Retry", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+
+                    Intent intent = getIntent();
+                    finish();
+                    startActivity(intent);
+                }
+            });
+            CheckBuilder.setNegativeButton("Exit", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    finish();
+                }
+            });
+            AlertDialog alert = CheckBuilder.create();
+            alert.show();
+        } else {
+            if (isNetworkAvailable()) {
+                //Toast.makeText(this, "Internet Available", Toast.LENGTH_SHORT).show();
+            }
+        }
+
+    }
+
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null;
     }
 
     private void addUsersInGroup(DataSnapshot dataSnapshot) {

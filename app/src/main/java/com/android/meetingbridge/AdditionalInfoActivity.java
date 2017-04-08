@@ -8,6 +8,8 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
@@ -60,6 +62,7 @@ public class AdditionalInfoActivity extends PermissionClass implements GoogleApi
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         buildGoogleApiClient();
+        checkNetwork();
         requestAppPermission(new String[]
                         {android.Manifest.permission.READ_CONTACTS,
                                 Manifest.permission.READ_EXTERNAL_STORAGE,
@@ -110,7 +113,7 @@ public class AdditionalInfoActivity extends PermissionClass implements GoogleApi
         submit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
+                checkNetwork();
                 final String name = fullName.getText().toString().trim();
                 final String contact = contactNo.getText().toString().trim();
                 final String email = user.getEmail();
@@ -242,5 +245,42 @@ public class AdditionalInfoActivity extends PermissionClass implements GoogleApi
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
+    }
+
+    private void checkNetwork() {
+        if (!IsNetworkAvailable()) {
+            android.support.v7.app.AlertDialog.Builder CheckBuilder = new android.support.v7.app.AlertDialog.Builder(this);
+            CheckBuilder.setCancelable(false);
+            CheckBuilder.setTitle("Error!");
+            CheckBuilder.setMessage("Check Your Internet Connection!");
+
+            CheckBuilder.setPositiveButton("Retry", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+
+                    Intent intent = getIntent();
+                    finish();
+                    startActivity(intent);
+                }
+            });
+            CheckBuilder.setNegativeButton("Exit", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    finish();
+                }
+            });
+            android.support.v7.app.AlertDialog alert = CheckBuilder.create();
+            alert.show();
+        } else if (IsNetworkAvailable()) {
+            //Toast.makeText(this, "Internet Available", Toast.LENGTH_SHORT).show();
+
+        }
+
+    }
+
+    private boolean IsNetworkAvailable() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null;
     }
 }

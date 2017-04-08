@@ -79,6 +79,7 @@ public class LoginActivity extends PermissionClass {
         btnlogin.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                checkNetwork();
                 String email = etEmail.getText().toString();
                 final String password = etPassword.getText().toString();
 
@@ -99,7 +100,7 @@ public class LoginActivity extends PermissionClass {
                             if (password.length() < 6) {
                                 etPassword.setError("Password too short, enter minimum 8 characters");
                             } else {
-                                Toast.makeText(LoginActivity.this, "Authentication Failed", Toast.LENGTH_LONG).show();
+                                Toast.makeText(LoginActivity.this, task.getResult().toString(), Toast.LENGTH_LONG).show();
                             }
                         } else {
                             startActivity(new Intent(LoginActivity.this, HomeActivity.class));
@@ -119,7 +120,7 @@ public class LoginActivity extends PermissionClass {
     }
 
     private void checkNetwork() {
-        if (!IsNetworkAvailable()) {
+        if (!isNetworkAvailable()) {
             AlertDialog.Builder CheckBuilder = new AlertDialog.Builder(this);
             CheckBuilder.setTitle("Error!");
             CheckBuilder.setMessage("Check Your Internet Connection!");
@@ -143,14 +144,14 @@ public class LoginActivity extends PermissionClass {
             AlertDialog alert = CheckBuilder.create();
             alert.show();
         } else {
-            if (IsNetworkAvailable()) {
-                Toast.makeText(this, "Internet Available", Toast.LENGTH_SHORT).show();
+            if (isNetworkAvailable()) {
+                // Toast.makeText(this, "Internet Available", Toast.LENGTH_SHORT).show();
             }
         }
 
     }
 
-    private boolean IsNetworkAvailable() {
+    private boolean isNetworkAvailable() {
         ConnectivityManager connectivityManager = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
         return activeNetworkInfo != null;

@@ -1,7 +1,11 @@
 package com.android.meetingbridge;
 
 import android.app.Dialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -15,6 +19,7 @@ import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
@@ -68,7 +73,7 @@ public class GroupActivity extends AppCompatActivity implements NavigationView.O
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_group);
         auth = FirebaseAuth.getInstance();
-
+        checkNetwork();
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         authStateListener = new FirebaseAuth.AuthStateListener() {
             @Override
@@ -84,6 +89,7 @@ public class GroupActivity extends AppCompatActivity implements NavigationView.O
         databaseReference.child("Groups").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+                subMenu.clear();
                 getNavPopulated(dataSnapshot);
             }
 
@@ -119,8 +125,10 @@ public class GroupActivity extends AppCompatActivity implements NavigationView.O
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
                 if (position == 2) {
                     fab.show();
+                    checkNetwork();
                     Toast.makeText(getApplicationContext(), "Tap Direction Button", Toast.LENGTH_SHORT).show();
                 } else {
+                    checkNetwork();
                     fab.hide();
                 }
             }
@@ -129,14 +137,16 @@ public class GroupActivity extends AppCompatActivity implements NavigationView.O
             public void onPageSelected(int position) {
                 if (position == 2) {
                     fab.show();
+                    checkNetwork();
                 } else {
+                    checkNetwork();
                     fab.hide();
                 }
             }
 
             @Override
             public void onPageScrollStateChanged(int state) {
-
+                checkNetwork();
             }
         });
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
@@ -265,7 +275,6 @@ public class GroupActivity extends AppCompatActivity implements NavigationView.O
         }
     }
 
-
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
@@ -278,6 +287,7 @@ public class GroupActivity extends AppCompatActivity implements NavigationView.O
         } else if (id == R.id.homeActivity) {
             Intent intent = new Intent(GroupActivity.this, HomeActivity.class);
             startActivity(intent);
+            finish();
         } else if (id == R.id.nav_slideshow) {
 
         } else if (id == R.id.nav_manage) {
@@ -310,6 +320,44 @@ public class GroupActivity extends AppCompatActivity implements NavigationView.O
         }
     }
 
+    private void checkNetwork() {
+        if (!IsNetworkAvailable()) {
+            AlertDialog.Builder CheckBuilder = new AlertDialog.Builder(this);
+            CheckBuilder.setCancelable(false);
+            CheckBuilder.setTitle("Error!");
+            CheckBuilder.setMessage("Check Your Internet Connection!");
+
+            CheckBuilder.setPositiveButton("Retry", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+
+                    Intent intent = getIntent();
+                    finish();
+                    startActivity(intent);
+                }
+            });
+            CheckBuilder.setNegativeButton("Exit", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    finish();
+                }
+            });
+            AlertDialog alert = CheckBuilder.create();
+            alert.show();
+        } else {
+            if (IsNetworkAvailable()) {
+                // Toast.makeText(this, "Internet Available", Toast.LENGTH_SHORT).show();
+            }
+        }
+
+    }
+
+    private boolean IsNetworkAvailable() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null;
+    }
+
     private GroupInfo getCurrentGroup(DataSnapshot dataSnapshot) {
         ArrayList<GroupInfo> groupInfos = new ArrayList<>();
         for (DataSnapshot data : dataSnapshot.getChildren()) {
@@ -332,6 +380,7 @@ public class GroupActivity extends AppCompatActivity implements NavigationView.O
     }
 
     private void getNavPopulated(DataSnapshot dataSnapshot) {
+        subMenu.clear();
         ArrayList<GroupInfo> groupInfos = new ArrayList<>();
         ArrayList<String> groupNames = new ArrayList<>();
         for (DataSnapshot data : dataSnapshot.getChildren()) {
@@ -339,7 +388,7 @@ public class GroupActivity extends AppCompatActivity implements NavigationView.O
             ArrayList<userInfo> userInfos = g.getMembersList();
 
             for (int i = 0; i < userInfos.size(); i++) {
-                if (FirebaseAuth.getInstance().getCurrentUser().getEmail().equals(userInfos.get(i).getEmail())) {
+                if (FirebaseAuth.getInstance().getCurrentUser().getEmail().equals(userInfos.get(i).getEmail()) && !searchArray(g, groupInfos)) {
                     groupInfos.add(g);
                     groupNames.add(g.getGroupName());
                 }
@@ -355,6 +404,15 @@ public class GroupActivity extends AppCompatActivity implements NavigationView.O
             setTitle(ABC);
         }
 
+    }
+
+    private boolean searchArray(GroupInfo g, ArrayList<GroupInfo> groupInfos) {
+        for (int i = 0; i < groupInfos.size(); i++) {
+            if (groupInfos.get(i).getGroupId().equals(g.getGroupId())) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

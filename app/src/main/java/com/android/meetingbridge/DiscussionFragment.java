@@ -175,6 +175,7 @@ public class DiscussionFragment extends Fragment implements GoogleApiClient.Conn
                                 if (!gps_enabled && !network_enabled) {
                                     AlertDialog.Builder dialog = new AlertDialog.Builder(getActivity());
                                     dialog.setMessage("Location Services not enabled!");
+                                    dialog.setCancelable(false);
                                     dialog.setPositiveButton("Enable Location Services", new DialogInterface.OnClickListener() {
                                         @Override
                                         public void onClick(DialogInterface paramDialogInterface, int paramInt) {

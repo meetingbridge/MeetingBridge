@@ -1,8 +1,13 @@
 package com.android.meetingbridge;
 
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.text.TextUtils;
 import android.view.View;
@@ -30,7 +35,7 @@ public class SignupActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_signup);
-
+        checkNetwork();
         auth = FirebaseAuth.getInstance();
         progressBar = (ProgressBar) findViewById(R.id.progressBar);
 
@@ -62,7 +67,7 @@ public class SignupActivity extends AppCompatActivity {
             public void onClick(View v) {
                 String email = etEmail.getText().toString();
                 String password = etPassword.getText().toString();
-
+                checkNetwork();
                 if (TextUtils.isEmpty(email)) {
                     Toast.makeText(SignupActivity.this, "Enter email address!", Toast.LENGTH_SHORT).show();
                     return;
@@ -82,7 +87,7 @@ public class SignupActivity extends AppCompatActivity {
                     public void onComplete(@NonNull Task<AuthResult> task) {
 
                         if (!task.isSuccessful()) {
-                            Toast.makeText(SignupActivity.this, "Wrong Email or User may exists already with this email", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(SignupActivity.this, task.getResult().toString(), Toast.LENGTH_SHORT).show();
                         } else {
                             Toast.makeText(SignupActivity.this, "Account Created", Toast.LENGTH_SHORT).show();
                             startActivity(new Intent(SignupActivity.this, AdditionalInfoActivity.class));
@@ -94,6 +99,44 @@ public class SignupActivity extends AppCompatActivity {
 
         });
 
+    }
+
+    private void checkNetwork() {
+        if (!isNetworkAvailable()) {
+            AlertDialog.Builder CheckBuilder = new AlertDialog.Builder(this);
+            CheckBuilder.setCancelable(false);
+            CheckBuilder.setTitle("Error!");
+            CheckBuilder.setMessage("Check Your Internet Connection!");
+
+            CheckBuilder.setPositiveButton("Retry", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+
+                    Intent intent = getIntent();
+                    finish();
+                    startActivity(intent);
+                }
+            });
+            CheckBuilder.setNegativeButton("Exit", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialogInterface, int i) {
+                    finish();
+                }
+            });
+            AlertDialog alert = CheckBuilder.create();
+            alert.show();
+        } else {
+            if (isNetworkAvailable()) {
+                //Toast.makeText(this, "Internet Available", Toast.LENGTH_SHORT).show();
+            }
+        }
+
+    }
+
+    private boolean isNetworkAvailable() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null;
     }
 }
 

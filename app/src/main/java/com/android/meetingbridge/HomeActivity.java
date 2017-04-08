@@ -100,6 +100,22 @@ public class HomeActivity extends AppCompatActivity
 
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
+        mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+            @Override
+            public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+                checkNetwork();
+            }
+
+            @Override
+            public void onPageSelected(int position) {
+                checkNetwork();
+            }
+
+            @Override
+            public void onPageScrollStateChanged(int state) {
+                checkNetwork();
+            }
+        });
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
@@ -243,7 +259,7 @@ public class HomeActivity extends AppCompatActivity
             alert.show();
         } else {
             if (IsNetworkAvailable()) {
-                Toast.makeText(this, "Internet Available", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(this, "Internet Available", Toast.LENGTH_SHORT).show();
             }
         }
 
@@ -253,7 +269,6 @@ public class HomeActivity extends AppCompatActivity
         ConnectivityManager connectivityManager = (ConnectivityManager) this.getSystemService(Context.CONNECTIVITY_SERVICE);
         NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
         return activeNetworkInfo != null;
-
     }
 
 
@@ -362,8 +377,9 @@ public class HomeActivity extends AppCompatActivity
                         ex.printStackTrace();
                     }
                     if (!gps_enabled && !network_enabled) {
-                        android.app.AlertDialog.Builder dialog = new android.app.AlertDialog.Builder(getApplicationContext());
+                        AlertDialog.Builder dialog = new AlertDialog.Builder(getApplicationContext());
                         dialog.setMessage("Location Services not enabled!");
+                        dialog.setCancelable(false);
                         dialog.setPositiveButton("Enable Location Services", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface paramDialogInterface, int paramInt) {
