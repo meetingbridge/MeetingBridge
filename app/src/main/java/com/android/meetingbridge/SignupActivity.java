@@ -65,7 +65,7 @@ public class SignupActivity extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
-                String email = etEmail.getText().toString();
+                String email = etEmail.getText().toString().toLowerCase();
                 String password = etPassword.getText().toString();
                 checkNetwork();
                 if (TextUtils.isEmpty(email)) {
@@ -77,7 +77,7 @@ public class SignupActivity extends AppCompatActivity {
                     return;
                 }
 
-                if (password.length() < 6) {
+                if (password.length() < 8) {
                     Toast.makeText(SignupActivity.this, "Password too short, enter minimum 8 characters!", Toast.LENGTH_SHORT).show();
                     return;
                 }

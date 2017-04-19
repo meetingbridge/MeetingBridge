@@ -37,7 +37,7 @@ public class LoginActivity extends PermissionClass {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        checkNetwork();
+
 
         requestAppPermission(new String[]
                         {Manifest.permission.READ_CONTACTS,
@@ -54,6 +54,7 @@ public class LoginActivity extends PermissionClass {
             startActivity(new Intent(LoginActivity.this, HomeActivity.class));
             finish();
         }
+        checkNetwork();
         etEmail = (EditText) findViewById(R.id.email);
         etPassword = (EditText) findViewById(R.id.password);
         btnlogin = (Button) findViewById(R.id.btnLogin);

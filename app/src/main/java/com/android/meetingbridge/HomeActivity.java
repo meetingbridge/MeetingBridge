@@ -11,6 +11,7 @@ import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Looper;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -142,9 +143,14 @@ public class HomeActivity extends AppCompatActivity
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 final userInfo user = dataSnapshot.getValue(userInfo.class);
-                uNameTV.setText(user.getName());
-                uEmailTV.setText(user.getEmail());
-                uEmailTV.setText(user.getEmail());
+                if (user.getName() == null) {
+                    startActivity(new Intent(getApplicationContext(), AdditionalInfoActivity.class));
+                    finish();
+                } else {
+                    uNameTV.setText(user.getName());
+                    uEmailTV.setText(user.getEmail());
+                    uEmailTV.setText(user.getEmail());
+                }
                 storageReference.child("Photos").child(user.getId()).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                     @Override
                     public void onSuccess(Uri uri) {
@@ -221,9 +227,14 @@ public class HomeActivity extends AppCompatActivity
             ArrayList<userInfo> users = g.getMembersList();
 
             for (int i = 0; i < users.size(); i++) {
-                if (FirebaseAuth.getInstance().getCurrentUser().getEmail().equals(users.get(i).getEmail())) {
-                    groupNames.add(g.getGroupName());
-                    groupInfos.add(g);
+                try {
+
+                    if (FirebaseAuth.getInstance().getCurrentUser().getEmail().equals(users.get(i).getEmail())) {
+                        groupNames.add(g.getGroupName());
+                        groupInfos.add(g);
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
         }
@@ -231,6 +242,7 @@ public class HomeActivity extends AppCompatActivity
         for (int i = 0; i < groupNames.size(); i++) {
             subMenu.add(i, i, i, groupNames.get(i));
         }
+
         return groupInfos;
     }
 
@@ -364,6 +376,7 @@ public class HomeActivity extends AppCompatActivity
                 databaseReference.child("Groups").addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot1) {
+
                         final ArrayList<GroupInfo> groupInfos = getUserGroups(dataSnapshot1);
 
                         try {
@@ -404,34 +417,33 @@ public class HomeActivity extends AppCompatActivity
                                 });
                                 dialog.show();
                             } else {
+                                Thread thread = new Thread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        mLocationRequest = LocationRequest.create();
+                                        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+                                        mLocationRequest.setInterval(10000);
+                                        if (ContextCompat.checkSelfPermission(getApplicationContext(),
+                                                android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 
-                                mLocationRequest = LocationRequest.create();
-                                mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-                                mLocationRequest.setInterval(10000);
-                                if (ContextCompat.checkSelfPermission(getApplicationContext(),
-                                        android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                                            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, new LocationListener() {
+                                                @Override
+                                                public void onLocationChanged(Location location) {
 
-                                    LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, new LocationListener() {
-                                        @Override
-                                        public void onLocationChanged(Location location) {
+                                                    userInfo user_Info = new userInfo(currentUser.getUid(), user.getName(), user.getContactNum(),
+                                                            user.getGender(), user.getEmail(), location.getLatitude(), location.getLongitude());
+                                                    databaseReference.child("Users").child(currentUser.getUid()).setValue(user_Info);
 
-                                            userInfo user_Info = new userInfo(currentUser.getUid(), user.getName(), user.getContactNum(),
-                                                    user.getGender(), user.getEmail(), location.getLatitude(), location.getLongitude());
-                                            for (int j = 0; j < groupInfos.size(); j++) {
-                                                for (int i = 0; i < groupInfos.get(j).getMembersList().size(); i++) {
-                                                    if (currentUser.getEmail().equals(groupInfos.get(j).getMembersList().get(i).getEmail())) {
-                                                        groupInfos.get(j).getMembersList().get(i).setLat(location.getLatitude());
-                                                        groupInfos.get(j).getMembersList().get(i).setLng(location.getLongitude());
-                                                    }
                                                 }
-                                                databaseReference.child("Groups").child(groupInfos.get(j).getGroupId()).setValue(groupInfos.get(j));
-                                            }
-                                            databaseReference.child("Users").child(currentUser.getUid()).setValue(user_Info);
 
-                                        }
+                                            }, Looper.getMainLooper());
+                                        }//
+                                    }
 
-                                    });
-                                }//
+                                });
+                                thread.setPriority(Thread.MIN_PRIORITY);
+                                thread.start();
+
                             }
                         } catch (Exception e) {
                             e.printStackTrace();

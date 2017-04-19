@@ -46,8 +46,8 @@ public class CreateGroupActivity extends AppCompatActivity {
         selectedUsersLV = (ListView) findViewById(R.id.selectedUsers);
         gName = (EditText) findViewById(R.id.gName);
         userEmail = (EditText) findViewById(R.id.userEmail);
-        Button searchButton = (Button) findViewById(R.id.searchButton);
-        Button createGroupButton = (Button) findViewById(R.id.createGroupButton);
+        final Button searchButton = (Button) findViewById(R.id.searchButton);
+        final Button createGroupButton = (Button) findViewById(R.id.createGroupButton);
         selectedMembers = new ArrayList<>();
         final ProgressBar progressBar = (ProgressBar) findViewById(R.id.progressBar);
         FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
@@ -55,8 +55,11 @@ public class CreateGroupActivity extends AppCompatActivity {
         databaseReference.child("Users").child(user.getUid()).addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
+
                 currentUser = dataSnapshot.getValue(userInfo.class);
-                selectedMembers.add(0, currentUser);
+                if (!searchArray(currentUser.getEmail())) {
+                    selectedMembers.add(0, currentUser);
+                }
             }
 
             @Override
@@ -66,54 +69,57 @@ public class CreateGroupActivity extends AppCompatActivity {
         });
 
 
-        searchButton.setOnClickListener(new View.OnClickListener() {
+        databaseReference.child("Users").addValueEventListener(new ValueEventListener() {
             @Override
-            public void onClick(View v) {
-                checkNetwork();
-                databaseReference.child("Users").addValueEventListener(new ValueEventListener() {
+            public void onDataChange(final DataSnapshot dataSnapshot) {
+                searchButton.setOnClickListener(new View.OnClickListener() {
                     @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        addUsersInGroup(dataSnapshot);
-                    }
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
+                    public void onClick(View v) {
+                        checkNetwork();
+                        progressBar.setVisibility(View.VISIBLE);
+                        addUsersInGroup(dataSnapshot, userEmail.getText().toString());
+                        progressBar.setVisibility(View.GONE);
 
                     }
                 });
             }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
         });
+
         createGroupButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                GroupInfo groupInfo = new GroupInfo();
+
                 if (isNetworkAvailable()) {
-                    groupInfo.setGroupName(gName.getText().toString());
-                    groupInfo.setMembersList(selectedMembers);
-                    groupInfo.setGroupId("1");
+                    GroupInfo groupInfo = new GroupInfo(selectedMembers, gName.getText().toString(), "id");
                     progressBar.setVisibility(View.VISIBLE);
 
                     databaseReference.child("Groups").push().setValue(groupInfo).addOnSuccessListener(new OnSuccessListener<Void>() {
                         @Override
                         public void onSuccess(Void aVoid) {
-                            Toast.makeText(CreateGroupActivity.this, "Group Created! Open it from Drawer!", Toast.LENGTH_SHORT).show();
-                            startActivity(new Intent(CreateGroupActivity.this, HomeActivity.class));
-                            progressBar.setVisibility(View.GONE);
-                            finish();
+                            databaseReference.child("Groups").addValueEventListener(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    addID(dataSnapshot);
+                                    Toast.makeText(CreateGroupActivity.this, "Group Created! Open it from Drawer!", Toast.LENGTH_SHORT).show();
+                                    progressBar.setVisibility(View.GONE);
+                                    startActivity(new Intent(CreateGroupActivity.this, HomeActivity.class));
+                                    finish();
+                                }
+
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) {
+
+                                }
+                            });
                         }
                     });
 
-                    databaseReference.child("Groups").addValueEventListener(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(DataSnapshot dataSnapshot) {
-                            addID(dataSnapshot);
-                        }
 
-                        @Override
-                        public void onCancelled(DatabaseError databaseError) {
-
-                        }
-                    });
                 } else {
                     checkNetwork();
                 }
@@ -163,19 +169,19 @@ public class CreateGroupActivity extends AppCompatActivity {
         return activeNetworkInfo != null;
     }
 
-    private void addUsersInGroup(DataSnapshot dataSnapshot) {
+    private void addUsersInGroup(DataSnapshot dataSnapshot, String emailText) {
         boolean userExist = false;
         for (DataSnapshot data : dataSnapshot.getChildren()) {
             userInfo u = data.getValue(userInfo.class);
-            String email = u.getEmail();
-            System.out.println(u.getEmail());
-            if (email.equals(userEmail.getText().toString().trim()) && !searchArray(userEmail.getText().toString().trim())) {
+            String email = u.getEmail().toLowerCase();
+
+            if (email.equals(emailText.toLowerCase()) && !searchArray(emailText.toLowerCase())) {
                 selectedMembers.add(0, u);
                 userExist = true;
             }
         }
-        if (searchArray(userEmail.getText().toString().trim())) {
-            Toast.makeText(CreateGroupActivity.this, "User of this Email is added!", Toast.LENGTH_SHORT).show();
+        if (searchArray(emailText.toLowerCase())) {
+            Toast.makeText(CreateGroupActivity.this, "User " + emailText + " is added!", Toast.LENGTH_SHORT).show();
         } else if (!userExist) {
 
             Toast.makeText(CreateGroupActivity.this, "No User of this Email!", Toast.LENGTH_SHORT).show();
@@ -198,17 +204,17 @@ public class CreateGroupActivity extends AppCompatActivity {
     }
 
     private void addID(DataSnapshot dataSnapshot) {
-        for (DataSnapshot data : dataSnapshot.getChildren()) {
-            GroupInfo g = data.getValue(GroupInfo.class);
-            if (g.getGroupId().equals("1")) {
-                String k = data.getKey();
+        for (DataSnapshot d : dataSnapshot.getChildren()) {
+            GroupInfo g = d.getValue(GroupInfo.class);
+            if (g.getGroupId().equals("id")) {
+                String k = d.getKey();
                 g.setGroupId(k);
                 databaseReference.child("Groups").child(k).setValue(g);
                 break;
             }
+
         }
     }
-
 
 }
 

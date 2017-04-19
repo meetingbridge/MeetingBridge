@@ -2,8 +2,12 @@ package com.android.meetingbridge;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.graphics.Color;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
+import android.support.v7.app.AlertDialog;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
@@ -208,6 +212,7 @@ public class PostListAdapter extends BaseAdapter {
                                         postCommentButton.setOnClickListener(new View.OnClickListener() {
                                             @Override
                                             public void onClick(final View v) {
+                                                checkNetwork();
                                                 CommentInfo commentInfo = new CommentInfo(currentTime, user, commentBox.getText().toString(), mPostList.get(i).getGroupInfo());
 
                                                 databaseReference.child("Comments")
@@ -231,14 +236,18 @@ public class PostListAdapter extends BaseAdapter {
                                                         userContact.setText(commentInfos.get(position).getHost().getContactNum());
                                                         userEmail.setText(commentInfos.get(position).getHost().getEmail());
                                                         userGender.setText(commentInfos.get(position).getHost().getGender());
-                                                        StorageReference storageReference = FirebaseStorage.getInstance().getReference();
-                                                        storageReference.child("Photos").child(commentInfos.get(position).getHost().getId()).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                                            @Override
-                                                            public void onSuccess(Uri uri) {
-                                                                Picasso.with(dialog.getContext()).load(uri)
-                                                                        .resize(200, 200).centerCrop().transform(new CircleTransform()).into(userProfile);
-                                                            }
-                                                        });
+                                                        try {
+                                                            StorageReference storageReference = FirebaseStorage.getInstance().getReference();
+                                                            storageReference.child("Photos").child(commentInfos.get(position).getHost().getId()).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                                                @Override
+                                                                public void onSuccess(Uri uri) {
+                                                                    Picasso.with(dialog.getContext()).load(uri)
+                                                                            .resize(200, 200).centerCrop().transform(new CircleTransform()).into(userProfile);
+                                                                }
+                                                            });
+                                                        } catch (Exception e) {
+                                                            e.printStackTrace();
+                                                        }
                                                         dialog.show();
                                                     }
                                                 });
@@ -265,6 +274,35 @@ public class PostListAdapter extends BaseAdapter {
         });
 
         return v;
+    }
+
+    private void checkNetwork() {
+        if (!IsNetworkAvailable()) {
+            AlertDialog.Builder CheckBuilder = new AlertDialog.Builder(mContext);
+            CheckBuilder.setCancelable(false);
+            CheckBuilder.setTitle("Error!");
+            CheckBuilder.setMessage("Check Your Internet Connection!");
+            CheckBuilder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                @Override
+                public void onClick(DialogInterface dialog, int which) {
+                    dialog.dismiss();
+                }
+            });
+            Toast.makeText(mContext, "Enable Internet Connection", Toast.LENGTH_SHORT).show();
+            AlertDialog alert = CheckBuilder.create();
+            alert.show();
+        } else {
+            if (IsNetworkAvailable()) {
+                //Toast.makeText(this, "Internet Available", Toast.LENGTH_SHORT).show();
+            }
+        }
+
+    }
+
+    private boolean IsNetworkAvailable() {
+        ConnectivityManager connectivityManager = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo activeNetworkInfo = connectivityManager.getActiveNetworkInfo();
+        return activeNetworkInfo != null;
     }
 
     private ArrayList<CommentInfo> fetchComments(DataSnapshot dataSnapshot) {

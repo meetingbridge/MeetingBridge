@@ -71,8 +71,28 @@ public class MapsFragment extends SupportMapFragment
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             mMap.clear();
-                            showMarkers(dataSnapshot);
+                            GroupInfo g = dataSnapshot.getValue(GroupInfo.class);
+                            final ArrayList<userInfo> membersList = g.getMembersList();
+                            for (int i = 0; i < membersList.size(); i++) {
+                                final int finalI = i;
+                                databaseReference.child("Users").child(membersList.get(i).getId()).addValueEventListener(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(DataSnapshot dataSnapshot) {
+                                        userInfo u = dataSnapshot.getValue(userInfo.class);
+                                        if (!searchArray(u, membersList)) {
+                                            membersList.add(u);
+                                        } else if (searchArray(u, membersList)) {
+                                            membersList.set(finalI, u);
+                                        }
+                                        showMarkers(membersList);
+                                    }
 
+                                    @Override
+                                    public void onCancelled(DatabaseError databaseError) {
+
+                                    }
+                                });
+                            }
                         }
 
                         @Override
@@ -92,11 +112,19 @@ public class MapsFragment extends SupportMapFragment
         }
     }
 
-    private void showMarkers(DataSnapshot dataSnapshot) {
+    private boolean searchArray(userInfo u, ArrayList<userInfo> userInfoArrayList) {
+        for (int i = 0; i < userInfoArrayList.size(); i++) {
+            if (u.getEmail().equals(userInfoArrayList.get(i).getEmail())) {
+                return true;
+            }
+        }
+        return false;
+    }
 
-        GroupInfo g = dataSnapshot.getValue(GroupInfo.class);
-        ArrayList<userInfo> membersList = g.getMembersList();
-        float[] colours = {BitmapDescriptorFactory.HUE_AZURE,
+    private void showMarkers(ArrayList<userInfo> memberList) {
+
+
+        final float[] colours = {BitmapDescriptorFactory.HUE_AZURE,
                 BitmapDescriptorFactory.HUE_BLUE,
                 BitmapDescriptorFactory.HUE_CYAN,
                 BitmapDescriptorFactory.HUE_GREEN,
@@ -105,16 +133,16 @@ public class MapsFragment extends SupportMapFragment
                 BitmapDescriptorFactory.HUE_ROSE,
                 BitmapDescriptorFactory.HUE_VIOLET,
                 BitmapDescriptorFactory.HUE_YELLOW};
-
-        for (int i = 0; i < membersList.size(); i++) {
-            createMarker(membersList.get(i).getLat(), membersList.get(i).getLng(), membersList.get(i).getName(),
+        mMap.clear();
+        for (int i = 0; i < memberList.size(); i++) {
+            createMarker(memberList.get(i).getLat(), memberList.get(i).getLng(), memberList.get(i).getName(),
                     BitmapDescriptorFactory.defaultMarker(colours[new Random().nextInt(colours.length)]));
 
         }
-
     }
 
-    private Marker createMarker(double latitude, double longitude, String title, BitmapDescriptor color) {
+    private Marker createMarker(double latitude, double longitude, String
+            title, BitmapDescriptor color) {
         return mMap.addMarker(new MarkerOptions()
                 .position(new LatLng(latitude, longitude))
                 .anchor(0.5f, 0.5f)

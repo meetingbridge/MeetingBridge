@@ -227,14 +227,19 @@ public class PublicPostListAdapter extends BaseAdapter {
                                                         userContact.setText(commentInfos.get(position).getHost().getContactNum());
                                                         userEmail.setText(commentInfos.get(position).getHost().getEmail());
                                                         userGender.setText(commentInfos.get(position).getHost().getGender());
-                                                        StorageReference storageReference = FirebaseStorage.getInstance().getReference();
-                                                        storageReference.child("Photos").child(commentInfos.get(position).getHost().getId()).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                                                            @Override
-                                                            public void onSuccess(Uri uri) {
-                                                                Picasso.with(dialog.getContext()).load(uri)
-                                                                        .resize(200, 200).centerCrop().transform(new CircleTransform()).into(userProfile);
-                                                            }
-                                                        });
+
+                                                        try {
+                                                            StorageReference storageReference = FirebaseStorage.getInstance().getReference();
+                                                            storageReference.child("Photos").child(commentInfos.get(position).getHost().getId()).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                                                                @Override
+                                                                public void onSuccess(Uri uri) {
+                                                                    Picasso.with(dialog.getContext()).load(uri)
+                                                                            .resize(200, 200).centerCrop().transform(new CircleTransform()).into(userProfile);
+                                                                }
+                                                            });
+                                                        } catch (Exception e) {
+                                                            e.printStackTrace();
+                                                        }
                                                         dialog.show();
                                                     }
                                                 });

@@ -73,10 +73,10 @@ public class MembersFragment extends Fragment {
 
             databaseReference.child("Groups").addValueEventListener(new ValueEventListener() {
                 @Override
-                public void onDataChange(DataSnapshot dataSnapshot) {
+                public void onDataChange(final DataSnapshot dataSnapshot) {
                     final GroupInfo currentGroup = getCurrentGroup(dataSnapshot, id);
-                    final ArrayList<userInfo> users = currentGroup.getMembersList();
 
+                    final ArrayList<userInfo> users = currentGroup.getMembersList();
                     UserListAdapter userListAdapter = new UserListAdapter(getActivity(), users);
                     membersLV.setAdapter(userListAdapter);
                     membersLV.setOnItemClickListener(new AdapterView.OnItemClickListener() {
@@ -106,13 +106,15 @@ public class MembersFragment extends Fragment {
                             dialog.show();
                         }
                     });
-                    add.setOnClickListener(new View.OnClickListener() {
+
+
+                    databaseReference.child("Users").addValueEventListener(new ValueEventListener() {
                         @Override
-                        public void onClick(View v) {
-                            final String email = emailET.getText().toString();
-                            databaseReference.child("Users").addValueEventListener(new ValueEventListener() {
+                        public void onDataChange(final DataSnapshot dataSnapshot1) {
+                            add.setOnClickListener(new View.OnClickListener() {
                                 @Override
-                                public void onDataChange(DataSnapshot dataSnapshot1) {
+                                public void onClick(View v) {
+                                    final String email = emailET.getText().toString().toLowerCase();
                                     final ArrayList<userInfo> newUsers = addUsersInGroup(dataSnapshot1, email, users);
                                     databaseReference.child("Groups").child(currentGroup.getGroupId()).child("membersList").setValue(newUsers).addOnSuccessListener(new OnSuccessListener<Void>() {
                                         @Override
@@ -120,20 +122,15 @@ public class MembersFragment extends Fragment {
                                             emailET.setVisibility(View.GONE);
                                             add.setVisibility(View.GONE);
                                             addMemberssButton.setVisibility(View.VISIBLE);
-                                            ArrayList<userInfo> users1 = currentGroup.getMembersList();
-                                            UserListAdapter userListAdapter = new UserListAdapter(getActivity(), users1);
-                                            membersLV.setAdapter(userListAdapter);
 
                                         }
                                     });
                                 }
-
-                                @Override
-                                public void onCancelled(DatabaseError databaseError) {
-
-                                }
                             });
+                        }
 
+                        @Override
+                        public void onCancelled(DatabaseError databaseError) {
 
                         }
                     });

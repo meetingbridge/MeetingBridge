@@ -48,18 +48,25 @@ public class PublicPostFragment extends Fragment {
         });
         final ListView postListView = (ListView) rootView.findViewById(R.id.postListView);
 
-
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
         databaseReference.child("publicmeetup").addValueEventListener(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                ArrayList<PostInfo> postInfos = showPosts(dataSnapshot);
-                ArrayList<PostInfo> temp = new ArrayList<>();
-                for (int i = 0; i < postInfos.size(); i++) {
-                    if (!searchArray(postInfos.get(i).getPostId(), temp)) {
-                        temp.add(0, postInfos.get(i));
+            public void onDataChange(final DataSnapshot dataSnapshot) {
+                final ArrayList<PostInfo> temp = new ArrayList<>();
+                new Thread(new Runnable() {
+                    @Override
+                    public void run() {
+                        ArrayList<PostInfo> postInfos = showPosts(dataSnapshot);
+
+                        for (int i = 0; i < postInfos.size(); i++) {
+                            if (!searchArray(postInfos.get(i).getPostId(), temp)) {
+                                temp.add(0, postInfos.get(i));
+                            }
+                        }
                     }
-                }
+                }).start();
+
+
                 if (temp.size() > 0) {
                     Collections.sort(temp, new Comparator<PostInfo>() {
                         @Override
@@ -68,7 +75,7 @@ public class PublicPostFragment extends Fragment {
                         }
                     });
                 }
-                PublicPostListAdapter adapter = new PublicPostListAdapter(getActivity(), postInfos);
+                PublicPostListAdapter adapter = new PublicPostListAdapter(getActivity(), temp);
                 postListView.setAdapter(adapter);
             }
 

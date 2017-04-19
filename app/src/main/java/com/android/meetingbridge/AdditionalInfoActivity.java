@@ -172,30 +172,37 @@ public class AdditionalInfoActivity extends PermissionClass implements GoogleApi
                     });
                     dialog.show();
                 } else {
-                    mLocationRequest = new LocationRequest();
-                    mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-                    if (ContextCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, new LocationListener() {
-                            @Override
-                            public void onLocationChanged(Location location) {
-                                userInfo user_Info = new userInfo(user.getUid(), name, contact, gender, email, location.getLatitude(), location.getLongitude());
-                                databaseReference.child("Users").child(user.getUid()).setValue(user_Info).addOnCompleteListener(new OnCompleteListener<Void>() {
+                    Thread myThread = new Thread(new Runnable() {
+                        @Override
+                        public void run() {
+                            mLocationRequest = new LocationRequest();
+                            mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+                            if (ContextCompat.checkSelfPermission(getApplicationContext(), android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                                LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, new LocationListener() {
                                     @Override
-                                    public void onComplete(@NonNull Task<Void> task) {
-                                        if (!task.isSuccessful()) {
-                                            Toast.makeText(AdditionalInfoActivity.this, "oops", Toast.LENGTH_SHORT).show();
-                                        } else {
-                                            progressBar.setVisibility(View.GONE);
-                                            Toast.makeText(AdditionalInfoActivity.this, "Great " + name + "! Your Profile has been Updated", Toast.LENGTH_SHORT).show();
-                                            startActivity(new Intent(AdditionalInfoActivity.this, HomeActivity.class));
-                                        }
+                                    public void onLocationChanged(Location location) {
+                                        userInfo user_Info = new userInfo(user.getUid(), name, contact, gender, email, location.getLatitude(), location.getLongitude());
+                                        databaseReference.child("Users").child(user.getUid()).setValue(user_Info).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                            @Override
+                                            public void onComplete(@NonNull Task<Void> task) {
+                                                if (!task.isSuccessful()) {
+                                                    Toast.makeText(AdditionalInfoActivity.this, "oops", Toast.LENGTH_SHORT).show();
+                                                } else {
+                                                    progressBar.setVisibility(View.GONE);
+                                                    Toast.makeText(AdditionalInfoActivity.this, "Great " + name + "! Your Profile has been Updated", Toast.LENGTH_SHORT).show();
+                                                    startActivity(new Intent(AdditionalInfoActivity.this, HomeActivity.class));
+                                                }
+                                            }
+                                        });
                                     }
                                 });
+                            } else {
+                                Toast.makeText(getApplicationContext(), "Allow Application to Check your Location!", Toast.LENGTH_LONG).show();
                             }
-                        });
-                    } else {
-                        Toast.makeText(getApplicationContext(), "Allow Application to Check your Location!", Toast.LENGTH_LONG).show();
-                    }
+                        }
+                    });
+                    myThread.setPriority(Thread.MIN_PRIORITY);
+                    myThread.start();
                 }
             }
         });

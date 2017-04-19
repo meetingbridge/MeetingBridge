@@ -8,6 +8,7 @@ import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
 import android.os.Bundle;
+import android.os.Looper;
 import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -188,34 +189,32 @@ public class DiscussionFragment extends Fragment implements GoogleApiClient.Conn
                                 });
                                 dialog.show();
                             } else {
+                                Thread myThread = new Thread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        mLocationRequest = LocationRequest.create();
+                                        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+                                        mLocationRequest.setInterval(10000);
+                                        if (ContextCompat.checkSelfPermission(getActivity(),
+                                                android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
 
-                                mLocationRequest = LocationRequest.create();
-                                mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-                                mLocationRequest.setInterval(10000);
-                                if (ContextCompat.checkSelfPermission(getActivity(),
-                                        android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                                            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, new LocationListener() {
+                                                @Override
+                                                public void onLocationChanged(Location location) {
 
-                                    LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, new LocationListener() {
-                                        @Override
-                                        public void onLocationChanged(Location location) {
+                                                    userInfo user_Info = new userInfo(currentUser.getUid(), user.getName(), user.getContactNum(),
+                                                            user.getGender(), user.getEmail(), location.getLatitude(), location.getLongitude());
 
-                                            userInfo user_Info = new userInfo(currentUser.getUid(), user.getName(), user.getContactNum(),
-                                                    user.getGender(), user.getEmail(), location.getLatitude(), location.getLongitude());
-                                            for (int j = 0; j < groupInfos.size(); j++) {
-                                                for (int i = 0; i < groupInfos.get(j).getMembersList().size(); i++) {
-                                                    if (currentUser.getEmail().equals(groupInfos.get(j).getMembersList().get(i).getEmail())) {
-                                                        groupInfos.get(j).getMembersList().get(i).setLat(location.getLatitude());
-                                                        groupInfos.get(j).getMembersList().get(i).setLng(location.getLongitude());
-                                                    }
+                                                    databaseReference.child("Users").child(currentUser.getUid()).setValue(user_Info);
+
                                                 }
-                                                databaseReference.child("Groups").child(groupInfos.get(j).getGroupId()).setValue(groupInfos.get(j));
-                                            }
-                                            databaseReference.child("Users").child(currentUser.getUid()).setValue(user_Info);
 
+                                            }, Looper.getMainLooper());
                                         }
-
-                                    });
-                                }//
+                                    }
+                                });
+                                myThread.setPriority(Thread.MIN_PRIORITY);
+                                myThread.start();
                             }
                         } catch (Exception e) {
                             e.printStackTrace();
