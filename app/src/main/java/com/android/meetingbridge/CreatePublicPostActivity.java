@@ -14,7 +14,6 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
@@ -191,7 +190,7 @@ public class CreatePublicPostActivity extends AppCompatActivity {
             alert.show();
         } else {
             if (isNetworkAvailable()) {
-                Toast.makeText(this, "Internet Available", Toast.LENGTH_SHORT).show();
+                //Toast.makeText(this, "Internet Available", Toast.LENGTH_SHORT).show();
             }
         }
 

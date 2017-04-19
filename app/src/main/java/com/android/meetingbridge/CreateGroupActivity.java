@@ -103,8 +103,16 @@ public class CreateGroupActivity extends AppCompatActivity {
                         public void onSuccess(Void aVoid) {
                             databaseReference.child("Groups").addValueEventListener(new ValueEventListener() {
                                 @Override
-                                public void onDataChange(DataSnapshot dataSnapshot) {
-                                    addID(dataSnapshot);
+                                public void onDataChange(final DataSnapshot dataSnapshot) {
+                                    Thread myThread = new Thread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            addID(dataSnapshot);
+                                        }
+                                    });
+                                    myThread.setPriority(Thread.MIN_PRIORITY);
+                                    myThread.start();
+
                                     Toast.makeText(CreateGroupActivity.this, "Group Created! Open it from Drawer!", Toast.LENGTH_SHORT).show();
                                     progressBar.setVisibility(View.GONE);
                                     startActivity(new Intent(CreateGroupActivity.this, HomeActivity.class));

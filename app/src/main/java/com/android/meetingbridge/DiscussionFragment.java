@@ -146,88 +146,80 @@ public class DiscussionFragment extends Fragment implements GoogleApiClient.Conn
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 final userInfo user = dataSnapshot.getValue(userInfo.class);
-                databaseReference.child("Groups").addValueEventListener(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot1) {
-                        final ArrayList<GroupInfo> groupInfos = getUserGroups(dataSnapshot1);
 
-                        try {
-                            LocationManager lm = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
-                            boolean gps_enabled = false;
-                            boolean network_enabled = false;
+                try {
+                    LocationManager lm = (LocationManager) getActivity().getSystemService(Context.LOCATION_SERVICE);
+                    boolean gps_enabled = false;
+                    boolean network_enabled = false;
 
-                            try {
-                                gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
-                            } catch (Exception ex) {
-                                ex.printStackTrace();
-                            }
-
-                            try {
-                                network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-                            } catch (Exception ex) {
-                                ex.printStackTrace();
-                            }
-                            if (!gps_enabled && !network_enabled) {
-                                AlertDialog.Builder dialog = new AlertDialog.Builder(getActivity());
-                                dialog.setMessage("Location Services not enabled!");
-                                dialog.setCancelable(false);
-                                dialog.setPositiveButton("Enable Location Services", new DialogInterface.OnClickListener() {
-                                    @Override
-                                    public void onClick(DialogInterface paramDialogInterface, int paramInt) {
-                                        Intent myIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                                        startActivity(myIntent);
-                                        //get gps
-                                    }
-                                });
-                                dialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-
-                                    @Override
-                                    public void onClick(DialogInterface paramDialogInterface, int paramInt) {
-                                        // TODO Auto-generated method stub
-
-                                    }
-                                });
-                                dialog.show();
-                            } else {
-                                Thread myThread = new Thread(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        mLocationRequest = LocationRequest.create();
-                                        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-                                        mLocationRequest.setInterval(10000);
-                                        if (ContextCompat.checkSelfPermission(getActivity(),
-                                                android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-
-                                            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, new LocationListener() {
-                                                @Override
-                                                public void onLocationChanged(Location location) {
-
-                                                    userInfo user_Info = new userInfo(currentUser.getUid(), user.getName(), user.getContactNum(),
-                                                            user.getGender(), user.getEmail(), location.getLatitude(), location.getLongitude());
-
-                                                    databaseReference.child("Users").child(currentUser.getUid()).setValue(user_Info);
-
-                                                }
-
-                                            }, Looper.getMainLooper());
-                                        }
-                                    }
-                                });
-                                myThread.setPriority(Thread.MIN_PRIORITY);
-                                myThread.start();
-                            }
-                        } catch (Exception e) {
-                            e.printStackTrace();
-
-                        }
+                    try {
+                        gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
                     }
 
-
-                    @Override
-                    public void onCancelled(DatabaseError databaseError) {
-
+                    try {
+                        network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
                     }
-                });
+                    if (!gps_enabled && !network_enabled) {
+                        AlertDialog.Builder dialog = new AlertDialog.Builder(getActivity());
+                        dialog.setMessage("Location Services not enabled!");
+                        dialog.setCancelable(false);
+                        dialog.setPositiveButton("Enable Location Services", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                                Intent myIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                                startActivity(myIntent);
+                                //get gps
+                            }
+                        });
+                        dialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+
+                            @Override
+                            public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                                // TODO Auto-generated method stub
+
+                            }
+                        });
+                        dialog.show();
+                    } else {
+                        Thread myThread = new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                mLocationRequest = LocationRequest.create();
+                                mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+                                mLocationRequest.setInterval(10000);
+                                buildGoogleApiClient();
+                                if (ContextCompat.checkSelfPermission(getActivity(),
+                                        android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                                    try {
+                                        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, new LocationListener() {
+                                            @Override
+                                            public void onLocationChanged(Location location) {
+
+                                                userInfo user_Info = new userInfo(currentUser.getUid(), user.getName(), user.getContactNum(),
+                                                        user.getGender(), user.getEmail(), location.getLatitude(), location.getLongitude());
+
+                                                databaseReference.child("Users").child(currentUser.getUid()).setValue(user_Info);
+
+                                            }
+
+                                        }, Looper.getMainLooper());
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            }
+                        });
+                        myThread.setPriority(Thread.MIN_PRIORITY);
+                        myThread.start();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+
+                }
 
             }
 

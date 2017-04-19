@@ -82,12 +82,13 @@ public class SignupActivity extends AppCompatActivity {
                     return;
                 }
                 progressBar.setVisibility(View.VISIBLE);
+
                 auth.createUserWithEmailAndPassword(email, password).addOnCompleteListener(SignupActivity.this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
 
                         if (!task.isSuccessful()) {
-                            Toast.makeText(SignupActivity.this, task.getResult().toString(), Toast.LENGTH_SHORT).show();
+                            Toast.makeText(SignupActivity.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                         } else {
                             Toast.makeText(SignupActivity.this, "Account Created", Toast.LENGTH_SHORT).show();
                             startActivity(new Intent(SignupActivity.this, AdditionalInfoActivity.class));
@@ -95,6 +96,7 @@ public class SignupActivity extends AppCompatActivity {
                         progressBar.setVisibility(View.GONE);
                     }
                 });
+
             }
 
         });

@@ -425,18 +425,22 @@ public class HomeActivity extends AppCompatActivity
                                         mLocationRequest.setInterval(10000);
                                         if (ContextCompat.checkSelfPermission(getApplicationContext(),
                                                 android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                                            try {
 
-                                            LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, new LocationListener() {
-                                                @Override
-                                                public void onLocationChanged(Location location) {
+                                                LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, new LocationListener() {
+                                                    @Override
+                                                    public void onLocationChanged(Location location) {
 
-                                                    userInfo user_Info = new userInfo(currentUser.getUid(), user.getName(), user.getContactNum(),
-                                                            user.getGender(), user.getEmail(), location.getLatitude(), location.getLongitude());
-                                                    databaseReference.child("Users").child(currentUser.getUid()).setValue(user_Info);
+                                                        userInfo user_Info = new userInfo(currentUser.getUid(), user.getName(), user.getContactNum(),
+                                                                user.getGender(), user.getEmail(), location.getLatitude(), location.getLongitude());
+                                                        databaseReference.child("Users").child(currentUser.getUid()).setValue(user_Info);
 
-                                                }
+                                                    }
 
-                                            }, Looper.getMainLooper());
+                                                }, Looper.getMainLooper());
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            }
                                         }//
                                     }
 
