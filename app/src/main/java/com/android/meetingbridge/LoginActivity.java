@@ -101,7 +101,7 @@ public class LoginActivity extends PermissionClass {
                             if (password.length() < 6) {
                                 etPassword.setError("Password too short, enter minimum 8 characters");
                             } else {
-                                Toast.makeText(LoginActivity.this, task.getResult().toString(), Toast.LENGTH_LONG).show();
+                                Toast.makeText(LoginActivity.this, task.getException().getMessage(), Toast.LENGTH_LONG).show();
                             }
                         } else {
                             startActivity(new Intent(LoginActivity.this, HomeActivity.class));

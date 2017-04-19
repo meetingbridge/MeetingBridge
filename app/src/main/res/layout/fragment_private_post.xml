@@ -2,11 +2,25 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:paddingBottom="50sp"
     tools:context="com.android.meetingbridge.PrivatePostFragment">
 
     <ListView
         android:id="@+id/postListView"
         android:layout_width="match_parent"
-        android:layout_height="440dp" />
+        android:layout_height="wrap_content" />
+
+    <TextView
+        android:id="@+id/emptyElement"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="fill_vertical"
+        android:layout_marginTop="200dp"
+        android:gravity="center"
+        android:text="Events which will held in future from your Groups, will appear here!!"
+        android:textColor="@color/colorPrimaryDark"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        android:visibility="gone" />
 
 </FrameLayout>

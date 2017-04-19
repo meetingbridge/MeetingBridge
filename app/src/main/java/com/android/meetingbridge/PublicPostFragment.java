@@ -46,7 +46,9 @@ public class PublicPostFragment extends Fragment {
                 startActivity(new Intent(getActivity(), CreatePublicPostActivity.class));
             }
         });
+
         final ListView postListView = (ListView) rootView.findViewById(R.id.postListView);
+        postListView.setEmptyView(rootView.findViewById(R.id.emptyElement));
 
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
         databaseReference.child("publicmeetup").addValueEventListener(new ValueEventListener() {

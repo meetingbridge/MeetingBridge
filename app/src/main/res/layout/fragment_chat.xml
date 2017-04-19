@@ -1,23 +1,11 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/fragment_discussion"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:paddingBottom="50sp"
-    tools:context="com.android.meetingbridge.PublicPostFragment">
-
-    <Button
-        android:id="@+id/newPublicMeetup"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:background="@color/colorPrimary"
-        android:text="New Public Meetup"
-        android:textColor="@color/colorText" />
-
-    <ListView
-        android:id="@+id/postListView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+    tools:context="com.android.meetingbridge.FutureMeetupFragment">
 
     <TextView
         android:id="@+id/emptyElement"
@@ -26,7 +14,7 @@
         android:layout_gravity="fill_vertical"
         android:layout_marginTop="200dp"
         android:gravity="center"
-        android:text="Public Events will appear here!!"
+        android:text="Group Chat Messages will appear here!!"
         android:textColor="@color/colorPrimaryDark"
         android:textSize="15sp"
         android:textStyle="bold"

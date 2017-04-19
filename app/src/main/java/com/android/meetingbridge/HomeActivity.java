@@ -122,6 +122,7 @@ public class HomeActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
         Menu menu = navigationView.getMenu();
         subMenu = menu.addSubMenu("Groups");
+
         View headerView = navigationView.getHeaderView(0);
 
 

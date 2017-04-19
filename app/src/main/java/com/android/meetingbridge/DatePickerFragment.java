@@ -40,40 +40,40 @@ public class DatePickerFragment extends DialogFragment implements DatePickerDial
         }
         switch (month) {
             case 0:
-                mon = "Jan";
+                mon = "01";
                 break;
             case 1:
-                mon = "Feb";
+                mon = "02";
                 break;
             case 2:
-                mon = "Mar";
+                mon = "03";
                 break;
             case 3:
-                mon = "Apr";
+                mon = "04";
                 break;
             case 4:
-                mon = "May";
+                mon = "05";
                 break;
             case 5:
-                mon = "Jun";
+                mon = "06";
                 break;
             case 6:
-                mon = "Jul";
+                mon = "07";
                 break;
             case 7:
-                mon = "Aug";
+                mon = "08";
                 break;
             case 8:
-                mon = "Sep";
+                mon = "09";
                 break;
             case 9:
-                mon = "Oct";
+                mon = "10";
                 break;
             case 10:
-                mon = "Nov";
+                mon = "11";
                 break;
             case 11:
-                mon = "Dec";
+                mon = "12";
                 break;
         }
 

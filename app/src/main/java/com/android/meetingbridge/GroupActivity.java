@@ -4,17 +4,24 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.location.Location;
+import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Looper;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v4.content.ContextCompat;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.view.ViewPager;
 import android.support.v4.widget.DrawerLayout;
@@ -28,13 +35,17 @@ import android.view.View;
 import android.view.Window;
 import android.widget.ImageView;
 import android.widget.ListView;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
+import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.Status;
+import com.google.android.gms.location.LocationListener;
+import com.google.android.gms.location.LocationRequest;
+import com.google.android.gms.location.LocationServices;
 import com.google.android.gms.location.places.Place;
 import com.google.android.gms.location.places.ui.PlaceAutocomplete;
 import com.google.android.gms.maps.model.LatLng;
@@ -53,7 +64,7 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
-public class GroupActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener {
+public class GroupActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, NavigationView.OnNavigationItemSelectedListener {
     private FirebaseAuth auth;
     private FirebaseAuth.AuthStateListener authStateListener;
     private DrawerLayout drawer;
@@ -64,7 +75,9 @@ public class GroupActivity extends AppCompatActivity implements NavigationView.O
     private int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
     private Place destination;
     private DatabaseReference databaseReference;
-    private ProgressBar progressBar;
+
+    private LocationRequest mLocationRequest;
+    private GoogleApiClient mGoogleApiClient;
     private FirebaseUser currentUser;
 
 
@@ -74,6 +87,7 @@ public class GroupActivity extends AppCompatActivity implements NavigationView.O
         setContentView(R.layout.activity_group);
         auth = FirebaseAuth.getInstance();
         checkNetwork();
+
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         authStateListener = new FirebaseAuth.AuthStateListener() {
             @Override
@@ -123,7 +137,7 @@ public class GroupActivity extends AppCompatActivity implements NavigationView.O
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-                if (position == 2) {
+                if (position == 4) {
                     fab.show();
                     checkNetwork();
                     Toast.makeText(getApplicationContext(), "Tap Direction Button", Toast.LENGTH_SHORT).show();
@@ -135,7 +149,7 @@ public class GroupActivity extends AppCompatActivity implements NavigationView.O
 
             @Override
             public void onPageSelected(int position) {
-                if (position == 2) {
+                if (position == 4) {
                     fab.show();
                     checkNetwork();
                 } else {
@@ -229,6 +243,113 @@ public class GroupActivity extends AppCompatActivity implements NavigationView.O
         }
 
     }
+
+    protected synchronized void buildGoogleApiClient() {
+        mGoogleApiClient = new GoogleApiClient.Builder(getApplicationContext())
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API)
+                .build();
+        mGoogleApiClient.connect();
+    }
+
+    @Override
+    public void onConnected(@Nullable Bundle bundle) {
+
+
+        databaseReference.child("Users").child(currentUser.getUid()).addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                final userInfo user = dataSnapshot.getValue(userInfo.class);
+
+                try {
+                    LocationManager lm = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
+                    boolean gps_enabled = false;
+                    boolean network_enabled = false;
+
+                    try {
+                        gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+
+                    try {
+                        network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+                    } catch (Exception ex) {
+                        ex.printStackTrace();
+                    }
+                    if (!gps_enabled && !network_enabled) {
+                        android.app.AlertDialog.Builder dialog = new android.app.AlertDialog.Builder(getApplicationContext());
+                        dialog.setMessage("Location Services not enabled!");
+                        dialog.setCancelable(false);
+                        dialog.setPositiveButton("Enable Location Services", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                                Intent myIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                                startActivity(myIntent);
+                                //get gps
+                            }
+                        });
+                        dialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+
+                            @Override
+                            public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                                // TODO Auto-generated method stub
+
+                            }
+                        });
+                        dialog.show();
+                    } else {
+                        Thread myThread = new Thread(new Runnable() {
+                            @Override
+                            public void run() {
+                                mLocationRequest = LocationRequest.create();
+                                mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+                                mLocationRequest.setInterval(10000);
+                                buildGoogleApiClient();
+                                if (ContextCompat.checkSelfPermission(getApplicationContext(),
+                                        android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                                    try {
+                                        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, new LocationListener() {
+                                            @Override
+                                            public void onLocationChanged(Location location) {
+
+                                                userInfo user_Info = new userInfo(currentUser.getUid(), user.getName(), user.getContactNum(),
+                                                        user.getGender(), user.getEmail(), location.getLatitude(), location.getLongitude());
+
+                                                databaseReference.child("Users").child(currentUser.getUid()).setValue(user_Info);
+
+                                            }
+
+                                        }, Looper.getMainLooper());
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            }
+                        });
+                        myThread.setPriority(Thread.MIN_PRIORITY);
+                        myThread.start();
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
+
+                }
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
+    }
+
+    @Override
+    public void onConnectionSuspended(int i) {
+
+    }
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -451,6 +572,11 @@ public class GroupActivity extends AppCompatActivity implements NavigationView.O
         }
     }
 
+    @Override
+    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
+
+    }
+
     public class SectionsPagerAdapter extends FragmentPagerAdapter {
 
         String id = getIntent().getExtras().get("id").toString();
@@ -465,10 +591,14 @@ public class GroupActivity extends AppCompatActivity implements NavigationView.O
             // Return a GroupFragment (defined as a static inner class below).
             switch (position) {
                 case 0:
-                    return DiscussionFragment.newInstance(id);
+                    return FutureMeetupFragment.newInstance(id);
                 case 1:
-                    return MembersFragment.newInstance(id);
+                    return PastMeetupFragment.newInstance(id);
                 case 2:
+                    return ChatFragment.newInstance(id);
+                case 3:
+                    return MembersFragment.newInstance(id);
+                case 4:
                     return MapsFragment.newInstance(id);
             }
             return null;
@@ -478,17 +608,21 @@ public class GroupActivity extends AppCompatActivity implements NavigationView.O
         @Override
         public int getCount() {
 
-            return 3;
+            return 5;
         }
 
         @Override
         public CharSequence getPageTitle(int position) {
             switch (position) {
                 case 0:
-                    return "Discussion";
+                    return "Current Meetups";
                 case 1:
-                    return "Members";
+                    return "Past Meetups";
                 case 2:
+                    return "Chat";
+                case 3:
+                    return "Members";
+                case 4:
                     return "Location";
             }
             return null;

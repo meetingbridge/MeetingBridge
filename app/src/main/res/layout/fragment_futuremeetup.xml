@@ -1,11 +1,11 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/fragment_discussion"
+    android:id="@+id/fragment_futuremeetup"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:weightSum="1"
-    tools:context="com.android.meetingbridge.DiscussionFragment">
+    android:paddingBottom="50sp"
+    tools:context="com.android.meetingbridge.FutureMeetupFragment">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -36,10 +36,20 @@
         android:id="@+id/postsListView"
         style="@android:style/Widget.DeviceDefault.ExpandableListView"
         android:layout_width="match_parent"
-        android:layout_height="350dp"
-        android:layout_weight="0.41"
-        android:dividerHeight="5dp"
-        android:footerDividersEnabled="false"
-        android:headerDividersEnabled="false" />
+        android:layout_height="wrap_content"
+        android:dividerHeight="5dp" />
+
+    <TextView
+        android:id="@+id/emptyElement"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="fill_vertical"
+        android:layout_marginTop="200dp"
+        android:gravity="center"
+        android:text="Events which will held in the future, will appear here!!"
+        android:textColor="@color/colorPrimaryDark"
+        android:textSize="15sp"
+        android:textStyle="bold"
+        android:visibility="gone" />
 
 </LinearLayout>

@@ -14,9 +14,12 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.Date;
 
 public class PrivatePostFragment extends Fragment {
 
@@ -36,6 +39,8 @@ public class PrivatePostFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_private_post, container, false);
 
         final ListView postListView = (ListView) rootView.findViewById(R.id.postListView);
+
+        postListView.setEmptyView(rootView.findViewById(R.id.emptyElement));
         final DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
         databaseReference.child("Groups").addValueEventListener(new ValueEventListener() {
             @Override
@@ -84,11 +89,22 @@ public class PrivatePostFragment extends Fragment {
 
     private ArrayList<PostInfo> showPosts(DataSnapshot dataSnapshot) {
         ArrayList<PostInfo> postInfo = new ArrayList<>();
+        SimpleDateFormat sdf = new SimpleDateFormat("dd-MM-yyyy");
+        String current = new SimpleDateFormat("dd-MM-yyyy").format(new Date());
+
 
         for (DataSnapshot data : dataSnapshot.getChildren()) {
             PostInfo p = data.getValue(PostInfo.class);
-            postInfo.add(0, p);
-
+            String postDate = p.getPostDate().getDay() + "-" + p.getPostDate().getMonth() + "-" + p.getPostDate().getYear();
+            try {
+                Date d1 = sdf.parse(postDate);
+                Date d2 = sdf.parse(current);
+                if (d2.before(d1) || d2.equals(d1)) {
+                    postInfo.add(p);
+                }
+            } catch (ParseException e) {
+                e.printStackTrace();
+            }
         }
         return postInfo;
     }
