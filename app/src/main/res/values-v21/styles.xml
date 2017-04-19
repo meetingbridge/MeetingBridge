@@ -14,6 +14,5 @@
         <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
         <item name="colorAccent">@color/colorAccent</item>
         <item name="android:windowBackground">?android:attr/colorBackground</item>
-        <item name="android:windowDrawsSystemBarBackgrounds">false</item>
     </style>
 </resources>

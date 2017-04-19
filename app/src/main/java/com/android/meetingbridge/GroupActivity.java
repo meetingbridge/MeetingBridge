@@ -560,8 +560,12 @@ public class GroupActivity extends AppCompatActivity implements GoogleApiClient.
 
     @Override
     public void onStart() {
-        super.onStart();
-        auth.addAuthStateListener(authStateListener);
+        try {
+            super.onStart();
+            auth.addAuthStateListener(authStateListener);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -575,6 +579,15 @@ public class GroupActivity extends AppCompatActivity implements GoogleApiClient.
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
+    }
+
+    @Override
+    protected void onResume() {
+        try {
+            super.onResume();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public class SectionsPagerAdapter extends FragmentPagerAdapter {

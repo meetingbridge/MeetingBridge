@@ -3,6 +3,7 @@ package com.android.meetingbridge;
 import android.app.Dialog;
 import android.net.Uri;
 import android.os.Bundle;
+import android.support.design.widget.TextInputLayout;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -53,6 +54,7 @@ public class MembersFragment extends Fragment {
         View rootView = inflater.inflate(R.layout.fragment_members, container, false);
         final Button addMemberssButton = (Button) rootView.findViewById(R.id.addMembersButton);
         final EditText emailET = (EditText) rootView.findViewById(R.id.memberEmail);
+        final TextInputLayout textInputLayout = (TextInputLayout) rootView.findViewById(R.id.memberEmailLayout);
         final ListView membersLV = (ListView) rootView.findViewById(R.id.usersListView);
         final Button add = (Button) rootView.findViewById(R.id.addMembers);
         final DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
@@ -61,6 +63,7 @@ public class MembersFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 emailET.setVisibility(View.VISIBLE);
+                textInputLayout.setVisibility(View.VISIBLE);
                 add.setVisibility(View.VISIBLE);
                 addMemberssButton.setVisibility(View.GONE);
 
@@ -121,6 +124,8 @@ public class MembersFragment extends Fragment {
                                         public void onSuccess(Void aVoid) {
                                             emailET.setVisibility(View.GONE);
                                             add.setVisibility(View.GONE);
+                                            emailET.setText("");
+                                            textInputLayout.setVisibility(View.GONE);
                                             addMemberssButton.setVisibility(View.VISIBLE);
 
                                         }

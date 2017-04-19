@@ -7,16 +7,19 @@
     tools:context="com.android.meetingbridge.MembersFragment">
 
     <android.support.design.widget.TextInputLayout
+        android:id="@+id/memberEmailLayout"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:textColorHighlight="@color/colorPrimaryDark"
+        android:textColorHint="@color/colorAccent"
+        android:visibility="gone">
 
         <android.support.design.widget.TextInputEditText
             android:id="@+id/memberEmail"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Enter Email"
-            android:textColor="@color/colorText"
-            android:visibility="gone" />
+            android:textColor="@color/colorPrimaryDark" />
     </android.support.design.widget.TextInputLayout>
 
     <Button
@@ -31,9 +34,11 @@
         android:id="@+id/addMembers"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/colorPrimary"
+        android:background="@null"
+        android:gravity="end"
         android:text="Add New Members by Email"
-        android:textColor="@color/colorText"
+        android:textColor="@color/colorPrimaryDark"
+        android:textStyle="bold"
         android:visibility="gone" />
 
     <ListView
