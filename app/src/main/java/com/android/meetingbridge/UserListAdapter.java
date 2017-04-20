@@ -41,23 +41,30 @@ public class UserListAdapter extends BaseAdapter {
     }
 
     @Override
-    public View getView(int i, View view, ViewGroup parent) {
+    public View getView(final int i, View view, ViewGroup parent) {
         final View v = View.inflate(mContext, R.layout.userinfo_layout, null);
         TextView userName = (TextView) v.findViewById(R.id.userName);
         TextView userEmail = (TextView) v.findViewById(R.id.userEmail);
         final ImageView userIcon = (ImageView) v.findViewById(R.id.userIcon);
         userName.setText(userList.get(i).getName());
         userEmail.setText(userList.get(i).getEmail());
-        StorageReference storageReference = FirebaseStorage.getInstance().getReference();
-        storageReference.child("Photos").child(userList.get(i).getId()).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+        Thread my = new Thread(new Runnable() {
             @Override
-            public void onSuccess(Uri uri) {
-                Picasso.with(v.getContext())
-                        .load(uri)
-                        .resize(200, 200).centerCrop()
-                        .transform(new CircleTransform()).into(userIcon);
+            public void run() {
+                StorageReference storageReference = FirebaseStorage.getInstance().getReference();
+                storageReference.child("Photos").child(userList.get(i).getId()).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                    @Override
+                    public void onSuccess(Uri uri) {
+                        Picasso.with(v.getContext())
+                                .load(uri)
+                                .resize(200, 200).centerCrop()
+                                .transform(new CircleTransform()).into(userIcon);
+                    }
+                });
             }
         });
+        my.setPriority(Thread.MAX_PRIORITY);
+        my.start();
         v.setTag(userList.get(i).getId());
         return v;
     }

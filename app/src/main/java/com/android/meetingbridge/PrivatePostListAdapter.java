@@ -36,11 +36,11 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
-public class PostListAdapter extends BaseAdapter {
+public class PrivatePostListAdapter extends BaseAdapter {
     private Context mContext;
     private ArrayList<PostInfo> mPostList;
 
-    public PostListAdapter(Context mContext, ArrayList<PostInfo> mPostList) {
+    public PrivatePostListAdapter(Context mContext, ArrayList<PostInfo> mPostList) {
         this.mContext = mContext;
         this.mPostList = mPostList;
     }
@@ -104,14 +104,22 @@ public class PostListAdapter extends BaseAdapter {
                 userContact.setText(mPostList.get(i).getHost().getContactNum());
                 userEmail.setText(mPostList.get(i).getHost().getEmail());
                 userGender.setText(mPostList.get(i).getHost().getGender());
-                StorageReference storageReference = FirebaseStorage.getInstance().getReference();
-                storageReference.child("Photos").child(mPostList.get(i).getHost().getId()).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                Thread myThread = new Thread(new Runnable() {
                     @Override
-                    public void onSuccess(Uri uri) {
-                        Picasso.with(dialog.getContext()).load(uri)
-                                .resize(200, 200).centerCrop().transform(new CircleTransform()).into(userProfile);
+                    public void run() {
+                        StorageReference storageReference = FirebaseStorage.getInstance().getReference();
+                        storageReference.child("Photos").child(mPostList.get(i).getHost().getId()).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                            @Override
+                            public void onSuccess(Uri uri) {
+                                Picasso.with(dialog.getContext()).load(uri)
+                                        .resize(200, 200).centerCrop().transform(new CircleTransform()).into(userProfile);
+                            }
+                        });
                     }
                 });
+                myThread.setPriority(Thread.MAX_PRIORITY);
+                myThread.start();
+
                 dialog.show();
             }
         });
@@ -170,7 +178,6 @@ public class PostListAdapter extends BaseAdapter {
         commentButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Toast.makeText(v.getContext(), mPostList.get(i).getGroupInfo().getGroupId(), Toast.LENGTH_SHORT).show();
                 final Dialog dialog = new Dialog(v.getContext());
                 dialog.setContentView(R.layout.comment_dialog_layout);
                 dialog.setTitle(mPostList.get(i).getPostTitle());

@@ -50,16 +50,24 @@ public class CommentListAdapter extends BaseAdapter {
         commentTime.setText(mCommentList.get(i).getCommentTime());
         v.setTag(mCommentList.get(i).getCommentDescription());
         final ImageView hostIcon = (ImageView) v.findViewById(R.id.hostIcon);
-        StorageReference storageReference = FirebaseStorage.getInstance().getReference();
+        final StorageReference storageReference = FirebaseStorage.getInstance().getReference();
 
         try {
-            storageReference.child("Photos").child(mCommentList.get(i).getHost().getId()).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+            Thread my = new Thread(new Runnable() {
                 @Override
-                public void onSuccess(Uri uri) {
-                    Picasso.with(v.getContext()).load(uri)
-                            .resize(200, 200).centerCrop().into(hostIcon);
+                public void run() {
+                    storageReference.child("Photos").child(mCommentList.get(i).getHost().getId()).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                        @Override
+                        public void onSuccess(Uri uri) {
+                            Picasso.with(v.getContext()).load(uri)
+                                    .resize(200, 200).centerCrop().into(hostIcon);
+                        }
+                    });
                 }
             });
+            my.setPriority(Thread.MAX_PRIORITY);
+            my.start();
+
         } catch (Exception e) {
             e.printStackTrace();
         }

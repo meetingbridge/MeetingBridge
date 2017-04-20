@@ -71,7 +71,7 @@ public class PastMeetupFragment extends Fragment {
                                 }
                             }
                             if (posts.size() > 0) {
-                                PostListAdapter adapter = new PostListAdapter(getActivity(), posts);
+                                PrivatePostListAdapter adapter = new PrivatePostListAdapter(getActivity(), posts);
                                 postListView.setAdapter(adapter);
                             }
                         }

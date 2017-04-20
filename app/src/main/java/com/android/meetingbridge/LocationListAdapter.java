@@ -55,7 +55,7 @@ public class LocationListAdapter extends BaseAdapter {
         final ImageView userIcon = (ImageView) v.findViewById(R.id.userIcon);
         userName.setText(locationList.get(i).getName());
         userloc.setText(getAddress(locationList.get(i).getLat(), locationList.get(i).getLng()));
-        String dest = String.valueOf(locationList.get(i).getDest().getName()) + String.valueOf(locationList.get(i).getDest().getAddress());
+        String dest = String.valueOf(locationList.get(i).getDest().getName()) + ", " + String.valueOf(locationList.get(i).getDest().getAddress());
         destination.setText(dest);
         String t = String.valueOf(distance(locationList.get(i).getLat(), locationList.get(i).getLng(),
                 locationList.get(i).getDest().getLatLng().latitude, locationList.get(i).getDest().getLatLng().longitude, "K")) + " KM away from destination";
@@ -101,7 +101,7 @@ public class LocationListAdapter extends BaseAdapter {
         try {
             List<Address> addresses = geocoder.getFromLocation(lat, lng, 1);
             Address obj = addresses.get(0);
-            String add = obj.getLocality() + " " + obj.getCountryName();
+            String add = obj.getLocality() + ", " + obj.getCountryName();
 
             return add;
 

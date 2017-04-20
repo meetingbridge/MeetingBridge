@@ -152,13 +152,21 @@ public class HomeActivity extends AppCompatActivity
                     uEmailTV.setText(user.getEmail());
                     uEmailTV.setText(user.getEmail());
                 }
-                storageReference.child("Photos").child(user.getId()).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                Thread myThread = new Thread(new Runnable() {
                     @Override
-                    public void onSuccess(Uri uri) {
-                        Picasso.with(HomeActivity.this).load(uri)
-                                .resize(200, 200).centerCrop().transform(new CircleTransform()).into(imageView);
+                    public void run() {
+                        storageReference.child("Photos").child(user.getId()).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                            @Override
+                            public void onSuccess(Uri uri) {
+                                Picasso.with(HomeActivity.this).load(uri)
+                                        .resize(200, 200).centerCrop().transform(new CircleTransform()).into(imageView);
+                            }
+                        });
                     }
                 });
+                myThread.setPriority(Thread.MAX_PRIORITY);
+                myThread.start();
+
                 imageView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -327,6 +335,8 @@ public class HomeActivity extends AppCompatActivity
 
         if (id == R.id.signout) {
             auth.signOut();
+            startActivity(new Intent(HomeActivity.this, LoginActivity.class));
+            finish();
 
         } else if (id == R.id.nav_slideshow) {
 

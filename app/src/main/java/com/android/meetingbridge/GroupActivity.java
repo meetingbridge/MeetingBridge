@@ -184,14 +184,21 @@ public class GroupActivity extends AppCompatActivity implements GoogleApiClient.
                 uNameTV.setText(userInfo.getName());
                 uEmailTV.setText(userInfo.getEmail());
                 uEmailTV.setText(userInfo.getEmail());
-                StorageReference storageReference = FirebaseStorage.getInstance().getReference();
-                storageReference.child("Photos").child(userInfo.getId()).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                Thread myThread = new Thread(new Runnable() {
                     @Override
-                    public void onSuccess(Uri uri) {
-                        Picasso.with(GroupActivity.this).load(uri)
-                                .resize(200, 200).centerCrop().transform(new CircleTransform()).into(imageView);
+                    public void run() {
+                        StorageReference storageReference = FirebaseStorage.getInstance().getReference();
+                        storageReference.child("Photos").child(userInfo.getId()).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                            @Override
+                            public void onSuccess(Uri uri) {
+                                Picasso.with(GroupActivity.this).load(uri)
+                                        .resize(200, 200).centerCrop().transform(new CircleTransform()).into(imageView);
+                            }
+                        });
                     }
                 });
+                myThread.setPriority(Thread.MAX_PRIORITY);
+                myThread.start();
                 imageView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
@@ -368,11 +375,28 @@ public class GroupActivity extends AppCompatActivity implements GoogleApiClient.
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         //dialog.dismiss();
-                        GroupInfo g = getCurrentGroup(dataSnapshot);
-                        ArrayList<LocationInfo> locationInfos = new ArrayList<>();
+                        final GroupInfo g = getCurrentGroup(dataSnapshot);
+                        final ArrayList<LocationInfo> locationInfos = new ArrayList<>();
                         for (int i = 0; i < g.getMembersList().size(); i++) {
-                            LocationInfo locationInfo = new LocationInfo(g.getMembersList().get(i), destination);
-                            locationInfos.add(0, locationInfo);
+                            final int finalI = i;
+                            databaseReference.child("Users").child(g.getMembersList().get(i).getId()).addValueEventListener(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                    userInfo u = dataSnapshot.getValue(userInfo.class);
+                                    LocationInfo locationInfo = new LocationInfo(u, destination);
+                                    if (!searchLocationArray(locationInfos, u)) {
+                                        locationInfos.add(0, locationInfo);
+                                    } else if (searchLocationArray(locationInfos, u)) {
+                                        locationInfos.set(finalI, locationInfo);
+                                    }
+                                }
+
+                                @Override
+                                public void onCancelled(DatabaseError databaseError) {
+
+                                }
+                            });
+
                         }
                         dialog.setTitle(g.getGroupName());
                         ListView listView = (ListView) dialog.findViewById(R.id.locList);
@@ -396,6 +420,15 @@ public class GroupActivity extends AppCompatActivity implements GoogleApiClient.
         }
     }
 
+    private boolean searchLocationArray(ArrayList<LocationInfo> locationInfos, userInfo u) {
+        for (int i = 0; i < locationInfos.size(); i++) {
+            if (locationInfos.get(i).getEmail().equals(u.getEmail())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
@@ -404,6 +437,8 @@ public class GroupActivity extends AppCompatActivity implements GoogleApiClient.
 
         if (id == R.id.signout) {
             auth.signOut();
+            startActivity(new Intent(GroupActivity.this, LoginActivity.class));
+            finish();
 
         } else if (id == R.id.homeActivity) {
             Intent intent = new Intent(GroupActivity.this, HomeActivity.class);

@@ -51,7 +51,7 @@ public class PrivatePostFragment extends Fragment {
                     public void onDataChange(DataSnapshot dataSnapshot1) {
                         ArrayList<PostInfo> postInfos = showPosts(dataSnapshot1);
                         final ArrayList<PostInfo> temp = new ArrayList<>();
-                        final PostListAdapter postListAdapter = new PostListAdapter(getActivity(), temp);
+                        final PrivatePostListAdapter privatePostListAdapter = new PrivatePostListAdapter(getActivity(), temp);
                         for (int i = 0; i < groupIds.size(); i++) {
                             for (int j = 0; j < postInfos.size(); j++) {
                                 if (!searchArray(postInfos.get(j).getPostId(), temp) && postInfos.get(j).getGroupInfo().getGroupId().equals(groupIds.get(i))) {
@@ -67,7 +67,7 @@ public class PrivatePostFragment extends Fragment {
                                 }
                             });
 
-                            postListView.setAdapter(postListAdapter);
+                            postListView.setAdapter(privatePostListAdapter);
 
                         }
                     }

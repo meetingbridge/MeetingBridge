@@ -71,18 +71,25 @@ public class PublicPostListAdapter extends BaseAdapter {
         final ImageView postIcon = (ImageView) v.findViewById(R.id.postIcon);
         TextView Title = (TextView) v.findViewById(R.id.postTitle);
         TextView Discription = (TextView) v.findViewById(R.id.postDiscription);
-        ImageView postedIn = (ImageView) v.findViewById(R.id.postedIn);
         TextView TimeView = (TextView) v.findViewById(R.id.Time);
         TextView DateView = (TextView) v.findViewById(R.id.Date);
         TextView locationTV = (TextView) v.findViewById(R.id.postLocationTV);
-        StorageReference storageReference = FirebaseStorage.getInstance().getReference();
-        storageReference.child("Photos").child(mPostList.get(i).getHost().getId()).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+        Thread myThread = new Thread(new Runnable() {
             @Override
-            public void onSuccess(Uri uri) {
-                Picasso.with(v.getContext()).load(uri)
-                        .resize(200, 200).centerCrop().into(postIcon);
+            public void run() {
+                StorageReference storageReference = FirebaseStorage.getInstance().getReference();
+                storageReference.child("Photos").child(mPostList.get(i).getHost().getId()).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                    @Override
+                    public void onSuccess(Uri uri) {
+                        Picasso.with(v.getContext()).load(uri)
+                                .resize(200, 200).centerCrop().into(postIcon);
+                    }
+                });
             }
         });
+        myThread.setPriority(Thread.MAX_PRIORITY);
+        myThread.start();
+
         locationTV.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -112,14 +119,22 @@ public class PublicPostListAdapter extends BaseAdapter {
                 userContact.setText(mPostList.get(i).getHost().getContactNum());
                 userEmail.setText(mPostList.get(i).getHost().getEmail());
                 userGender.setText(mPostList.get(i).getHost().getGender());
-                StorageReference storageReference = FirebaseStorage.getInstance().getReference();
-                storageReference.child("Photos").child(mPostList.get(i).getHost().getId()).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                Thread myThread = new Thread(new Runnable() {
                     @Override
-                    public void onSuccess(Uri uri) {
-                        Picasso.with(dialog.getContext()).load(uri)
-                                .resize(200, 200).centerCrop().transform(new CircleTransform()).into(userProfile);
+                    public void run() {
+                        StorageReference storageReference = FirebaseStorage.getInstance().getReference();
+                        storageReference.child("Photos").child(mPostList.get(i).getHost().getId()).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                            @Override
+                            public void onSuccess(Uri uri) {
+                                Picasso.with(dialog.getContext()).load(uri)
+                                        .resize(200, 200).centerCrop().transform(new CircleTransform()).into(userProfile);
+                            }
+                        });
                     }
                 });
+                myThread.setPriority(Thread.MIN_PRIORITY);
+                myThread.start();
+
                 dialog.show();
             }
         });
