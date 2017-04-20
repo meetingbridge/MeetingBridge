@@ -29,7 +29,6 @@ public class MapsFragment extends SupportMapFragment
     ArrayList<GroupInfo> groupInfos1 = new ArrayList<>();
     private GoogleMap mMap;
 
-
     public MapsFragment() {
     }
 
@@ -107,8 +106,6 @@ public class MapsFragment extends SupportMapFragment
 
                 }
             });
-
-
         }
     }
 
@@ -137,7 +134,6 @@ public class MapsFragment extends SupportMapFragment
         for (int i = 0; i < memberList.size(); i++) {
             createMarker(memberList.get(i).getLat(), memberList.get(i).getLng(), memberList.get(i).getName(),
                     BitmapDescriptorFactory.defaultMarker(colours[new Random().nextInt(colours.length)]));
-
         }
     }
 
@@ -163,4 +159,5 @@ public class MapsFragment extends SupportMapFragment
         }
         return groupInfos;
     }
+
 }
