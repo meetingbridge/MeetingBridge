@@ -3,7 +3,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:paddingBottom="50sp"
     tools:context="com.android.meetingbridge.PublicPostFragment">
 
     <Button
@@ -17,7 +16,7 @@
     <ListView
         android:id="@+id/postListView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content" />
+        android:layout_height="match_parent" />
 
     <TextView
         android:id="@+id/emptyElement"

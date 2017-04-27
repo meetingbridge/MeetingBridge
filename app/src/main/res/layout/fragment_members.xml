@@ -3,7 +3,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:paddingBottom="50sp"
     tools:context="com.android.meetingbridge.MembersFragment">
 
     <android.support.design.widget.TextInputLayout
@@ -17,7 +16,7 @@
         <android.support.design.widget.TextInputEditText
             android:id="@+id/memberEmail"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="match_parent"
             android:hint="Enter Email"
             android:textColor="@color/colorPrimaryDark" />
     </android.support.design.widget.TextInputLayout>

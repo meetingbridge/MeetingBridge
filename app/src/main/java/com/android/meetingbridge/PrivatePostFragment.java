@@ -1,7 +1,11 @@
 package com.android.meetingbridge;
 
+import android.app.NotificationManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.NotificationCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,6 +24,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
+
+import static android.content.Context.NOTIFICATION_SERVICE;
 
 public class PrivatePostFragment extends Fragment {
 
@@ -47,6 +53,8 @@ public class PrivatePostFragment extends Fragment {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 final ArrayList<String> groupIds = showGroups(dataSnapshot);
                 databaseReference.child("Posts").addValueEventListener(new ValueEventListener() {
+                    boolean check = true;
+
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot1) {
                         ArrayList<PostInfo> postInfos = showPosts(dataSnapshot1);
@@ -59,6 +67,7 @@ public class PrivatePostFragment extends Fragment {
                                 }
                             }
                         }
+
                         if (temp.size() > 0) {
                             Collections.sort(temp, new Comparator<PostInfo>() {
                                 @Override
@@ -66,9 +75,26 @@ public class PrivatePostFragment extends Fragment {
                                     return rhs.getPostingTime().compareTo(lhs.getPostingTime());
                                 }
                             });
-
+                            PostInfo p = temp.get(0);
+                            if (check) {
+                                if (!p.getHost().getEmail().equals(FirebaseAuth.getInstance().getCurrentUser().getEmail())) {
+                                    try {
+                                        Bitmap bm = BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher);
+                                        NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(getActivity())
+                                                .setContentTitle(p.getPostTitle())
+                                                .setSmallIcon(R.mipmap.ic_launcher_transparent)
+                                                .setLargeIcon(bm)
+                                                .setContentText(p.getHost().getName() + " posted in " + p.getGroupInfo().getGroupName() + ".");
+                                        NotificationManager notificationManager = (NotificationManager) getActivity().getSystemService(NOTIFICATION_SERVICE);
+                                        notificationManager.notify(NotificationID.getID(), mBuilder.build());
+                                    } catch (Exception e) {
+                                        e.printStackTrace();
+                                    }
+                                }
+                            } else {
+                                check = true;
+                            }
                             postListView.setAdapter(privatePostListAdapter);
-
                         }
                     }
 

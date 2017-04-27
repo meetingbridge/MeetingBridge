@@ -14,6 +14,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.common.GooglePlayServicesNotAvailableException;
 import com.google.android.gms.common.GooglePlayServicesRepairableException;
@@ -31,6 +32,8 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
+
+import static android.text.TextUtils.isEmpty;
 
 public class CreatePublicPostActivity extends AppCompatActivity {
 
@@ -97,6 +100,28 @@ public class CreatePublicPostActivity extends AppCompatActivity {
                         checkNetwork();
                         final ProgressBar progressBar = (ProgressBar) findViewById(R.id.progressBar);
                         progressBar.setVisibility(View.VISIBLE);
+                        if (isEmpty(postTitle.getText())) {
+                            postTitle.setError("Enter Event Title");
+                            progressBar.setVisibility(View.GONE);
+                            return;
+                        }
+                        if (isEmpty(postDescription.getText())) {
+                            postDescription.setError("Enter Event Details");
+                            progressBar.setVisibility(View.GONE);
+                            return;
+                        }
+                        if (isEmpty(timeView.getText()) || timeView.getText().equals("Select Event Time")) {
+                            timeView.setError("Select Event Time");
+                            progressBar.setVisibility(View.GONE);
+                            Toast.makeText(getApplicationContext(), "Select Event Time", Toast.LENGTH_SHORT).show();
+                            return;
+                        }
+                        if (isEmpty(dateView.getText()) || dateView.getText().equals("Select Event Date")) {
+                            dateView.setError("Select Event Date");
+                            Toast.makeText(getApplicationContext(), "Select Event Date", Toast.LENGTH_SHORT).show();
+                            progressBar.setVisibility(View.GONE);
+                            return;
+                        }
                         final String currentTime = new SimpleDateFormat("dd-M-yy hh:mm a").format(new Date());
                         final String title = postTitle.getText().toString();
                         final String description = postDescription.getText().toString();
@@ -110,34 +135,41 @@ public class CreatePublicPostActivity extends AppCompatActivity {
                         postDate.setDay(dateArray[0]);
                         postDate.setMonth(dateArray[1]);
                         postDate.setYear(dateArray[2]);
-                        PostPlaceInfo postPlaceInfo = new PostPlaceInfo(postPlace.getId(),
-                                postPlace.getName().toString(),
-                                String.valueOf(postPlace.getLatLng().latitude),
-                                String.valueOf(postPlace.getLatLng().longitude),
-                                postPlace.getAddress().toString(),
-                                postPlace.getPhoneNumber().toString());
-                        PostInfo postInfo = new PostInfo("1", "1", title, description, postPlaceInfo, postTime, postDate, user, currentTime);
-                        databaseReference.child("publicmeetup").push().setValue(postInfo).addOnSuccessListener(new OnSuccessListener<Void>() {
-                            @Override
-                            public void onSuccess(Void aVoid) {
+                        try {
 
-                                databaseReference.child("publicmeetup").addValueEventListener(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(DataSnapshot dataSnapshot) {
-                                        addID(dataSnapshot);
-                                        progressBar.setVisibility(View.GONE);
-                                        startActivity(new Intent(CreatePublicPostActivity.this, HomeActivity.class));
-                                        finish();
-                                    }
+                            PostPlaceInfo postPlaceInfo = new PostPlaceInfo(postPlace.getId(),
+                                    postPlace.getName().toString(),
+                                    String.valueOf(postPlace.getLatLng().latitude),
+                                    String.valueOf(postPlace.getLatLng().longitude),
+                                    postPlace.getAddress().toString(),
+                                    postPlace.getPhoneNumber().toString());
+                            PostInfo postInfo = new PostInfo("1", "1", title, description, postPlaceInfo, postTime, postDate, user, currentTime);
+                            databaseReference.child("publicmeetup").push().setValue(postInfo).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                @Override
+                                public void onSuccess(Void aVoid) {
 
-                                    @Override
-                                    public void onCancelled(DatabaseError databaseError) {
+                                    databaseReference.child("publicmeetup").addValueEventListener(new ValueEventListener() {
+                                        @Override
+                                        public void onDataChange(DataSnapshot dataSnapshot) {
+                                            addID(dataSnapshot);
+                                            progressBar.setVisibility(View.GONE);
+                                            startActivity(new Intent(CreatePublicPostActivity.this, HomeActivity.class));
+                                            finish();
+                                        }
 
-                                    }
-                                });
+                                        @Override
+                                        public void onCancelled(DatabaseError databaseError) {
 
-                            }
-                        });
+                                        }
+                                    });
+
+                                }
+                            });
+                        } catch (Exception e) {
+                            progressBar.setVisibility(View.GONE);
+                            Toast.makeText(getApplicationContext(), "Select Event Venue", Toast.LENGTH_SHORT).show();
+                            e.printStackTrace();
+                        }
                     }
                 });
 

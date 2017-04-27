@@ -78,14 +78,25 @@ public class PrivatePostListAdapter extends BaseAdapter {
         TextView TimeView = (TextView) v.findViewById(R.id.Time);
         TextView DateView = (TextView) v.findViewById(R.id.Date);
         TextView locationTV = (TextView) v.findViewById(R.id.postLocationTV);
-        StorageReference storageReference = FirebaseStorage.getInstance().getReference();
-        storageReference.child("Photos").child(mPostList.get(i).getHost().getId()).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-            @Override
-            public void onSuccess(Uri uri) {
-                Picasso.with(v.getContext()).load(uri)
-                        .resize(200, 200).centerCrop().into(postIcon);
-            }
-        });
+        try {
+            Thread myThread = new Thread(new Runnable() {
+                @Override
+                public void run() {
+                    StorageReference storageReference = FirebaseStorage.getInstance().getReference();
+                    storageReference.child("Photos").child(mPostList.get(i).getHost().getId()).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                        @Override
+                        public void onSuccess(Uri uri) {
+                            Picasso.with(v.getContext()).load(uri)
+                                    .resize(200, 200).centerCrop().into(postIcon);
+                        }
+                    });
+                }
+            });
+            myThread.setPriority(Thread.MAX_PRIORITY);
+            myThread.start();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
         postIcon.setOnClickListener(new View.OnClickListener() {
             @Override

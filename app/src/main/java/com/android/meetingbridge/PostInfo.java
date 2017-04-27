@@ -8,7 +8,6 @@ public class PostInfo {
     private PostDate postDate;
     private GroupInfo groupInfo;
 
-
     public PostInfo() {
         //Null Constructor
     }

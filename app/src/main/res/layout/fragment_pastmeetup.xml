@@ -4,7 +4,6 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:paddingBottom="50sp"
     tools:context="com.android.meetingbridge.FutureMeetupFragment">
 
     <LinearLayout
@@ -47,7 +46,7 @@
         android:id="@+id/postsListView"
         style="@android:style/Widget.DeviceDefault.ExpandableListView"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="match_parent"
         android:dividerHeight="5dp"
         android:footerDividersEnabled="true" />
 

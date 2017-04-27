@@ -35,6 +35,8 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
+import static android.text.TextUtils.isEmpty;
+
 public class CreatePostActivity extends AppCompatActivity {
 
     private DatabaseReference databaseReference;
@@ -133,6 +135,28 @@ public class CreatePostActivity extends AppCompatActivity {
                                 checkNetwork();
                                 final ProgressBar progressBar = (ProgressBar) findViewById(R.id.progressBar);
                                 progressBar.setVisibility(View.VISIBLE);
+                                if (isEmpty(postTitle.getText())) {
+                                    postTitle.setError("Enter Event Title");
+                                    progressBar.setVisibility(View.GONE);
+                                    return;
+                                }
+                                if (isEmpty(postDescription.getText())) {
+                                    postDescription.setError("Enter Event Details");
+                                    progressBar.setVisibility(View.GONE);
+                                    return;
+                                }
+                                if (isEmpty(timeView.getText()) || timeView.getText().equals("Select Event Time")) {
+                                    timeView.setError("Select Event Time");
+                                    progressBar.setVisibility(View.GONE);
+                                    Toast.makeText(getApplicationContext(), "Select Event Time", Toast.LENGTH_SHORT).show();
+                                    return;
+                                }
+                                if (isEmpty(dateView.getText()) || dateView.getText().equals("Select Event Date")) {
+                                    dateView.setError("Select Event Date");
+                                    Toast.makeText(getApplicationContext(), "Select Event Date", Toast.LENGTH_SHORT).show();
+                                    progressBar.setVisibility(View.GONE);
+                                    return;
+                                }
                                 final String currentTime = new SimpleDateFormat("dd-M-yy hh:mm a").format(new Date());
                                 final String title = postTitle.getText().toString();
                                 final String description = postDescription.getText().toString();
@@ -146,39 +170,45 @@ public class CreatePostActivity extends AppCompatActivity {
                                 postDate.setDay(dateArray[0]);
                                 postDate.setMonth(dateArray[1]);
                                 postDate.setYear(dateArray[2]);
-                                PostPlaceInfo postPlaceInfo = new PostPlaceInfo(postPlace.getId(),
-                                        postPlace.getName().toString(),
-                                        String.valueOf(postPlace.getLatLng().latitude),
-                                        String.valueOf(postPlace.getLatLng().longitude),
-                                        postPlace.getAddress().toString(),
-                                        postPlace.getPhoneNumber().toString());
-                                final PostInfo postInfo = new PostInfo("1", "2", title, description, postPlaceInfo, postTime,
-                                        postDate, user, currentTime, groupInfos.get(temp));
-                                postInfo.setPostType(type);
+                                try {
+                                    PostPlaceInfo postPlaceInfo = new PostPlaceInfo(postPlace.getId(),
+                                            postPlace.getName().toString(),
+                                            String.valueOf(postPlace.getLatLng().latitude),
+                                            String.valueOf(postPlace.getLatLng().longitude),
+                                            postPlace.getAddress().toString(),
+                                            postPlace.getPhoneNumber().toString());
 
-                                databaseReference.child("Posts").push().setValue(postInfo).addOnSuccessListener(new OnSuccessListener<Void>() {
-                                    @Override
-                                    public void onSuccess(Void aVoid) {
-                                        Toast.makeText(CreatePostActivity.this, "Posted!", Toast.LENGTH_SHORT).show();
+                                    final PostInfo postInfo = new PostInfo("1", "2", title, description, postPlaceInfo, postTime,
+                                            postDate, user, currentTime, groupInfos.get(temp));
+                                    postInfo.setPostType(type);
 
-                                        databaseReference.child("Posts").addValueEventListener(new ValueEventListener() {
-                                            @Override
-                                            public void onDataChange(DataSnapshot dataSnapshot) {
-                                                addID(dataSnapshot);
-                                                progressBar.setVisibility(View.GONE);
-                                                Intent intent = new Intent(CreatePostActivity.this, GroupActivity.class);
-                                                intent.putExtra("id", id);
-                                                startActivity(intent);
-                                                finish();
-                                            }
+                                    databaseReference.child("Posts").push().setValue(postInfo).addOnSuccessListener(new OnSuccessListener<Void>() {
+                                        @Override
+                                        public void onSuccess(Void aVoid) {
+                                            Toast.makeText(CreatePostActivity.this, "Posted!", Toast.LENGTH_SHORT).show();
+                                            databaseReference.child("Posts").addValueEventListener(new ValueEventListener() {
+                                                @Override
+                                                public void onDataChange(DataSnapshot dataSnapshot) {
+                                                    addID(dataSnapshot);
+                                                    progressBar.setVisibility(View.GONE);
+                                                    Intent intent = new Intent(CreatePostActivity.this, GroupActivity.class);
+                                                    intent.putExtra("id", id);
+                                                    startActivity(intent);
+                                                    finish();
+                                                }
 
-                                            @Override
-                                            public void onCancelled(DatabaseError databaseError) {
+                                                @Override
+                                                public void onCancelled(DatabaseError databaseError) {
 
-                                            }
-                                        });
-                                    }
-                                });
+                                                }
+                                            });
+                                        }
+                                    });
+                                } catch (Exception e) {
+                                    progressBar.setVisibility(View.GONE);
+                                    Toast.makeText(getApplicationContext(), "Select Event Venue", Toast.LENGTH_SHORT).show();
+                                    e.printStackTrace();
+                                }
                             }
                         });
 
@@ -200,6 +230,7 @@ public class CreatePostActivity extends AppCompatActivity {
 
 
     }
+
 
     private void callPlaceAutocompleteActivityIntent() {
         try {

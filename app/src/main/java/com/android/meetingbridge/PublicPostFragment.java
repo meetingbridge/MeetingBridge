@@ -1,8 +1,12 @@
 package com.android.meetingbridge;
 
+import android.app.NotificationManager;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.NotificationCompat;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -11,6 +15,7 @@ import android.widget.Button;
 import android.widget.ListView;
 import android.widget.TextView;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -20,6 +25,8 @@ import com.google.firebase.database.ValueEventListener;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+
+import static android.content.Context.NOTIFICATION_SERVICE;
 
 public class PublicPostFragment extends Fragment {
 
@@ -52,6 +59,8 @@ public class PublicPostFragment extends Fragment {
 
         DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
         databaseReference.child("publicmeetup").addValueEventListener(new ValueEventListener() {
+            boolean check = true;
+
             @Override
             public void onDataChange(final DataSnapshot dataSnapshot) {
                 final ArrayList<PostInfo> temp = new ArrayList<>();
@@ -76,9 +85,31 @@ public class PublicPostFragment extends Fragment {
                             return rhs.getPostingTime().compareTo(lhs.getPostingTime());
                         }
                     });
+
+                    PostInfo p = temp.get(0);
+                    if (check) {
+                        if (!p.getHost().getEmail().equals(FirebaseAuth.getInstance().getCurrentUser().getEmail())) {
+                            try {
+                                Bitmap bm = BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher);
+                                NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(getActivity())
+                                        .setContentTitle(p.getPostTitle())
+                                        .setSmallIcon(R.mipmap.ic_launcher_transparent)
+                                        .setLargeIcon(bm)
+                                        .setContentText(p.getHost().getName() + " posted a new Public Event.");
+                                NotificationManager notificationManager = (NotificationManager) getActivity().getSystemService(NOTIFICATION_SERVICE);
+                                notificationManager.notify(NotificationID.getID(), mBuilder.build());
+                                check = false;
+                            } catch (Exception e) {
+                                e.printStackTrace();
+                            }
+                        }
+
+                    } else {
+                        check = true;
+                    }
+                    PublicPostListAdapter adapter = new PublicPostListAdapter(getActivity(), temp);
+                    postListView.setAdapter(adapter);
                 }
-                PublicPostListAdapter adapter = new PublicPostListAdapter(getActivity(), temp);
-                postListView.setAdapter(adapter);
             }
 
             @Override

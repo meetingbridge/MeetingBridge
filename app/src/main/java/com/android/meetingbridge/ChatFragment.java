@@ -1,7 +1,11 @@
 package com.android.meetingbridge;
 
+import android.app.NotificationManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.NotificationCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,6 +25,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 
+import static android.content.Context.NOTIFICATION_SERVICE;
 import static android.text.TextUtils.isEmpty;
 
 public class ChatFragment extends Fragment {
@@ -63,10 +68,33 @@ public class ChatFragment extends Fragment {
                     ArrayList<GroupInfo> groupInfos = getUserGroups(dataSnapshot);
                     final GroupInfo currentGroup = groupInfos.get(a);
                     databaseReference.child("Chat").child(currentGroup.getGroupId()).addValueEventListener(new ValueEventListener() {
+                        boolean check = true;
+
                         @Override
                         public void onDataChange(DataSnapshot dataSnapshot) {
                             ArrayList<ChatInfo> chatInfos = showMesssages(dataSnapshot);
                             if (chatInfos.size() > 0) {
+                                ChatInfo c = chatInfos.get(chatInfos.size() - 1);
+                                if (check) {
+                                    if (!c.getHost().getEmail().equals(FirebaseAuth.getInstance().getCurrentUser().getEmail())) {
+                                        try {
+                                            Bitmap bm = BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher);
+                                            NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(getActivity())
+                                                    .setContentTitle(c.getHost().getName() + " in " + c.getCurrentGroup().getGroupName() + ".")
+                                                    .setSmallIcon(R.mipmap.ic_launcher_transparent)
+                                                    .setLargeIcon(bm)
+                                                    .setContentText(c.getMessage());
+                                            NotificationManager notificationManager = (NotificationManager) getActivity().getSystemService(NOTIFICATION_SERVICE);
+                                            notificationManager.notify(NotificationID.getID(), mBuilder.build());
+                                            check = false;
+                                        } catch (Exception e) {
+                                            e.printStackTrace();
+                                        }
+                                    }
+
+                                } else {
+                                    check = true;
+                                }
                                 ChatListAdapter adapter = new ChatListAdapter(getActivity(), chatInfos);
                                 chatListView.setAdapter(adapter);
                             }
