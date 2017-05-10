@@ -85,10 +85,6 @@ public class UpdateProfile extends AppCompatActivity {
                             Toast.makeText(UpdateProfile.this, "Select Gender", Toast.LENGTH_SHORT).show();
                             return;
                         }
-                        if (uri == null) {
-                            Toast.makeText(UpdateProfile.this, "Select Profile Picture", Toast.LENGTH_SHORT).show();
-                            return;
-                        }
                         progressBar.setVisibility(View.VISIBLE);
                         final userInfo user_Info = new userInfo(u.getId(), fullName.getText().toString(), contactNo.getText().toString(), gender.getText().toString(), u.getEmail(), u.getLat(), u.getLng());
                         databaseReference.child("Users").child(u.getId()).setValue(user_Info).addOnCompleteListener(new OnCompleteListener<Void>() {
