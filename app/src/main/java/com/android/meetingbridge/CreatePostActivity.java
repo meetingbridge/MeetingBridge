@@ -179,7 +179,7 @@ public class CreatePostActivity extends AppCompatActivity {
                                             postPlace.getPhoneNumber().toString());
 
                                     final PostInfo postInfo = new PostInfo("1", "2", title, description, postPlaceInfo, postTime,
-                                            postDate, user, currentTime, groupInfos.get(temp));
+                                            postDate, user, currentTime, groupInfos.get(temp), true);
                                     postInfo.setPostType(type);
 
                                     databaseReference.child("Posts").push().setValue(postInfo).addOnSuccessListener(new OnSuccessListener<Void>() {
@@ -190,6 +190,7 @@ public class CreatePostActivity extends AppCompatActivity {
                                                 @Override
                                                 public void onDataChange(DataSnapshot dataSnapshot) {
                                                     addID(dataSnapshot);
+
                                                     progressBar.setVisibility(View.GONE);
                                                     Intent intent = new Intent(CreatePostActivity.this, GroupActivity.class);
                                                     intent.putExtra("id", id);

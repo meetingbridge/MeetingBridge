@@ -1,21 +1,14 @@
 package com.android.meetingbridge;
 
-import android.app.NotificationManager;
 import android.content.Intent;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.NotificationCompat;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ListView;
-import android.widget.TextView;
 
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -26,9 +19,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 
-import static android.content.Context.NOTIFICATION_SERVICE;
-
 public class PublicPostFragment extends Fragment {
+
+    public static Boolean check = true;
 
     public PublicPostFragment() {
         // Required empty public constructor
@@ -57,25 +50,20 @@ public class PublicPostFragment extends Fragment {
         final ListView postListView = (ListView) rootView.findViewById(R.id.postListView);
         postListView.setEmptyView(rootView.findViewById(R.id.emptyElement));
 
-        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
-        databaseReference.child("publicmeetup").addValueEventListener(new ValueEventListener() {
-            boolean check = true;
+        final DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference();
+        databaseReference.child("PublicPosts").addValueEventListener(new ValueEventListener() {
+
 
             @Override
             public void onDataChange(final DataSnapshot dataSnapshot) {
                 final ArrayList<PostInfo> temp = new ArrayList<>();
-                new Thread(new Runnable() {
-                    @Override
-                    public void run() {
-                        ArrayList<PostInfo> postInfos = showPosts(dataSnapshot);
+                ArrayList<PostInfo> postInfos = showPosts(dataSnapshot);
 
-                        for (int i = 0; i < postInfos.size(); i++) {
-                            if (!searchArray(postInfos.get(i).getPostId(), temp)) {
-                                temp.add(0, postInfos.get(i));
-                            }
-                        }
+                for (int i = 0; i < postInfos.size(); i++) {
+                    if (!searchArray(postInfos.get(i).getPostId(), temp)) {
+                        temp.add(0, postInfos.get(i));
                     }
-                }).start();
+                }
 
 
                 if (temp.size() > 0) {
@@ -86,29 +74,9 @@ public class PublicPostFragment extends Fragment {
                         }
                     });
 
-                    PostInfo p = temp.get(0);
-                    if (check) {
-                        if (!p.getHost().getEmail().equals(FirebaseAuth.getInstance().getCurrentUser().getEmail())) {
-                            try {
-                                Bitmap bm = BitmapFactory.decodeResource(getResources(), R.drawable.ic_launcher);
-                                NotificationCompat.Builder mBuilder = new NotificationCompat.Builder(getActivity())
-                                        .setContentTitle(p.getPostTitle())
-                                        .setSmallIcon(R.mipmap.ic_launcher_transparent)
-                                        .setLargeIcon(bm)
-                                        .setContentText(p.getHost().getName() + " posted a new Public Event.");
-                                NotificationManager notificationManager = (NotificationManager) getActivity().getSystemService(NOTIFICATION_SERVICE);
-                                notificationManager.notify(NotificationID.getID(), mBuilder.build());
-                                check = false;
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                        }
-
-                    } else {
-                        check = true;
-                    }
                     PublicPostListAdapter adapter = new PublicPostListAdapter(getActivity(), temp);
                     postListView.setAdapter(adapter);
+
                 }
             }
 
@@ -128,15 +96,6 @@ public class PublicPostFragment extends Fragment {
             postInfos.add(0, postInfo);
         }
         return postInfos;
-    }
-
-    private TextView emptyView() {
-        TextView emptyView = new TextView(getActivity());
-        emptyView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-        emptyView.setText("Public Meetups will appear here!");
-        emptyView.setTextColor(getResources().getColor(R.color.colorPrimaryDark));
-        emptyView.setGravity(Gravity.CENTER_HORIZONTAL | Gravity.CENTER_VERTICAL);
-        return emptyView;
     }
 
     private boolean searchArray(String postId, ArrayList<PostInfo> postInfos) {

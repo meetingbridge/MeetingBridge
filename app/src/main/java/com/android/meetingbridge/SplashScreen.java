@@ -25,6 +25,21 @@ public class SplashScreen extends Activity {
         Button signup = (Button) findViewById(R.id.signup);
         Button login = (Button) findViewById(R.id.login);
         FirebaseUser currentUser = FirebaseAuth.getInstance().getCurrentUser();
+        signup.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(SplashScreen.this, SignupActivity.class));
+                finish();
+            }
+        });
+        login.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                startActivity(new Intent(SplashScreen.this, LoginActivity.class));
+                finish();
+
+            }
+        });
         if (currentUser != null) {
             signup.setVisibility(View.GONE);
             login.setVisibility(View.GONE);
@@ -41,22 +56,7 @@ public class SplashScreen extends Activity {
                 }
             });
             myThread.start();
-        } else {
-            signup.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    startActivity(new Intent(SplashScreen.this, SignupActivity.class));
-                    finish();
-                }
-            });
-            login.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View v) {
-                    startActivity(new Intent(SplashScreen.this, LoginActivity.class));
-                    finish();
-
-                }
-            });
         }
+
     }
 }

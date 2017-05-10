@@ -75,6 +75,9 @@
         <activity
             android:name=".CreatePublicPostActivity"
             android:theme="@style/AppTheme.NoActionBar" />
+        <activity
+            android:name="com.android.meetingbridge.UpdateProfile"
+            android:theme="@style/AppTheme.NoActionBar" />
     </application>
 
 </manifest>

@@ -2,15 +2,18 @@ package com.android.meetingbridge;
 
 import android.app.Dialog;
 import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.squareup.picasso.Picasso;
@@ -83,6 +86,16 @@ public class ChatListAdapter extends BaseAdapter {
                 userContact.setText(mChatList.get(i).getHost().getContactNum());
                 userEmail.setText(mChatList.get(i).getHost().getEmail());
                 userGender.setText(mChatList.get(i).getHost().getGender());
+                Button update = (Button) dialog.findViewById(R.id.updateprofile);
+                if (mChatList.get(i).getHost().getEmail().equals(FirebaseAuth.getInstance().getCurrentUser())) {
+                    update.setVisibility(View.VISIBLE);
+                }
+                update.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        mContext.startActivity(new Intent(mContext, UpdateProfile.class));
+                    }
+                });
                 StorageReference storageReference = FirebaseStorage.getInstance().getReference();
                 storageReference.child("Photos").child(mChatList.get(i).getHost().getId()).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                     @Override

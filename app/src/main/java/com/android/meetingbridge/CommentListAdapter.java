@@ -41,10 +41,11 @@ public class CommentListAdapter extends BaseAdapter {
     }
 
     public View getView(final int i, View view, ViewGroup viewGroup) {
-        final View v = View.inflate(mContext, R.layout.commentlayout, null);
+        View v = View.inflate(mContext, R.layout.commentlayout, null);
         TextView commentTime = (TextView) v.findViewById(R.id.commentTimeTV);
         TextView commentHost = (TextView) v.findViewById(R.id.hostNameTV);
         TextView commentDiscription = (TextView) v.findViewById(R.id.commentDescriptionTV);
+
         commentHost.setText(mCommentList.get(i).getHost().getName());
         commentDiscription.setText(mCommentList.get(i).getCommentDescription());
         commentTime.setText(mCommentList.get(i).getCommentTime());
@@ -53,16 +54,21 @@ public class CommentListAdapter extends BaseAdapter {
         final StorageReference storageReference = FirebaseStorage.getInstance().getReference();
 
         try {
+            final View finalV = v;
             Thread my = new Thread(new Runnable() {
                 @Override
                 public void run() {
-                    storageReference.child("Photos").child(mCommentList.get(i).getHost().getId()).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                        @Override
-                        public void onSuccess(Uri uri) {
-                            Picasso.with(v.getContext()).load(uri)
-                                    .resize(200, 200).centerCrop().into(hostIcon);
-                        }
-                    });
+                    try {
+                        storageReference.child("Photos").child(mCommentList.get(i).getHost().getId()).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                            @Override
+                            public void onSuccess(Uri uri) {
+                                Picasso.with(finalV.getContext()).load(uri)
+                                        .resize(200, 200).centerCrop().into(hostIcon);
+                            }
+                        });
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
                 }
             });
             my.setPriority(Thread.MAX_PRIORITY);

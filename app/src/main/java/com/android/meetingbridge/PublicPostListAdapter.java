@@ -123,6 +123,16 @@ public class PublicPostListAdapter extends BaseAdapter {
                 userContact.setText(mPostList.get(i).getHost().getContactNum());
                 userEmail.setText(mPostList.get(i).getHost().getEmail());
                 userGender.setText(mPostList.get(i).getHost().getGender());
+                Button update = (Button) dialog.findViewById(R.id.updateprofile);
+                if (mPostList.get(i).getHost().getEmail().equals(FirebaseAuth.getInstance().getCurrentUser().getEmail())) {
+                    update.setVisibility(View.VISIBLE);
+                }
+                update.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        mContext.startActivity(new Intent(mContext, UpdateProfile.class));
+                    }
+                });
                 Thread myThread = new Thread(new Runnable() {
                     @Override
                     public void run() {
@@ -159,6 +169,16 @@ public class PublicPostListAdapter extends BaseAdapter {
                 userContact.setText(mPostList.get(i).getHost().getContactNum());
                 userEmail.setText(mPostList.get(i).getHost().getEmail());
                 userGender.setText(mPostList.get(i).getHost().getGender());
+                Button update = (Button) dialog.findViewById(R.id.updateprofile);
+                if (mPostList.get(i).getHost().getEmail().equals(FirebaseAuth.getInstance().getCurrentUser().getEmail())) {
+                    update.setVisibility(View.VISIBLE);
+                }
+                update.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        mContext.startActivity(new Intent(mContext, UpdateProfile.class));
+                    }
+                });
                 StorageReference storageReference = FirebaseStorage.getInstance().getReference();
                 storageReference.child("Photos").child(mPostList.get(i).getHost().getId()).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                     @Override
@@ -211,7 +231,7 @@ public class PublicPostListAdapter extends BaseAdapter {
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         final userInfo user = dataSnapshot.getValue(userInfo.class);
                         databaseReference.child("Comments")
-                                .child("publicmeetup")
+                                .child("PublicPosts")
                                 .child(mPostList.get(i).getPostId())
                                 .addValueEventListener(new ValueEventListener() {
                                     @Override
@@ -225,7 +245,7 @@ public class PublicPostListAdapter extends BaseAdapter {
                                             public void onClick(final View v) {
                                                 commentInfos.add(0, new CommentInfo(currentTime, user, commentBox.getText().toString()));
                                                 databaseReference.child("Comments")
-                                                        .child("publicmeetup")
+                                                        .child("PublicPosts")
                                                         .child(mPostList.get(i).getPostId()).setValue(commentInfos);
                                                 commentBox.setText("");
                                                 commentLV.setAdapter(adapter);
@@ -246,6 +266,17 @@ public class PublicPostListAdapter extends BaseAdapter {
                                                         userContact.setText(commentInfos.get(position).getHost().getContactNum());
                                                         userEmail.setText(commentInfos.get(position).getHost().getEmail());
                                                         userGender.setText(commentInfos.get(position).getHost().getGender());
+                                                        Button update = (Button) dialog.findViewById(R.id.updateprofile);
+                                                        if (commentInfos.get(position).getHost().getEmail().equals(FirebaseAuth.getInstance().getCurrentUser().getEmail())) {
+                                                            update.setVisibility(View.VISIBLE);
+                                                        }
+                                                        update.setOnClickListener(new View.OnClickListener() {
+                                                            @Override
+                                                            public void onClick(View v) {
+                                                                mContext.startActivity(new Intent(mContext, UpdateProfile.class));
+
+                                                            }
+                                                        });
 
                                                         try {
                                                             StorageReference storageReference = FirebaseStorage.getInstance().getReference();

@@ -46,4 +46,13 @@
         android:text="Gender"
         android:textSize="20dp" />
 
+    <Button
+        android:id="@+id/updateprofile"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@color/colorAccent"
+        android:text="Update Profile"
+        android:textColor="@color/colorText"
+        android:visibility="gone" />
+
 </LinearLayout>

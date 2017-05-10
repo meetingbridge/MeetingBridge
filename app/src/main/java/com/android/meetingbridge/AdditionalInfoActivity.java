@@ -153,7 +153,8 @@ public class AdditionalInfoActivity extends PermissionClass implements GoogleApi
                     ex.printStackTrace();
                 }
                 if (!gps_enabled && !network_enabled) {
-                    AlertDialog.Builder dialog = new AlertDialog.Builder(getApplicationContext());
+                    progressBar.setVisibility(View.GONE);
+                    AlertDialog.Builder dialog = new AlertDialog.Builder(AdditionalInfoActivity.this);
                     dialog.setMessage("Location Services not enabled!");
                     dialog.setPositiveButton("Enable Location Services", new DialogInterface.OnClickListener() {
                         @Override

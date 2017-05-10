@@ -7,13 +7,14 @@ public class PostInfo {
     private PostTime postTime;
     private PostDate postDate;
     private GroupInfo groupInfo;
+    private Boolean notify;
 
     public PostInfo() {
         //Null Constructor
     }
 
     public PostInfo(String postId, String postType, String postTitle, String postDescription, PostPlaceInfo postLocation,
-                    PostTime postTime, PostDate postDate, userInfo host, String postingTime) {
+                    PostTime postTime, PostDate postDate, userInfo host, String postingTime, Boolean notify) {
         this.host = host;
         this.postId = postId;
         this.postTitle = postTitle;
@@ -23,10 +24,11 @@ public class PostInfo {
         this.postLocation = postLocation;
         this.postTime = postTime;
         this.postDate = postDate;
+        this.notify = notify;
     }
 
     public PostInfo(String postId, String postType, String postTitle, String postDescription, PostPlaceInfo postLocation,
-                    PostTime postTime, PostDate postDate, userInfo host, String postingTime, GroupInfo groupInfo) {
+                    PostTime postTime, PostDate postDate, userInfo host, String postingTime, GroupInfo groupInfo, Boolean notify) {
         this.postTitle = postTitle;
         this.postId = postId;
         this.postType = postType;
@@ -37,6 +39,15 @@ public class PostInfo {
         this.postLocation = postLocation;
         this.postingTime = postingTime;
         this.groupInfo = groupInfo;
+        this.notify = notify;
+    }
+
+    public Boolean getNotify() {
+        return notify;
+    }
+
+    public void setNotify(Boolean notify) {
+        this.notify = notify;
     }
 
     public String getPostType() {

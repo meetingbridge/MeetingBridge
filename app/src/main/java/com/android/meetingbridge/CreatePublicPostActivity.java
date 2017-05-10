@@ -143,17 +143,20 @@ public class CreatePublicPostActivity extends AppCompatActivity {
                                     String.valueOf(postPlace.getLatLng().longitude),
                                     postPlace.getAddress().toString(),
                                     postPlace.getPhoneNumber().toString());
-                            PostInfo postInfo = new PostInfo("1", "1", title, description, postPlaceInfo, postTime, postDate, user, currentTime);
-                            databaseReference.child("publicmeetup").push().setValue(postInfo).addOnSuccessListener(new OnSuccessListener<Void>() {
+                            PostInfo postInfo = new PostInfo("1", "1", title, description, postPlaceInfo, postTime, postDate, user, currentTime, true);
+                            databaseReference.child("PublicPosts").push().setValue(postInfo).addOnSuccessListener(new OnSuccessListener<Void>() {
                                 @Override
                                 public void onSuccess(Void aVoid) {
 
-                                    databaseReference.child("publicmeetup").addValueEventListener(new ValueEventListener() {
+                                    Toast.makeText(CreatePublicPostActivity.this, "Posted!", Toast.LENGTH_SHORT).show();
+                                    databaseReference.child("PublicPosts").addValueEventListener(new ValueEventListener() {
                                         @Override
                                         public void onDataChange(DataSnapshot dataSnapshot) {
                                             addID(dataSnapshot);
                                             progressBar.setVisibility(View.GONE);
+
                                             startActivity(new Intent(CreatePublicPostActivity.this, HomeActivity.class));
+
                                             finish();
                                         }
 
@@ -165,7 +168,11 @@ public class CreatePublicPostActivity extends AppCompatActivity {
 
                                 }
                             });
-                        } catch (Exception e) {
+                        } catch (
+                                Exception e
+                                )
+
+                        {
                             progressBar.setVisibility(View.GONE);
                             Toast.makeText(getApplicationContext(), "Select Event Venue", Toast.LENGTH_SHORT).show();
                             e.printStackTrace();
@@ -184,16 +191,19 @@ public class CreatePublicPostActivity extends AppCompatActivity {
     }
 
     private void addID(DataSnapshot dataSnapshot) {
+
         for (DataSnapshot data : dataSnapshot.getChildren()) {
             PostInfo p = data.getValue(PostInfo.class);
             if (String.valueOf(p.getPostId()).equals("1")) {
                 String k = data.getKey();
                 p.setPostId(k);
-                databaseReference.child("publicmeetup").child(k).setValue(p);
+
+
+                databaseReference.child("PublicPosts").child(k).setValue(p);
                 break;
             }
-
         }
+
     }
 
     private void checkNetwork() {

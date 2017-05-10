@@ -4,6 +4,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
@@ -32,7 +33,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
+import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -60,6 +64,9 @@ public class HomeActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, GoogleApiClient.ConnectionCallbacks,
         GoogleApiClient.OnConnectionFailedListener {
 
+    public static final String PREFS = "sharedPrefs";
+    public static Boolean isLocationEnabled;
+    private static SharedPreferences examplePrefs;
     private FirebaseAuth.AuthStateListener authListener;
     private FirebaseAuth auth;
     private ImageView imageView;
@@ -71,6 +78,7 @@ public class HomeActivity extends AppCompatActivity
     private DatabaseReference databaseReference;
     private StorageReference storageReference;
     private FirebaseUser currentUser;
+    private NavigationView navigationView;
 
     //nnjnjn
     @Override
@@ -118,12 +126,19 @@ public class HomeActivity extends AppCompatActivity
             }
         });
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
+        navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         Menu menu = navigationView.getMenu();
         subMenu = menu.addSubMenu("Groups");
 
+
         View headerView = navigationView.getHeaderView(0);
+        navigationView.getMenu().findItem(R.id.nav_location)
+                .setActionView(new Switch(this));
+        Switch ding = ((Switch) navigationView.getMenu().findItem(R.id.nav_location).getActionView());
+        examplePrefs = getSharedPreferences(PREFS, 0);
+        Boolean isDingChecked = examplePrefs.getBoolean("location", ding.isChecked());
+        ding.setChecked(isDingChecked);
 
 
         uNameTV = (TextView) headerView.findViewById(R.id.uName);
@@ -184,6 +199,17 @@ public class HomeActivity extends AppCompatActivity
                         userContact.setText(user.getContactNum());
                         userEmail.setText(user.getEmail());
                         userGender.setText(user.getGender());
+                        Button update = (Button) dialog.findViewById(R.id.updateprofile);
+                        if (user.getEmail().equals(FirebaseAuth.getInstance().getCurrentUser().getEmail())) {
+                            update.setVisibility(View.VISIBLE);
+                        }
+                        update.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                startActivity(new Intent(getApplicationContext(), UpdateProfile.class));
+                                finish();
+                            }
+                        });
                         storageReference.child("Photos").child(user.getId()).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                             @Override
                             public void onSuccess(Uri uri) {
@@ -329,7 +355,7 @@ public class HomeActivity extends AppCompatActivity
 
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
-    public boolean onNavigationItemSelected(MenuItem item) {
+    public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         // Handle navigation view item clicks here.
         int id = item.getItemId();
 
@@ -338,10 +364,11 @@ public class HomeActivity extends AppCompatActivity
             startActivity(new Intent(HomeActivity.this, LoginActivity.class));
             finish();
 
-        } else if (id == R.id.nav_slideshow) {
-
+        } else if (id == R.id.nav_location) {
+            ((Switch) item.getActionView()).toggle();
+            return true;
         } else if (id == R.id.nav_manage) {
-
+            startActivity(new Intent(getApplicationContext(), UpdateProfile.class));
         } else if (id == R.id.create_group) {
             startActivity(new Intent(HomeActivity.this, CreateGroupActivity.class));
 
@@ -378,17 +405,28 @@ public class HomeActivity extends AppCompatActivity
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
+        ShareMyLocation();
+    }
 
-
-        databaseReference.child("Users").child(currentUser.getUid()).addValueEventListener(new ValueEventListener() {
+    private void ShareMyLocation() {
+        ((Switch) navigationView.getMenu().findItem(R.id.nav_location).getActionView()).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                final userInfo user = dataSnapshot.getValue(userInfo.class);
-                databaseReference.child("Groups").addValueEventListener(new ValueEventListener() {
+            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+                isLocationEnabled = isChecked;
+                SharedPreferences.Editor editor = examplePrefs.edit();
+                editor.putBoolean("location", isLocationEnabled);
+                editor.apply();
+                if (((Switch) navigationView.getMenu().findItem(R.id.nav_location).getActionView()).isChecked()) {
+                    navigationView.getMenu().findItem(R.id.nav_location).setTitle("Sharing Enabled");
+                    Toast.makeText(HomeActivity.this, "Updated Location will be shared to private Groups!", Toast.LENGTH_SHORT).show();
+                } else {
+                    navigationView.getMenu().findItem(R.id.nav_location).setTitle("Sharing Disabled");
+                    Toast.makeText(HomeActivity.this, "Updated Location will NOT be Shared from now on!", Toast.LENGTH_SHORT).show();
+                }
+                databaseReference.child("Users").child(currentUser.getUid()).addValueEventListener(new ValueEventListener() {
                     @Override
-                    public void onDataChange(DataSnapshot dataSnapshot1) {
-
-                        final ArrayList<GroupInfo> groupInfos = getUserGroups(dataSnapshot1);
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        final userInfo user = dataSnapshot.getValue(userInfo.class);
 
                         try {
                             LocationManager lm = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
@@ -418,14 +456,6 @@ public class HomeActivity extends AppCompatActivity
                                         //get gps
                                     }
                                 });
-                                dialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-
-                                    @Override
-                                    public void onClick(DialogInterface paramDialogInterface, int paramInt) {
-                                        // TODO Auto-generated method stub
-
-                                    }
-                                });
                                 dialog.show();
                             } else {
                                 Thread thread = new Thread(new Runnable() {
@@ -441,18 +471,18 @@ public class HomeActivity extends AppCompatActivity
                                                 LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, new LocationListener() {
                                                     @Override
                                                     public void onLocationChanged(Location location) {
-
-                                                        userInfo user_Info = new userInfo(currentUser.getUid(), user.getName(), user.getContactNum(),
-                                                                user.getGender(), user.getEmail(), location.getLatitude(), location.getLongitude());
-                                                        databaseReference.child("Users").child(currentUser.getUid()).setValue(user_Info);
-
+                                                        if (isLocationEnabled) {
+                                                            userInfo user_Info = new userInfo(currentUser.getUid(), user.getName(), user.getContactNum(),
+                                                                    user.getGender(), user.getEmail(), location.getLatitude(), location.getLongitude());
+                                                            databaseReference.child("Users").child(currentUser.getUid()).setValue(user_Info);
+                                                        }
                                                     }
 
                                                 }, Looper.getMainLooper());
                                             } catch (Exception e) {
                                                 e.printStackTrace();
                                             }
-                                        }//
+                                        }
                                     }
 
                                 });
@@ -460,24 +490,22 @@ public class HomeActivity extends AppCompatActivity
                                 thread.start();
 
                             }
-                        } catch (Exception e) {
+                        } catch (
+                                Exception e
+                                )
+
+                        {
                             e.printStackTrace();
 
                         }
-                    }
 
+                    }
 
                     @Override
                     public void onCancelled(DatabaseError databaseError) {
 
                     }
                 });
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
             }
         });
     }

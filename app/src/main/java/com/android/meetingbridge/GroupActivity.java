@@ -4,6 +4,7 @@ import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.location.Location;
 import android.location.LocationManager;
@@ -33,8 +34,11 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.Window;
+import android.widget.Button;
+import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.ListView;
+import android.widget.Switch;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -64,6 +68,9 @@ import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 
+import static com.android.meetingbridge.HomeActivity.PREFS;
+import static com.android.meetingbridge.HomeActivity.isLocationEnabled;
+
 public class GroupActivity extends AppCompatActivity implements GoogleApiClient.ConnectionCallbacks, GoogleApiClient.OnConnectionFailedListener, NavigationView.OnNavigationItemSelectedListener {
     private FirebaseAuth auth;
     private FirebaseAuth.AuthStateListener authStateListener;
@@ -75,11 +82,11 @@ public class GroupActivity extends AppCompatActivity implements GoogleApiClient.
     private int PLACE_AUTOCOMPLETE_REQUEST_CODE = 1;
     private Place destination;
     private DatabaseReference databaseReference;
-
+    private NavigationView navigationView;
     private LocationRequest mLocationRequest;
     private GoogleApiClient mGoogleApiClient;
     private FirebaseUser currentUser;
-
+    private SharedPreferences examplePrefs;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,6 +94,7 @@ public class GroupActivity extends AppCompatActivity implements GoogleApiClient.
         setContentView(R.layout.activity_group);
         auth = FirebaseAuth.getInstance();
         checkNetwork();
+        buildGoogleApiClient();
 
         currentUser = FirebaseAuth.getInstance().getCurrentUser();
         authStateListener = new FirebaseAuth.AuthStateListener() {
@@ -124,8 +132,10 @@ public class GroupActivity extends AppCompatActivity implements GoogleApiClient.
         ViewPager mViewPager = (ViewPager) findViewById(R.id.container);
         mViewPager.setAdapter(mSectionsPagerAdapter);
 
+
         TabLayout tabLayout = (TabLayout) findViewById(R.id.tabs);
         tabLayout.setupWithViewPager(mViewPager);
+
 
         fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -137,7 +147,7 @@ public class GroupActivity extends AppCompatActivity implements GoogleApiClient.
         mViewPager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
             @Override
             public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
-                if (position == 4) {
+                if (position == 3) {
                     fab.show();
                     checkNetwork();
                     Toast.makeText(getApplicationContext(), "Tap Direction Button", Toast.LENGTH_SHORT).show();
@@ -149,7 +159,7 @@ public class GroupActivity extends AppCompatActivity implements GoogleApiClient.
 
             @Override
             public void onPageSelected(int position) {
-                if (position == 4) {
+                if (position == 3) {
                     fab.show();
                     checkNetwork();
                 } else {
@@ -168,12 +178,20 @@ public class GroupActivity extends AppCompatActivity implements GoogleApiClient.
         drawer.addDrawerListener(toggle);
         toggle.syncState();
 
-        NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view1);
+        navigationView = (NavigationView) findViewById(R.id.nav_view1);
         navigationView.setNavigationItemSelectedListener(this);
         subMenu = navigationView.getMenu().addSubMenu("Groups");
         MenuItem homeItem = navigationView.getMenu().findItem(R.id.homeActivity);
+
         homeItem.setVisible(true);
         View headerView = navigationView.getHeaderView(0);
+        navigationView.getMenu().findItem(R.id.nav_location)
+                .setActionView(new Switch(this));
+        Switch ding = ((Switch) navigationView.getMenu().findItem(R.id.nav_location).getActionView());
+        examplePrefs = getSharedPreferences(PREFS, 0);
+        Boolean isDingChecked = examplePrefs.getBoolean("location", ding.isChecked());
+        ding.setChecked(isDingChecked);
+
         uNameTV = (TextView) headerView.findViewById(R.id.uName);
         imageView = (ImageView) headerView.findViewById(R.id.profileIcon);
         uEmailTV = (TextView) headerView.findViewById(R.id.uEmail);
@@ -216,6 +234,17 @@ public class GroupActivity extends AppCompatActivity implements GoogleApiClient.
                         userContact.setText(userInfo.getContactNum());
                         userEmail.setText(userInfo.getEmail());
                         userGender.setText(userInfo.getGender());
+                        Button update = (Button) dialog.findViewById(R.id.updateprofile);
+                        if (userInfo.getEmail().equals(FirebaseAuth.getInstance().getCurrentUser().getEmail())) {
+                            update.setVisibility(View.VISIBLE);
+                        }
+                        update.setOnClickListener(new View.OnClickListener() {
+                            @Override
+                            public void onClick(View v) {
+                                startActivity(new Intent(getApplicationContext(), UpdateProfile.class));
+                                finish();
+                            }
+                        });
                         StorageReference storageReference = FirebaseStorage.getInstance().getReference();
                         storageReference.child("Photos").child(userInfo.getId()).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                             @Override
@@ -262,93 +291,105 @@ public class GroupActivity extends AppCompatActivity implements GoogleApiClient.
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
+        ShareMyLocation();
+    }
 
-
-        databaseReference.child("Users").child(currentUser.getUid()).addValueEventListener(new ValueEventListener() {
+    private void ShareMyLocation() {
+        ((Switch) navigationView.getMenu().findItem(R.id.nav_location).getActionView()).setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                final userInfo user = dataSnapshot.getValue(userInfo.class);
-
-                try {
-                    LocationManager lm = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
-                    boolean gps_enabled = false;
-                    boolean network_enabled = false;
-
-                    try {
-                        gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                    }
-
-                    try {
-                        network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-                    } catch (Exception ex) {
-                        ex.printStackTrace();
-                    }
-                    if (!gps_enabled && !network_enabled) {
-                        android.app.AlertDialog.Builder dialog = new android.app.AlertDialog.Builder(getApplicationContext());
-                        dialog.setMessage("Location Services not enabled!");
-                        dialog.setCancelable(false);
-                        dialog.setPositiveButton("Enable Location Services", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface paramDialogInterface, int paramInt) {
-                                Intent myIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                                startActivity(myIntent);
-                                //get gps
-                            }
-                        });
-                        dialog.setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
-
-                            @Override
-                            public void onClick(DialogInterface paramDialogInterface, int paramInt) {
-                                // TODO Auto-generated method stub
-
-                            }
-                        });
-                        dialog.show();
-                    } else {
-                        Thread myThread = new Thread(new Runnable() {
-                            @Override
-                            public void run() {
-                                mLocationRequest = LocationRequest.create();
-                                mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
-                                mLocationRequest.setInterval(10000);
-                                buildGoogleApiClient();
-                                if (ContextCompat.checkSelfPermission(getApplicationContext(),
-                                        android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                                    try {
-                                        LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, new LocationListener() {
-                                            @Override
-                                            public void onLocationChanged(Location location) {
-
-                                                userInfo user_Info = new userInfo(currentUser.getUid(), user.getName(), user.getContactNum(),
-                                                        user.getGender(), user.getEmail(), location.getLatitude(), location.getLongitude());
-
-                                                databaseReference.child("Users").child(currentUser.getUid()).setValue(user_Info);
-
-                                            }
-
-                                        }, Looper.getMainLooper());
-                                    } catch (Exception e) {
-                                        e.printStackTrace();
-                                    }
-                                }
-                            }
-                        });
-                        myThread.setPriority(Thread.MIN_PRIORITY);
-                        myThread.start();
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-
+            public void onCheckedChanged(CompoundButton buttonView, final boolean isChecked) {
+                SharedPreferences.Editor editor = examplePrefs.edit();
+                isLocationEnabled = isChecked;
+                editor.putBoolean("location", isLocationEnabled);
+                editor.apply();
+                if (((Switch) navigationView.getMenu().findItem(R.id.nav_location).getActionView()).isChecked()) {
+                    navigationView.getMenu().findItem(R.id.nav_location).setTitle("Sharing Enabled");
+                } else {
+                    navigationView.getMenu().findItem(R.id.nav_location).setTitle("Sharing Disabled");
                 }
+                databaseReference.child("Users").child(currentUser.getUid()).addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        final userInfo user = dataSnapshot.getValue(userInfo.class);
 
+                        try {
+                            LocationManager lm = (LocationManager) getApplicationContext().getSystemService(Context.LOCATION_SERVICE);
+                            boolean gps_enabled = false;
+                            boolean network_enabled = false;
+
+                            try {
+                                gps_enabled = lm.isProviderEnabled(LocationManager.GPS_PROVIDER);
+                            } catch (Exception ex) {
+                                ex.printStackTrace();
+                            }
+
+                            try {
+                                network_enabled = lm.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+                            } catch (Exception ex) {
+                                ex.printStackTrace();
+                            }
+                            if (!gps_enabled && !network_enabled) {
+                                android.app.AlertDialog.Builder dialog = new android.app.AlertDialog.Builder(getApplicationContext());
+                                dialog.setMessage("Location Services not enabled!");
+                                dialog.setCancelable(false);
+                                dialog.setPositiveButton("Enable Location Services", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+                                        Intent myIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                                        startActivity(myIntent);
+                                        //get gps
+                                    }
+                                });
+
+                                dialog.show();
+                            } else {
+                                Thread thread = new Thread(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        mLocationRequest = LocationRequest.create();
+                                        mLocationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
+                                        mLocationRequest.setInterval(10000);
+                                        if (ContextCompat.checkSelfPermission(getApplicationContext(),
+                                                android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+                                            try {
+
+                                                LocationServices.FusedLocationApi.requestLocationUpdates(mGoogleApiClient, mLocationRequest, new LocationListener() {
+                                                    @Override
+                                                    public void onLocationChanged(Location location) {
+                                                        if (isLocationEnabled) {
+                                                            userInfo user_Info = new userInfo(currentUser.getUid(), user.getName(), user.getContactNum(),
+                                                                    user.getGender(), user.getEmail(), location.getLatitude(), location.getLongitude());
+                                                            databaseReference.child("Users").child(currentUser.getUid()).setValue(user_Info);
+                                                        }
+                                                    }
+
+                                                }, Looper.getMainLooper());
+                                            } catch (Exception e) {
+                                                e.printStackTrace();
+                                            }
+                                        }
+                                    }
+
+                                });
+                                thread.setPriority(Thread.MIN_PRIORITY);
+                                thread.start();
+
+                            }
+                        } catch (Exception e) {
+                            e.printStackTrace();
+
+                        }
+
+                    }
+
+
+                    @Override
+                    public void onCancelled(DatabaseError databaseError) {
+
+                    }
+                });
             }
 
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-
-            }
         });
     }
 
@@ -444,10 +485,11 @@ public class GroupActivity extends AppCompatActivity implements GoogleApiClient.
             Intent intent = new Intent(GroupActivity.this, HomeActivity.class);
             startActivity(intent);
             finish();
-        } else if (id == R.id.nav_slideshow) {
-
+        } else if (id == R.id.nav_location) {
+            ((Switch) item.getActionView()).toggle();
+            return true;
         } else if (id == R.id.nav_manage) {
-
+            startActivity(new Intent(getApplicationContext(), UpdateProfile.class));
         } else if (id == R.id.create_group) {
             startActivity(new Intent(GroupActivity.this, CreateGroupActivity.class));
 
@@ -645,9 +687,9 @@ public class GroupActivity extends AppCompatActivity implements GoogleApiClient.
                 case 2:
                     return ChatFragment.newInstance(id);
                 case 3:
-                    return MembersFragment.newInstance(id);
-                case 4:
                     return MapsFragment.newInstance(id);
+                case 4:
+                    return MembersFragment.newInstance(id);
             }
             return null;
         }
@@ -655,9 +697,9 @@ public class GroupActivity extends AppCompatActivity implements GoogleApiClient.
 
         @Override
         public int getCount() {
-
             return 5;
         }
+
 
         @Override
         public CharSequence getPageTitle(int position) {
@@ -669,9 +711,16 @@ public class GroupActivity extends AppCompatActivity implements GoogleApiClient.
                 case 2:
                     return "Chat";
                 case 3:
-                    return "Members";
-                case 4:
                     return "Location";
+                case 4:
+//                    Drawable image = getDrawable(R.drawable.ic_location);
+//                    image.setBounds(0, 0, image.getIntrinsicWidth(), image.getIntrinsicHeight());
+//                    Spannable sb = new SpannableString(" ");
+//                    ImageSpan imageSpan = new ImageSpan(image, ImageSpan.ALIGN_BASELINE);
+//                    sb.setSpan(imageSpan, 0, 1, Spanned.SPAN_INCLUSIVE_INCLUSIVE);
+//                    return sb;
+                    return "Members";
+
             }
             return null;
         }

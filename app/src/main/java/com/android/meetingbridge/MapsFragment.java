@@ -132,7 +132,7 @@ public class MapsFragment extends SupportMapFragment
                 BitmapDescriptorFactory.HUE_YELLOW};
         mMap.clear();
         for (int i = 0; i < memberList.size(); i++) {
-            createMarker(memberList.get(i).getLat(), memberList.get(i).getLng(), memberList.get(i).getName(),
+            createMarker(memberList.get(i).getLat(), memberList.get(i).getLng(), memberList.get(i).getName() + " (Last Known Location)",
                     BitmapDescriptorFactory.defaultMarker(colours[new Random().nextInt(colours.length)]));
         }
     }

@@ -13,13 +13,13 @@
             android:icon="@android:drawable/ic_input_add"
             android:title="Create New Group" />
         <item
-            android:id="@+id/nav_slideshow"
-            android:icon="@drawable/ic_menu_slideshow"
-            android:title="Slideshow" />
+            android:id="@+id/nav_location"
+            android:icon="@drawable/ic_location_blue"
+            android:title="Current Location" />
         <item
             android:id="@+id/nav_manage"
             android:icon="@drawable/ic_menu_manage"
-            android:title="Tools" />
+            android:title="Update Profile" />
         <item
             android:id="@+id/signout"
             android:icon="@android:drawable/ic_media_previous"

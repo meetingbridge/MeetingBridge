@@ -3,6 +3,7 @@ package com.android.meetingbridge;
 import android.app.Dialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.graphics.Color;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -115,6 +116,16 @@ public class PrivatePostListAdapter extends BaseAdapter {
                 userContact.setText(mPostList.get(i).getHost().getContactNum());
                 userEmail.setText(mPostList.get(i).getHost().getEmail());
                 userGender.setText(mPostList.get(i).getHost().getGender());
+                Button update = (Button) dialog.findViewById(R.id.updateprofile);
+                if (mPostList.get(i).getHost().getEmail().equals(FirebaseAuth.getInstance().getCurrentUser().getEmail())) {
+                    update.setVisibility(View.VISIBLE);
+                }
+                update.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        mContext.startActivity(new Intent(mContext, UpdateProfile.class));
+                    }
+                });
                 Thread myThread = new Thread(new Runnable() {
                     @Override
                     public void run() {
@@ -151,6 +162,16 @@ public class PrivatePostListAdapter extends BaseAdapter {
                 userContact.setText(mPostList.get(i).getHost().getContactNum());
                 userEmail.setText(mPostList.get(i).getHost().getEmail());
                 userGender.setText(mPostList.get(i).getHost().getGender());
+                Button update = (Button) dialog.findViewById(R.id.updateprofile);
+                if (mPostList.get(i).getHost().getEmail().equals(FirebaseAuth.getInstance().getCurrentUser().getEmail())) {
+                    update.setVisibility(View.VISIBLE);
+                }
+                update.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        mContext.startActivity(new Intent(mContext, UpdateProfile.class));
+                    }
+                });
                 StorageReference storageReference = FirebaseStorage.getInstance().getReference();
                 storageReference.child("Photos").child(mPostList.get(i).getHost().getId()).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
                     @Override
@@ -254,6 +275,17 @@ public class PrivatePostListAdapter extends BaseAdapter {
                                                         userContact.setText(commentInfos.get(position).getHost().getContactNum());
                                                         userEmail.setText(commentInfos.get(position).getHost().getEmail());
                                                         userGender.setText(commentInfos.get(position).getHost().getGender());
+                                                        Button update = (Button) dialog.findViewById(R.id.updateprofile);
+                                                        if (commentInfos.get(i).getHost().getEmail().equals(FirebaseAuth.getInstance().getCurrentUser().getEmail())) {
+                                                            update.setVisibility(View.VISIBLE);
+                                                        }
+                                                        update.setOnClickListener(new View.OnClickListener() {
+                                                            @Override
+                                                            public void onClick(View v) {
+                                                                mContext.startActivity(new Intent(mContext, UpdateProfile.class));
+                                                            }
+                                                        });
+
                                                         try {
                                                             StorageReference storageReference = FirebaseStorage.getInstance().getReference();
                                                             storageReference.child("Photos").child(commentInfos.get(position).getHost().getId()).getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
